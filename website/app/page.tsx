@@ -1,15 +1,15 @@
-import { BookVisit } from "@/components/BookVisit";
-import { HeroPair } from "@/components/HeroPair";
-import { NavMenu } from "@/components/NavMenu";
-import { ParlorSlide } from "@/components/ParlorSlide";
-import { PriceList } from "@/components/PriceList";
-import { ServiceMenu } from "@/components/ServiceMenu";
-import { ServiceModal } from "@/components/ServiceModal";
-import { ServicesOverview } from "@/components/ServicesOverview";
+import { BookVisit } from "@/components/sections/BookVisit";
+import { HeroPair } from "@/components/slides/HeroPair";
+import { NavMenu } from "@/components/layout/NavMenu";
+import { ParlorSlide } from "@/components/slides/ParlorSlide";
+import { PriceList } from "@/components/sections/PriceList";
+import { ServiceMenu } from "@/components/services/ServiceMenu";
+import { ServiceModal } from "@/components/services/ServiceModal";
+import { ServicesOverview } from "@/components/services/ServicesOverview";
 import { SiteBehavior } from "@/components/SiteBehavior";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
-import { SplitSlide } from "@/components/SplitSlide";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SplitSlide } from "@/components/slides/SplitSlide";
 
 export default function Home() {
   return (

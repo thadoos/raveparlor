@@ -10,7 +10,7 @@ Website for Rave's Parlor London, a hair salon in New Malden.
 ├── .claude/launch.json   # dev server config for the Claude preview pane
 └── website/              # Next.js app (App Router, TypeScript)
     ├── app/              # layout, page, global styles
-    ├── components/       # one component per section of the page
+    ├── components/       # layout/, slides/, services/, sections/ + SiteBehavior
     ├── lib/              # site-behavior.js: deck paging, menu, service panel
     └── public/images/    # photography
 ```
