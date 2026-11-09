@@ -4,6 +4,8 @@
  * detail panel, and reveal-on-scroll. It drives server-rendered markup in the
  * DOM, so it lives outside React. `initSiteBehavior` returns a cleanup function.
  */
+import { serviceMessage, whatsappLink } from "./contact";
+
 export function initSiteBehavior() {
   var ac = new AbortController();
   var io = null;
@@ -477,6 +479,7 @@ export function initSiteBehavior() {
       images: [IMG.colour, IMG.mono],
       media: IMG.colour,
       mediaPos: "50% 30%",
+      barbers: ["Rave", "John", "Julian"],
       intro: [
         "Every appointment starts with a conversation about how you wear your hair. Cuts are shaped to your texture and routine, then finished so you leave ready.",
         "Choose from Rave, John or Julian. Styling and up-dos are available for events, weddings and nights out.",
@@ -703,7 +706,7 @@ export function initSiteBehavior() {
       card.appendChild(el("p", null, it.desc));
       var acts = el("div", "mn-actions");
       var bk = el("a", "mn-booknow", "Book now");
-      bk.href = "#book";
+      bk.href = whatsappLink(serviceMessage(it.name, null, !!c.barbers));
       var more = el("button", "mn-more", "Learn more");
       more.type = "button";
       acts.appendChild(bk);
@@ -761,9 +764,39 @@ export function initSiteBehavior() {
     panel = document.getElementById("md-panel");
   var openCard = null,
     mdBusy = false;
+  var shownItem = null,
+    shownCat = null,
+    pickedBarber = null;
   var EXPAND = 560;
 
+  function updateWhatsApp() {
+    var c = MENU[shownCat];
+    panel.querySelector(".md-book").href = whatsappLink(
+      serviceMessage(shownItem.name, pickedBarber, !!c.barbers),
+    );
+  }
+
+  function pickBarber(name) {
+    pickedBarber = name;
+    panel.querySelectorAll("#md-barbers .md-chip").forEach(function (b) {
+      var on = (b.dataset.barber || null) === name;
+      b.setAttribute("aria-checked", on ? "true" : "false");
+      b.classList.toggle("is-on", on);
+    });
+    var pt = document.querySelector("#md-price table.has-rows");
+    if (pt) {
+      pt.classList.toggle("has-pick", name !== null);
+      pt.querySelectorAll("tbody tr").forEach(function (r) {
+        r.classList.toggle("is-on", r.dataset.barber === name);
+      });
+    }
+    updateWhatsApp();
+  }
+
   function fillModal(item, cat) {
+    shownItem = item;
+    shownCat = cat;
+    pickedBarber = null;
     var c = MENU[cat];
     document.getElementById("md-cat").textContent = c.name;
     document.getElementById("md-name").textContent = item.name;
@@ -786,6 +819,7 @@ export function initSiteBehavior() {
       rows.forEach(function (row) {
         var vr = el("tr");
         if (item.rows) {
+          vr.dataset.barber = row.label;
           var rh = el("th", null, row.label);
           rh.scope = "row";
           if (row.sub) rh.appendChild(el("small", null, row.sub));
@@ -805,6 +839,28 @@ export function initSiteBehavior() {
     document.getElementById("md-ideal-wrap").style.display = item.ideal ? "" : "none";
     document.getElementById("md-note").textContent = item.note || "";
     document.getElementById("md-note-wrap").style.display = item.note ? "" : "none";
+    var bw = document.getElementById("md-barber-wrap"),
+      bs = document.getElementById("md-barbers");
+    bs.textContent = "";
+    if (c.barbers) {
+      [["", "No preference"]]
+        .concat(
+          c.barbers.map(function (b) {
+            return [b, b];
+          }),
+        )
+        .forEach(function (o) {
+          var b = el("button", "md-chip", o[1]);
+          b.type = "button";
+          b.dataset.barber = o[0];
+          b.setAttribute("role", "radio");
+          bs.appendChild(b);
+        });
+      bw.style.display = "";
+    } else {
+      bw.style.display = "none";
+    }
+    pickBarber(null);
     var gallery = panel.querySelector(".md-media");
     gallery.textContent = "";
     c.images.forEach(function (src) {
@@ -931,6 +987,14 @@ export function initSiteBehavior() {
           goToEl(target);
         });
       }
+    },
+    { signal: ac.signal },
+  );
+  document.getElementById("md-barbers").addEventListener(
+    "click",
+    function (e) {
+      var chip = e.target.closest(".md-chip");
+      if (chip) pickBarber(chip.dataset.barber || null);
     },
     { signal: ac.signal },
   );

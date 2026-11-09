@@ -1,3 +1,5 @@
+import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
+
 export function NavMenu() {
   return (
     <div className="menu" id="menu" aria-hidden="true">
@@ -11,7 +13,7 @@ export function NavMenu() {
       </nav>
       <div className="menu-foot">
         <a href="https://www.instagram.com/ravesparlor_london">Instagram</a>
-        <a href="https://wa.me/447789096148">WhatsApp</a>
+        <a href={whatsappLink(BOOK_MESSAGE)}>WhatsApp</a>
       </div>
     </div>
   );

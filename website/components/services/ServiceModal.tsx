@@ -1,3 +1,5 @@
+import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
+
 export function ServiceModal() {
   return (
     <div className="md" id="md" aria-hidden="true">
@@ -33,12 +35,18 @@ export function ServiceModal() {
               <h4>Good to know</h4>
               <p id="md-note"></p>
             </div>
+            <div className="md-block" id="md-barber-wrap">
+              <h4 id="md-barber-title">Choose your barber</h4>
+              <div
+                className="md-barbers"
+                id="md-barbers"
+                role="radiogroup"
+                aria-labelledby="md-barber-title"
+              ></div>
+            </div>
             <div className="md-actions">
-              <a className="md-book" href="#book" data-close-nav>
+              <a className="md-book" href={whatsappLink(BOOK_MESSAGE)}>
                 Book now
-              </a>
-              <a className="md-wa" href="https://wa.me/447789096148">
-                WhatsApp 07789 096148
               </a>
             </div>
           </div>

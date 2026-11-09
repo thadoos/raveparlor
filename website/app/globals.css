@@ -1301,6 +1301,16 @@ body {
 }
 .md-price table.has-rows {
   max-width: 100%;
+  table-layout: fixed;
+}
+.md-price table.has-rows thead th:first-child {
+  width: 31%;
+}
+.md-price table.has-rows.has-pick tbody tr:not(.is-on) {
+  opacity: 0.4;
+}
+.md-price tbody tr {
+  transition: opacity 0.3s var(--ease);
 }
 .md-price tbody th {
   padding: 8px 16px 8px 0;
@@ -1344,6 +1354,39 @@ body {
   line-height: 1.6;
   color: #444;
 }
+.md-barbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.md-chip {
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid #111;
+  background: transparent;
+  color: #111;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 0.25s var(--ease),
+    color 0.25s var(--ease);
+}
+.md-chip.is-on {
+  background: #111;
+  color: #fff;
+}
+.md-chip:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
+}
+@media (hover: hover) {
+  .md-chip:not(.is-on):hover {
+    background: #f0f0ec;
+  }
+}
 .md-actions {
   margin-top: auto;
   padding-top: 12px;
@@ -1367,12 +1410,6 @@ body {
 .md-book:hover {
   opacity: 0.82;
   color: #fff;
-}
-.md-wa {
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  text-underline-offset: 5px;
 }
 .md-close {
   position: absolute;
@@ -1432,6 +1469,13 @@ html.modal-open {
   }
   .md-media img + img {
     display: none;
+  }
+  .md-price table.has-rows thead th {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+  .md-price table.has-rows thead th:first-child {
+    width: 28%;
   }
   .md-actions {
     position: sticky;

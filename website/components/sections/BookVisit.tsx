@@ -1,3 +1,5 @@
+import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
+
 export function BookVisit() {
   return (
     <section className="visit" id="book" data-tone="dark" aria-labelledby="book-title">
@@ -12,7 +14,7 @@ export function BookVisit() {
             <br />
             WhatsApp 07789 096148
           </p>
-          <a className="cta" href="https://wa.me/447789096148">
+          <a className="cta" href={whatsappLink(BOOK_MESSAGE)}>
             Book on WhatsApp
           </a>
         </div>
