@@ -6,6 +6,7 @@ import { PHOTOS } from "@/lib/data/images";
 import { useModalLock } from "@/lib/hooks/use-modal-lock";
 import poster from "@/public/images/price-list.webp";
 import styles from "./PricePoster.module.css";
+import { usePosterMotion } from "./use-poster-motion";
 
 const PARTS = ["Hair Cut / Blow-dry", "Colour, Perm & Treatments"] as const;
 const SWIPE_MIN_PX = 40;
@@ -29,12 +30,18 @@ function Icon({ path }: { path: string }) {
 /**
  * The price list poster. Clicking it opens a full-screen viewer (never navigates away): the whole
  * poster on wide screens, and on phones one half at a time with arrows and swipe to slide between
- * the halves. Close with the X button, Esc, or by clicking the dark area. The link href stays as a
+ * the halves. Close with the X button, Esc, or by clicking the dark area. The poster grows out of
+ * its place on the page when opened and folds back into it when closed. The link href stays as a
  * no-JS fallback.
  */
 export function PricePoster() {
   const dialog = useRef<HTMLDialogElement>(null);
   const stage = useRef<HTMLDivElement>(null);
+  const view = useRef<HTMLDivElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
+  const nav = useRef<HTMLDivElement>(null);
+  const thumb = useRef<HTMLAnchorElement>(null);
   const touchX = useRef<number | null>(null);
   const [part, setPart] = useState<0 | 1>(0);
   const [viewing, setViewing] = useState(false);
@@ -42,11 +49,19 @@ export function PricePoster() {
   // The deck stands down (no slide wheel/touch/key handling) while the viewer is open.
   useModalLock(viewing);
 
+  const motion = usePosterMotion({
+    elements: { dialog, view, track, closeButton, nav, thumb },
+    showViewer: () => {
+      setPart(0);
+      setViewing(true);
+    },
+    resetPart: () => setPart(0),
+    hideViewer: () => setViewing(false),
+  });
+
   function open(e: MouseEvent<HTMLAnchorElement>) {
     e.preventDefault();
-    setPart(0);
-    setViewing(true);
-    dialog.current?.showModal();
+    motion.open();
   }
 
   function onTouchStart(e: TouchEvent<HTMLDivElement>) {
@@ -63,7 +78,8 @@ export function PricePoster() {
   return (
     <>
       <a
-        className={styles.poster}
+        ref={thumb}
+        className={viewing ? `${styles.poster} ${styles.lifted}` : styles.poster}
         href="/images/price-list.webp"
         target="_blank"
         rel="noopener"
@@ -78,29 +94,40 @@ export function PricePoster() {
         className={styles.viewer}
         data-part={part}
         aria-label="Price list"
-        onClose={() => setViewing(false)}
+        onClose={motion.handleClosed}
+        onCancel={(e) => {
+          // Escape: run the animated close instead of closing at once
+          e.preventDefault();
+          motion.close();
+        }}
         onClick={(e) => {
-          if (e.target === e.currentTarget || e.target === stage.current) dialog.current?.close();
+          if (e.target === e.currentTarget || e.target === stage.current) motion.close();
         }}
       >
         <button
           type="button"
+          ref={closeButton}
           className={styles.close}
           aria-label="Close price list"
-          onClick={() => dialog.current?.close()}
+          onClick={motion.close}
         >
           <Icon path="M6 6l12 12M18 6 6 18" />
         </button>
 
         <div className={styles.stage} ref={stage}>
-          <div className={styles.view} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-            <div className={styles.track}>
+          <div
+            className={styles.view}
+            ref={view}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          >
+            <div className={styles.track} ref={track}>
               <Image src={poster} alt={ALT} sizes="(max-width: 820px) 180vw, 1500px" />
             </div>
           </div>
         </div>
 
-        <div className={styles.nav}>
+        <div className={styles.nav} ref={nav}>
           <button
             type="button"
             className={styles.btn}

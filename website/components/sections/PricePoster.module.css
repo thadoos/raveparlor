@@ -5,6 +5,10 @@
     0 1px 0 rgba(0, 0, 0, 0.04),
     0 18px 48px rgba(0, 0, 0, 0.12);
 }
+/* Hidden (but still laid out and focusable) while the viewer is open: the poster is up there instead. */
+.lifted {
+  opacity: 0;
+}
 .poster img {
   width: 100%;
   height: auto;
@@ -37,18 +41,13 @@
   color: var(--color-paper);
   overflow: hidden;
 }
+/* The dialog already covers the viewport, so it fades the dark in itself (see use-poster-motion). */
 .viewer::backdrop {
-  background: var(--color-ink);
+  background: transparent;
 }
 .viewer[open] {
   display: flex;
   flex-direction: column;
-  animation: viewer-in 0.35s var(--ease);
-}
-@keyframes viewer-in {
-  from {
-    opacity: 0;
-  }
 }
 .close {
   position: absolute;
@@ -75,7 +74,9 @@
 }
 /* One half of the poster at a time: a window 57% of the image wide (so the centre wordmark stays in frame), slid between 0% and 43%. */
 .view {
-  overflow: hidden;
+  /* clip-path, not overflow: the open/close animation widens it to show the whole poster */
+  clip-path: inset(0);
+  transform-origin: 0 0;
   aspect-ratio: 850 / 1055;
   width: min(100vw, calc((100dvh - 64px - 110px) * 850 / 1055));
   touch-action: pan-y;
@@ -138,9 +139,6 @@
   letter-spacing: 0.1em;
 }
 @media (prefers-reduced-motion: reduce) {
-  .viewer[open] {
-    animation: none;
-  }
   .track {
     transition: none;
   }
