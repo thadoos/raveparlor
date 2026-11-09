@@ -1357,8 +1357,7 @@ body {
 .md-flip {
   width: 100%;
 }
-.md-front,
-.md-back {
+.md-front {
   display: grid;
   grid-template-rows: 1fr;
   transition:
@@ -1369,28 +1368,11 @@ body {
   min-height: 0;
   overflow: hidden;
 }
-.md-back {
-  grid-template-rows: 0fr;
-  opacity: 0;
-}
 .md-flip[data-flipped] .md-front {
   grid-template-rows: 0fr;
   opacity: 0;
 }
-.md-flip[data-flipped] .md-back {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-.md-pick-hint {
-  margin: 0 0 18px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #444;
-}
-.md-pick-hint strong {
-  color: #111;
-}
-.md-pick-hint.nudge {
+.md-price.nudge {
   animation: md-nudge 0.5s var(--ease);
 }
 @keyframes md-nudge {
@@ -1434,6 +1416,19 @@ body {
   display: table-row;
   animation: md-row-in 0.5s var(--ease);
 }
+.md-who {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px 4px;
+  margin-top: 14px;
+}
+.md-who.is-picking {
+  display: flex;
+  animation: md-row-in 0.5s var(--ease);
+}
+.md-who .md-cell:first-child {
+  margin-left: -12px;
+}
 @keyframes md-row-in {
   from {
     opacity: 0;
@@ -1449,17 +1444,21 @@ body {
 .md-price table.is-picking tbody th {
   vertical-align: middle;
 }
-.md-price table.is-picking .md-cell {
+.md-price table.is-picking .md-cell,
+.md-price .md-who.is-picking .md-cell {
   display: inline-block;
   width: auto;
-  margin-left: -12px;
   padding: 8px 12px;
   border-color: transparent;
   text-decoration: underline dotted #b5b5b0;
   text-underline-offset: 7px;
   cursor: pointer;
 }
-.md-price table.is-picking .md-cell[aria-pressed="true"] {
+.md-price table.is-picking .md-cell {
+  margin-left: -12px;
+}
+.md-price table.is-picking .md-cell[aria-pressed="true"],
+.md-price .md-who.is-picking .md-cell[aria-pressed="true"] {
   background: #111;
   border-color: #111;
   color: #fff;
@@ -1479,14 +1478,15 @@ body {
 }
 .md-price table.is-picking thead th.is-on {
   color: #111;
-  box-shadow: inset 0 -2px 0 #111;
+  font-weight: 700;
 }
 .md-cell:focus-visible {
   outline: 2px solid #111;
   outline-offset: 2px;
 }
 @media (hover: hover) {
-  .md-price table.is-picking .md-cell:not([aria-pressed="true"]):hover {
+  .md-price table.is-picking .md-cell:not([aria-pressed="true"]):hover,
+  .md-price .md-who.is-picking .md-cell:not([aria-pressed="true"]):hover {
     text-decoration-color: #111;
   }
 }
@@ -2031,10 +2031,10 @@ html.modal-open {
 
 @media (prefers-reduced-motion: reduce) {
   .md-front,
-  .md-back,
   .md-cell,
-  .md-pick-hint,
-  .md-price tr.md-any {
+  .md-price.nudge,
+  .md-price tr.md-any,
+  .md-who {
     transition: none;
     animation: none;
   }

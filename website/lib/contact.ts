@@ -12,7 +12,8 @@ export const BOOK_MESSAGE = "Hi, I'd like to book an appointment at Rave's Parlo
 
 /**
  * Message for a service's WhatsApp link. `chooseBarber` is true only for services with per-barber
- * prices; `barber` is null for "no preference"; `cut` is the chosen cut type, e.g. "Gentleman".
+ * prices; `barber` is null for "no preference"; `cut` is the chosen cut type or hair length,
+ * e.g. "Gentleman" or "Medium length" (included whether or not a barber is chosen).
  */
 export function serviceMessage(
   service: string,
@@ -20,8 +21,10 @@ export function serviceMessage(
   chooseBarber: boolean,
   cut: string | null = null,
 ) {
-  if (!chooseBarber) return `Hi, I'd like to book ${service}.`;
-  const what = cut ? `${service} (${cut})` : service;
+  // "&" in a wa.me link can be mangled on the way into the WhatsApp app, so spell it out
+  const name = service.replace(/ & /g, " and ");
+  const what = cut ? `${name} (${cut})` : name;
+  if (!chooseBarber) return `Hi, I'd like to book ${what}.`;
   if (barber) return `Hi, I'd like to book ${what} with ${barber}.`;
   return `Hi, I'd like to book ${what}. Any barber is fine.`;
 }

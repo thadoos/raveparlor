@@ -40,13 +40,6 @@ export function ServiceModal() {
                   </div>
                 </div>
               </div>
-              <div className="md-back" id="md-back" aria-hidden="true" inert>
-                <div className="md-collapse">
-                  <p className="md-pick-hint" id="md-pick-hint">
-                    Tap a price to choose your barber and cut.
-                  </p>
-                </div>
-              </div>
             </div>
             <div className="md-actions">
               <a className="md-book" href={whatsappLink(BOOK_MESSAGE)}>
