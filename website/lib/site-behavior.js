@@ -710,7 +710,9 @@ export function initSiteBehavior() {
       card.appendChild(el("p", null, it.desc));
       var acts = el("div", "mn-actions");
       var bk = el("a", "mn-booknow", "Book now");
-      bk.href = whatsappLink(serviceMessage(it.name, null, !!c.barbers, null));
+      bk.href = whatsappLink(
+        serviceMessage({ service: it.name, barber: null, chooseBarber: !!c.barbers, cut: null }),
+      );
       var more = el("button", "mn-more", "Learn more");
       more.type = "button";
       acts.appendChild(bk);
@@ -791,7 +793,12 @@ export function initSiteBehavior() {
 
   function updateWhatsApp() {
     panel.querySelector(".md-book").href = whatsappLink(
-      serviceMessage(shownItem.name, pickedBarber, !!MENU[shownCat].barbers, pickedCut),
+      serviceMessage({
+        service: shownItem.name,
+        barber: pickedBarber,
+        chooseBarber: !!MENU[shownCat].barbers,
+        cut: pickedCut,
+      }),
     );
   }
 

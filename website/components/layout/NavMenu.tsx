@@ -1,18 +1,19 @@
 import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
+import { MENU_LINKS } from "@/lib/data/nav";
+import { SITE } from "@/lib/data/site";
 
 export function NavMenu() {
   return (
     <div className="menu" id="menu" aria-hidden="true">
       <nav aria-label="Page sections">
-        <a href="#top">Home</a>
-        <a href="#gallery">Gallery</a>
-        <a href="#parlor">The Parlor</a>
-        <a href="#services">Services</a>
-        <a href="#prices">Price List</a>
-        <a href="#book">Book &amp; Visit</a>
+        {MENU_LINKS.map((link) => (
+          <a key={link.href} href={link.href}>
+            {link.label}
+          </a>
+        ))}
       </nav>
       <div className="menu-foot">
-        <a href="https://www.instagram.com/ravesparlor_london">Instagram</a>
+        <a href={SITE.instagramUrl}>Instagram</a>
         <a href={whatsappLink(BOOK_MESSAGE)}>WhatsApp</a>
       </div>
     </div>

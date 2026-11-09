@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { PHOTOS, SLIDE_POSITIONS } from "@/lib/data/images";
 
 export function SplitSlide() {
   return (
@@ -6,11 +7,11 @@ export function SplitSlide() {
       <div className="layer split-grid">
         <figure>
           <Image
-            src="/images/portrait-mono.jpg"
-            alt="Black and white profile portrait of a client"
+            src={PHOTOS.portraitMono.src}
+            alt={PHOTOS.portraitMono.alt}
             fill
             sizes="(max-width: 820px) 100vw, 50vw"
-            style={{ objectPosition: "50% 40%" }}
+            style={{ objectPosition: SLIDE_POSITIONS.split }}
             loading="eager"
           />
           <div className="scrim"></div>

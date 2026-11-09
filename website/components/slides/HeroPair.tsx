@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { PHOTOS, SLIDE_POSITIONS } from "@/lib/data/images";
 
 export function HeroPair() {
   return (
@@ -7,12 +8,12 @@ export function HeroPair() {
         <figure className="half is-current" id="gallery" data-tone="light">
           <div className="layer">
             <Image
-              src="/images/portrait-colour.jpg"
-              alt="Client with a sleek shoulder-length cut on a rooftop at golden hour"
+              src={PHOTOS.portraitColour.src}
+              alt={PHOTOS.portraitColour.alt}
               fill
               sizes="(max-width: 820px) 100vw, 50vw"
               className="m-left"
-              style={{ objectPosition: "46% 42%" }}
+              style={{ objectPosition: SLIDE_POSITIONS.heroLeft }}
               loading="eager"
               fetchPriority="high"
             />
@@ -28,11 +29,11 @@ export function HeroPair() {
         <figure className="half" data-tone="light">
           <div className="layer">
             <Image
-              src="/images/bob-copper.jpg"
-              alt="Client with a copper bob, eyes lowered"
+              src={PHOTOS.bobCopper.src}
+              alt={PHOTOS.bobCopper.alt}
               fill
               sizes="(max-width: 820px) 100vw, 50vw"
-              style={{ objectPosition: "50% 38%" }}
+              style={{ objectPosition: SLIDE_POSITIONS.heroRight }}
               loading="eager"
               fetchPriority="high"
             />

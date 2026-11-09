@@ -1,4 +1,14 @@
+import { Fragment } from "react";
 import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
+import { SITE } from "@/lib/data/site";
+import {
+  formatAddressLines,
+  formatClosedDays,
+  formatHours,
+  formatLastAppointment,
+  formatRatingLine,
+  formatWhatsAppLine,
+} from "@/lib/format";
 
 export function BookVisit() {
   return (
@@ -12,7 +22,7 @@ export function BookVisit() {
           <p>
             By appointment only
             <br />
-            WhatsApp 07789 096148
+            {formatWhatsAppLine()}
           </p>
           <a className="cta" href={whatsappLink(BOOK_MESSAGE)}>
             Book on WhatsApp
@@ -21,43 +31,26 @@ export function BookVisit() {
         <div className="reveal">
           <h3>Opening hours</h3>
           <p>
-            Mon – Sat 10:00 – 19:00
-            <br />
-            Last appointment 18:00
-            <br />
-            Sunday 10:00 – 18:00
-            <br />
-            Last appointment 17:00
+            {SITE.hours.map((hours, i) => (
+              <Fragment key={hours.days}>
+                {i > 0 && <br />}
+                {formatHours(hours)}
+                <br />
+                {formatLastAppointment(hours)}
+              </Fragment>
+            ))}
           </p>
-          <p
-            style={{
-              marginTop: "10px",
-              color: "#a6a6a3",
-              fontSize: "12px",
-              letterSpacing: ".08em",
-            }}
-          >
-            Closed Christmas Day, Boxing Day and New Year’s Day
-          </p>
+          <p className="visit-note">{formatClosedDays()}</p>
         </div>
         <div className="reveal">
           <h3>Find us</h3>
           <p>
-            15 Coombe Road
+            {formatAddressLines()[0]}
             <br />
-            New Malden KT3 4QG
+            {formatAddressLines()[1]}
           </p>
-          <p
-            style={{
-              marginTop: "10px",
-              color: "#a6a6a3",
-              fontSize: "12px",
-              letterSpacing: ".08em",
-            }}
-          >
-            4.9 on Google · 200 reviews
-          </p>
-          <a className="cta" href="https://maps.app.goo.gl/5DsbgsoeiHCW4rab9">
+          <p className="visit-note">{formatRatingLine()}</p>
+          <a className="cta" href={SITE.mapsUrl}>
             Directions
           </a>
         </div>

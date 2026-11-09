@@ -1,16 +1,18 @@
 import Image from "next/image";
+import { PHOTOS, SLIDE_POSITIONS } from "@/lib/data/images";
+import { formatAddressShort, formatHoursSummary } from "@/lib/format";
 
 export function ParlorSlide() {
   return (
     <section className="slide" id="parlor" data-tone="dark">
       <div className="layer">
         <Image
-          src="/images/parlor-reception.jpg"
-          alt="Rave’s Parlor reception desk and salon floor"
+          src={PHOTOS.parlorReception.src}
+          alt={PHOTOS.parlorReception.alt}
           fill
           sizes="100vw"
           className="m-reception"
-          style={{ objectPosition: "50% 50%" }}
+          style={{ objectPosition: SLIDE_POSITIONS.parlor }}
           loading="eager"
         />
         <div className="scrim"></div>
@@ -20,7 +22,8 @@ export function ParlorSlide() {
           </span>
         </div>
         <div className="cap">
-          <strong>15 Coombe Road, New Malden</strong>Mon – Sat 10:00 – 19:00 · Sun 10:00 – 18:00
+          <strong>{formatAddressShort()}</strong>
+          {formatHoursSummary(" · ")}
         </div>
       </div>
     </section>

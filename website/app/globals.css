@@ -1723,6 +1723,12 @@ html.modal-open {
   font-size: 14px;
   line-height: 1.9;
 }
+.visit .visit-note {
+  margin-top: 10px;
+  color: #a6a6a3;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
 .cta {
   display: inline-flex;
   align-items: center;

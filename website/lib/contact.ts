@@ -1,5 +1,6 @@
-/** Business WhatsApp number, in international format without the plus. */
-export const WHATSAPP_NUMBER = "447789096148";
+import { WHATSAPP_NUMBER } from "@/lib/data/site";
+
+export { WHATSAPP_NUMBER };
 
 /** Opens a chat with the salon; `message` pre-fills the text box (the customer still presses send). */
 export function whatsappLink(message?: string) {
@@ -10,17 +11,24 @@ export function whatsappLink(message?: string) {
 /** Message for the general "book" links (menu, footer, book section). */
 export const BOOK_MESSAGE = "Hi, I'd like to book an appointment at Rave's Parlor.";
 
-/**
- * Message for a service's WhatsApp link. `chooseBarber` is true only for services with per-barber
- * prices; `barber` is null for "no preference"; `cut` is the chosen cut type or hair length,
- * e.g. "Gentleman" or "Medium length" (included whether or not a barber is chosen).
- */
-export function serviceMessage(
-  service: string,
-  barber: string | null,
-  chooseBarber: boolean,
-  cut: string | null = null,
-) {
+export interface ServiceMessageOptions {
+  /** Service name, e.g. "Cutting & Finishing". */
+  service: string;
+  /** The chosen barber, or null for "no preference". Only used when `chooseBarber` is true. */
+  barber: string | null;
+  /** True only for services with per-barber prices. */
+  chooseBarber: boolean;
+  /** The chosen cut type or hair length, e.g. "Gentleman" or "Medium length" (with or without a barber). */
+  cut?: string | null;
+}
+
+/** Message for a service's WhatsApp link. */
+export function serviceMessage({
+  service,
+  barber,
+  chooseBarber,
+  cut = null,
+}: ServiceMessageOptions) {
   // "&" in a wa.me link can be mangled on the way into the WhatsApp app, so spell it out
   const name = service.replace(/ & /g, " and ");
   const what = cut ? `${name} (${cut})` : name;

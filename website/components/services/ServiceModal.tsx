@@ -1,4 +1,6 @@
 import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
+import { SITE } from "@/lib/data/site";
+import { formatGoogleReviews } from "@/lib/format";
 
 export function ServiceModal() {
   return (
@@ -20,8 +22,8 @@ export function ServiceModal() {
           <div className="md-media"></div>
           <div className="md-text">
             <p className="md-rating">
-              <span aria-hidden="true">★★★★★</span> 4.9{" "}
-              <span className="md-rating-src">· 200 Google reviews</span>
+              <span aria-hidden="true">★★★★★</span> {`${SITE.googleRating.score} `}
+              <span className="md-rating-src">{formatGoogleReviews()}</span>
             </p>
             <p className="md-cat" id="md-cat"></p>
             <h3 className="md-name" id="md-name"></h3>
