@@ -473,13 +473,23 @@ export function initSiteBehavior() {
     parlor: "/images/parlor-reception.jpg",
   };
   var CHEM = "Chemical services don’t include a haircut, wash or finish — add one when you book.";
+  var BARBERS = [
+    { name: "Rave", days: "Mon, Thu, Fri, Sat & Sun" },
+    { name: "John", days: "Tue, Wed, Thu, Fri & occasional Sat" },
+    { name: "Julian", days: "Thu, Fri, Sat & Sun" },
+  ];
+  var CUT_PRICES = [
+    ["£55", "£80", "£35"],
+    ["£45", "£60", "£30"],
+    ["£40", "£65", "£30"],
+  ];
   var MENU = {
     cut: {
       name: "Cut & Style",
       images: [IMG.colour, IMG.mono],
       media: IMG.colour,
       mediaPos: "50% 30%",
-      barbers: ["Rave", "John", "Julian"],
+      barbers: BARBERS,
       intro: [
         "Every appointment starts with a conversation about how you wear your hair. Cuts are shaped to your texture and routine, then finished so you leave ready.",
         "Choose from Rave, John or Julian. Styling and up-dos are available for events, weddings and nights out.",
@@ -488,15 +498,9 @@ export function initSiteBehavior() {
         {
           name: "Cutting & Finishing",
           cols: ["Gentleman", "Ladies", "Under 12s"],
-          rows: [
-            { label: "Rave", sub: "Mon, Thu, Fri, Sat & Sun", prices: ["£55", "£80", "£35"] },
-            {
-              label: "John",
-              sub: "Tue, Wed, Thu, Fri & occasional Sat",
-              prices: ["£45", "£60", "£30"],
-            },
-            { label: "Julian", sub: "Thu, Fri, Sat & Sun", prices: ["£40", "£65", "£30"] },
-          ],
+          rows: BARBERS.map(function (b, i) {
+            return { label: b.name, sub: b.days, prices: CUT_PRICES[i] };
+          }),
           from: "£30",
           desc: "A consultation, precision cut, wash and finish with Rave, John or Julian.",
           ideal: "Regular trims, a change of shape, or a complete restyle.",
@@ -706,7 +710,7 @@ export function initSiteBehavior() {
       card.appendChild(el("p", null, it.desc));
       var acts = el("div", "mn-actions");
       var bk = el("a", "mn-booknow", "Book now");
-      bk.href = whatsappLink(serviceMessage(it.name, null, !!c.barbers));
+      bk.href = whatsappLink(serviceMessage(it.name, null, pickable(it, c), null));
       var more = el("button", "mn-more", "Learn more");
       more.type = "button";
       acts.appendChild(bk);
@@ -766,30 +770,69 @@ export function initSiteBehavior() {
     mdBusy = false;
   var shownItem = null,
     shownCat = null,
-    pickedBarber = null;
+    pickedBarber = null,
+    pickedCut = null,
+    pickedPrice = null;
   var EXPAND = 560;
+  var HINT = "Tap a price to choose your barber and cut.";
+
+  // only services with per-barber prices (in a category that has barbers) get the picker
+  function pickable(item, c) {
+    return !!(item.rows && c.barbers);
+  }
 
   function updateWhatsApp() {
-    var c = MENU[shownCat];
     panel.querySelector(".md-book").href = whatsappLink(
-      serviceMessage(shownItem.name, pickedBarber, !!c.barbers),
+      serviceMessage(shownItem.name, pickedBarber, pickable(shownItem, MENU[shownCat]), pickedCut),
     );
   }
 
-  function pickBarber(name) {
-    pickedBarber = name;
-    panel.querySelectorAll("#md-barbers .md-chip").forEach(function (b) {
-      var on = (b.dataset.barber || null) === name;
-      b.setAttribute("aria-checked", on ? "true" : "false");
-      b.classList.toggle("is-on", on);
+  var flipped = false;
+  function setFlipped(on) {
+    flipped = on;
+    var flip = document.getElementById("md-flip"),
+      front = document.getElementById("md-front"),
+      back = document.getElementById("md-back");
+    if (on) flip.setAttribute("data-flipped", "");
+    else flip.removeAttribute("data-flipped");
+    front.inert = on;
+    back.inert = !on;
+    front.setAttribute("aria-hidden", on ? "true" : "false");
+    back.setAttribute("aria-hidden", on ? "false" : "true");
+    panel.querySelector(".md-book").textContent = on ? "Continue on WhatsApp" : "Book now";
+    panel.querySelector(".md-back-btn").hidden = !on;
+    document.querySelectorAll("#md-price .md-cell").forEach(function (b) {
+      b.disabled = !on;
     });
-    var pt = document.querySelector("#md-price table.has-rows");
-    if (pt) {
-      pt.classList.toggle("has-pick", name !== null);
-      pt.querySelectorAll("tbody tr").forEach(function (r) {
-        r.classList.toggle("is-on", r.dataset.barber === name);
-      });
-    }
+    var pt = document.querySelector("#md-price table");
+    if (pt) pt.classList.toggle("is-picking", on);
+    var bk = panel.querySelector(".md-book");
+    if (on && pickedCut === null) bk.setAttribute("aria-disabled", "true");
+    else bk.removeAttribute("aria-disabled");
+  }
+
+  function pickCell(btn) {
+    pickedBarber = btn.dataset.barber || null;
+    pickedCut = btn.dataset.cut;
+    pickedPrice = btn.dataset.price;
+    document.querySelectorAll("#md-price .md-cell").forEach(function (b) {
+      b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+    });
+    var tbl = btn.closest("table"),
+      tr = btn.closest("tr"),
+      ci = btn.closest("td").cellIndex;
+    tbl.classList.add("has-sel");
+    tbl.querySelectorAll("tbody tr").forEach(function (r) {
+      r.classList.toggle("is-on", r === tr);
+    });
+    tbl.querySelectorAll("thead th").forEach(function (h, i) {
+      h.classList.toggle("is-on", i === ci);
+    });
+    var hint = document.getElementById("md-pick-hint");
+    hint.textContent = "";
+    hint.appendChild(el("strong", null, pickedBarber || "No preference"));
+    hint.appendChild(document.createTextNode(" · " + pickedCut + " · " + pickedPrice));
+    panel.querySelector(".md-book").removeAttribute("aria-disabled");
     updateWhatsApp();
   }
 
@@ -797,6 +840,8 @@ export function initSiteBehavior() {
     shownItem = item;
     shownCat = cat;
     pickedBarber = null;
+    pickedCut = null;
+    pickedPrice = null;
     var c = MENU[cat];
     document.getElementById("md-cat").textContent = c.name;
     document.getElementById("md-name").textContent = item.name;
@@ -816,20 +861,49 @@ export function initSiteBehavior() {
       var th = el("thead");
       th.appendChild(hr);
       var tb = el("tbody");
+      function cellBtn(barber, cut, price) {
+        var b = el("button", "md-cell", price);
+        b.type = "button";
+        b.disabled = true;
+        b.dataset.barber = barber;
+        b.dataset.cut = cut;
+        b.dataset.price = price;
+        return b;
+      }
       rows.forEach(function (row) {
         var vr = el("tr");
         if (item.rows) {
-          vr.dataset.barber = row.label;
           var rh = el("th", null, row.label);
           rh.scope = "row";
           if (row.sub) rh.appendChild(el("small", null, row.sub));
           vr.appendChild(rh);
         }
-        row.prices.forEach(function (v) {
-          vr.appendChild(el("td", null, v));
+        row.prices.forEach(function (v, idx) {
+          var td = el("td");
+          if (item.rows) td.appendChild(cellBtn(row.label, item.cols[idx], v));
+          else td.textContent = v;
+          vr.appendChild(td);
         });
         tb.appendChild(vr);
       });
+      if (c.barbers && item.rows) {
+        var ar = el("tr", "md-any");
+        var ah = el("th", null, "No preference");
+        ah.scope = "row";
+        ar.appendChild(ah);
+        item.cols.forEach(function (col, idx) {
+          var min = Math.min.apply(
+            null,
+            item.rows.map(function (r) {
+              return parseInt(r.prices[idx].replace(/[^\d]/g, ""), 10);
+            }),
+          );
+          var td = el("td");
+          td.appendChild(cellBtn("", col, "from £" + min));
+          ar.appendChild(td);
+        });
+        tb.appendChild(ar);
+      }
       t.appendChild(th);
       t.appendChild(tb);
       pr.appendChild(t);
@@ -839,28 +913,9 @@ export function initSiteBehavior() {
     document.getElementById("md-ideal-wrap").style.display = item.ideal ? "" : "none";
     document.getElementById("md-note").textContent = item.note || "";
     document.getElementById("md-note-wrap").style.display = item.note ? "" : "none";
-    var bw = document.getElementById("md-barber-wrap"),
-      bs = document.getElementById("md-barbers");
-    bs.textContent = "";
-    if (c.barbers) {
-      [["", "No preference"]]
-        .concat(
-          c.barbers.map(function (b) {
-            return [b, b];
-          }),
-        )
-        .forEach(function (o) {
-          var b = el("button", "md-chip", o[1]);
-          b.type = "button";
-          b.dataset.barber = o[0];
-          b.setAttribute("role", "radio");
-          bs.appendChild(b);
-        });
-      bw.style.display = "";
-    } else {
-      bw.style.display = "none";
-    }
-    pickBarber(null);
+    document.getElementById("md-pick-hint").textContent = HINT;
+    setFlipped(false);
+    updateWhatsApp();
     var gallery = panel.querySelector(".md-media");
     gallery.textContent = "";
     c.images.forEach(function (src) {
@@ -886,10 +941,11 @@ export function initSiteBehavior() {
     );
   }
 
-  function openModal(card) {
+  function openModal(card, picking) {
     if (mdBusy) return;
     var item = MENU[current].items[+card.dataset.i];
     fillModal(item, current);
+    if (picking) setFlipped(true);
     openCard = card;
     mdBusy = true;
     md.classList.add("open");
@@ -955,7 +1011,15 @@ export function initSiteBehavior() {
     function (e) {
       var card = e.target.closest(".mn-card");
       if (!card) return;
-      if (e.target.closest(".mn-booknow")) return; // straight to booking
+      if (e.target.closest(".mn-booknow")) {
+        var bookItem = MENU[current].items[+card.dataset.i];
+        if (pickable(bookItem, MENU[current])) {
+          // options to choose from: open the details already in the booking step
+          e.preventDefault();
+          openModal(card, true);
+        }
+        return; // otherwise the link goes straight to WhatsApp
+      }
       openModal(card);
     },
     { signal: ac.signal },
@@ -978,6 +1042,34 @@ export function initSiteBehavior() {
         closeModal();
         return;
       }
+      if (e.target.closest(".md-book") && pickable(shownItem, MENU[shownCat]) && !flipped) {
+        e.preventDefault();
+        setFlipped(true);
+        document
+          .getElementById("md-price")
+          .scrollIntoView({ block: "nearest", behavior: still.matches ? "auto" : "smooth" });
+        return;
+      }
+      if (e.target.closest(".md-book") && flipped && pickedCut === null) {
+        e.preventDefault();
+        var hint = document.getElementById("md-pick-hint");
+        hint.classList.add("nudge");
+        setTimeout(function () {
+          hint.classList.remove("nudge");
+        }, 600);
+        return;
+      }
+      var cell = e.target.closest(".md-cell");
+      if (cell && !cell.disabled) {
+        pickCell(cell);
+        return;
+      }
+      if (e.target.closest(".md-back-btn")) {
+        e.preventDefault();
+        setFlipped(false);
+        panel.querySelector(".md-book").focus({ preventScroll: true });
+        return;
+      }
       var nav = e.target.closest("[data-close-nav]");
       if (nav) {
         e.preventDefault();
@@ -987,14 +1079,6 @@ export function initSiteBehavior() {
           goToEl(target);
         });
       }
-    },
-    { signal: ac.signal },
-  );
-  document.getElementById("md-barbers").addEventListener(
-    "click",
-    function (e) {
-      var chip = e.target.closest(".md-chip");
-      if (chip) pickBarber(chip.dataset.barber || null);
     },
     { signal: ac.signal },
   );

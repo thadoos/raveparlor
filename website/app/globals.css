@@ -1306,12 +1306,6 @@ body {
 .md-price table.has-rows thead th:first-child {
   width: 31%;
 }
-.md-price table.has-rows.has-pick tbody tr:not(.is-on) {
-  opacity: 0.4;
-}
-.md-price tbody tr {
-  transition: opacity 0.3s var(--ease);
-}
 .md-price tbody th {
   padding: 8px 16px 8px 0;
   border-top: 1px solid #e3e3df;
@@ -1331,6 +1325,11 @@ body {
 }
 .md-price table.has-rows td {
   vertical-align: top;
+}
+/* per-barber rows: no dividers at all (neither under the header nor between barbers) */
+.md-price table.has-rows tbody th,
+.md-price table.has-rows tbody td {
+  border-top: 0;
 }
 .md-desc {
   margin: 0 0 22px;
@@ -1354,38 +1353,158 @@ body {
   line-height: 1.6;
   color: #444;
 }
-.md-barbers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+/* "Book now" collapses the details and turns the price table into a picker */
+.md-flip {
+  width: 100%;
 }
-.md-chip {
-  height: 40px;
-  padding: 0 16px;
-  border: 1px solid #111;
-  background: transparent;
+.md-front,
+.md-back {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 0.6s var(--ease),
+    opacity 0.4s var(--ease);
+}
+.md-collapse {
+  min-height: 0;
+  overflow: hidden;
+}
+.md-back {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.md-flip[data-flipped] .md-front {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.md-flip[data-flipped] .md-back {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.md-pick-hint {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #444;
+}
+.md-pick-hint strong {
   color: #111;
+}
+.md-pick-hint.nudge {
+  animation: md-nudge 0.5s var(--ease);
+}
+@keyframes md-nudge {
+  20%,
+  60% {
+    transform: translateX(-5px);
+  }
+  40%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+.md-book[aria-disabled="true"] {
+  opacity: 0.4;
+}
+.md-cell {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+  transition:
+    padding 0.45s var(--ease),
+    margin 0.45s var(--ease),
+    border-color 0.45s var(--ease),
+    background-color 0.25s var(--ease),
+    color 0.25s var(--ease);
+}
+.md-cell:disabled {
+  color: inherit;
+}
+.md-price tr.md-any {
+  display: none;
+}
+.md-price table.is-picking tr.md-any {
+  display: table-row;
+  animation: md-row-in 0.5s var(--ease);
+}
+@keyframes md-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.md-price table.is-picking td {
+  padding-right: 8px;
+}
+.md-price table.is-picking.has-rows td {
+  vertical-align: middle;
+}
+.md-price table.is-picking tbody th {
+  vertical-align: middle;
+}
+.md-price table.is-picking .md-cell {
+  display: inline-block;
+  width: auto;
+  margin-left: -12px;
+  padding: 8px 12px;
+  border-color: transparent;
+  text-decoration: underline dotted #b5b5b0;
+  text-underline-offset: 7px;
+  cursor: pointer;
+}
+.md-price table.is-picking .md-cell[aria-pressed="true"] {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+  text-decoration-color: transparent;
+}
+.md-price thead th,
+.md-price tbody th {
+  transition:
+    color 0.3s var(--ease),
+    box-shadow 0.3s var(--ease);
+}
+.md-price table.is-picking.has-sel tbody tr:not(.is-on) th {
+  color: #8a8a85;
+}
+.md-price table.is-picking.has-sel thead th:not(.is-on) {
+  color: #b5b5b0;
+}
+.md-price table.is-picking thead th.is-on {
+  color: #111;
+  box-shadow: inset 0 -2px 0 #111;
+}
+.md-cell:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .md-price table.is-picking .md-cell:not([aria-pressed="true"]):hover {
+    text-decoration-color: #111;
+  }
+}
+.md-back-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
   font: inherit;
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 5px;
   cursor: pointer;
-  transition:
-    background-color 0.25s var(--ease),
-    color 0.25s var(--ease);
 }
-.md-chip.is-on {
-  background: #111;
-  color: #fff;
-}
-.md-chip:focus-visible {
-  outline: 2px solid #111;
-  outline-offset: 3px;
-}
-@media (hover: hover) {
-  .md-chip:not(.is-on):hover {
-    background: #f0f0ec;
-  }
+.md-back-btn[hidden] {
+  display: none;
 }
 .md-actions {
   margin-top: auto;
@@ -1476,6 +1595,10 @@ html.modal-open {
   }
   .md-price table.has-rows thead th:first-child {
     width: 28%;
+  }
+  /* keep the price picker clear of the sticky Book bar when it scrolls into view */
+  .md-price {
+    scroll-margin: 70px 0 120px;
   }
   .md-actions {
     position: sticky;
@@ -1903,5 +2026,16 @@ html.modal-open {
   }
   .pv-nav {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md-front,
+  .md-back,
+  .md-cell,
+  .md-pick-hint,
+  .md-price tr.md-any {
+    transition: none;
+    animation: none;
   }
 }

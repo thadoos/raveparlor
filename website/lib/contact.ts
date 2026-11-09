@@ -11,11 +11,17 @@ export function whatsappLink(message?: string) {
 export const BOOK_MESSAGE = "Hi, I'd like to book an appointment at Rave's Parlor.";
 
 /**
- * Message for a service's WhatsApp link. `chooseBarber` is true for services where the customer
- * picks a barber; `barber` is null for "no preference".
+ * Message for a service's WhatsApp link. `chooseBarber` is true only for services with per-barber
+ * prices; `barber` is null for "no preference"; `cut` is the chosen cut type, e.g. "Gentleman".
  */
-export function serviceMessage(service: string, barber: string | null, chooseBarber: boolean) {
+export function serviceMessage(
+  service: string,
+  barber: string | null,
+  chooseBarber: boolean,
+  cut: string | null = null,
+) {
   if (!chooseBarber) return `Hi, I'd like to book ${service}.`;
-  if (barber) return `Hi, I'd like to book ${service} with ${barber}.`;
-  return `Hi, I'd like to book ${service}. Any barber is fine.`;
+  const what = cut ? `${service} (${cut})` : service;
+  if (barber) return `Hi, I'd like to book ${what} with ${barber}.`;
+  return `Hi, I'd like to book ${what}. Any barber is fine.`;
 }

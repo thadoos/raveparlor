@@ -26,28 +26,35 @@ export function ServiceModal() {
             <p className="md-cat" id="md-cat"></p>
             <h3 className="md-name" id="md-name"></h3>
             <div className="md-price" id="md-price"></div>
-            <p className="md-desc" id="md-desc"></p>
-            <div className="md-block" id="md-ideal-wrap">
-              <h4>Ideal for</h4>
-              <p id="md-ideal"></p>
-            </div>
-            <div className="md-block" id="md-note-wrap">
-              <h4>Good to know</h4>
-              <p id="md-note"></p>
-            </div>
-            <div className="md-block" id="md-barber-wrap">
-              <h4 id="md-barber-title">Choose your barber</h4>
-              <div
-                className="md-barbers"
-                id="md-barbers"
-                role="radiogroup"
-                aria-labelledby="md-barber-title"
-              ></div>
+            <div className="md-flip" id="md-flip">
+              <div className="md-front" id="md-front">
+                <div className="md-collapse">
+                  <p className="md-desc" id="md-desc"></p>
+                  <div className="md-block" id="md-ideal-wrap">
+                    <h4>Ideal for</h4>
+                    <p id="md-ideal"></p>
+                  </div>
+                  <div className="md-block" id="md-note-wrap">
+                    <h4>Good to know</h4>
+                    <p id="md-note"></p>
+                  </div>
+                </div>
+              </div>
+              <div className="md-back" id="md-back" aria-hidden="true" inert>
+                <div className="md-collapse">
+                  <p className="md-pick-hint" id="md-pick-hint">
+                    Tap a price to choose your barber and cut.
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="md-actions">
               <a className="md-book" href={whatsappLink(BOOK_MESSAGE)}>
                 Book now
               </a>
+              <button className="md-back-btn" type="button" hidden>
+                Back
+              </button>
             </div>
           </div>
         </div>
