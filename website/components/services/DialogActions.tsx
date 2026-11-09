@@ -27,6 +27,8 @@ export function DialogActions({
         ref={bookRef}
         className={styles.book}
         href={href}
+        target="_blank"
+        rel="noopener noreferrer"
         aria-disabled={blocked ? "true" : undefined}
         onClick={onBook}
       >

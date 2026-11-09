@@ -14,7 +14,13 @@ export function SiteFooter() {
           </a>
         ))}
         <a href={SITE.instagramUrl}>Instagram</a>
-        <a href={whatsappLink(BOOK_MESSAGE)}>WhatsApp</a>
+        <a
+          href={whatsappLink(BOOK_MESSAGE)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          WhatsApp
+        </a>
       </nav>
       <p>{`${formatAddress()} · ${formatWhatsAppLine()}`}</p>
       <p>{formatCopyright()}</p>

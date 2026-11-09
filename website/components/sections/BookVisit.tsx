@@ -26,7 +26,12 @@ export function BookVisit() {
             <br />
             {formatWhatsAppLine()}
           </p>
-          <a className={styles.cta} href={whatsappLink(BOOK_MESSAGE)}>
+          <a
+            className={styles.cta}
+            href={whatsappLink(BOOK_MESSAGE)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Book on WhatsApp
           </a>
         </Reveal>

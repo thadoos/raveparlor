@@ -80,6 +80,8 @@ export function ServiceCard({ categoryKey, index, item, animate }: ServiceCardPr
         <a
           className={styles.booknow}
           href={bookingHref({ item, category, selection: null })}
+          target="_blank"
+          rel="noopener noreferrer"
           onClick={onBookNow}
         >
           Book now

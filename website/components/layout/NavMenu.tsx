@@ -29,7 +29,12 @@ export function NavMenu() {
         <a href={SITE.instagramUrl} onClick={close}>
           Instagram
         </a>
-        <a href={whatsappLink(BOOK_MESSAGE)} onClick={close}>
+        <a
+          href={whatsappLink(BOOK_MESSAGE)}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={close}
+        >
           WhatsApp
         </a>
       </div>
