@@ -135,11 +135,21 @@
   width: auto;
   padding: 8px 12px;
   border-color: transparent;
-  text-decoration: underline dotted #b5b5b0;
-  text-underline-offset: 7px;
+  position: relative;
   cursor: pointer;
 }
+.price table.isPicking .cell::after,
+.price .who.isPicking .cell::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 5px;
+  border-bottom: 1px dotted #b5b5b0;
+  pointer-events: none;
+}
 .price table.isPicking .cell {
+  width: min-content;
   margin-left: -12px;
 }
 .price table.isPicking .cell[aria-pressed="true"],
@@ -147,7 +157,10 @@
   background: #111;
   border-color: #111;
   color: #fff;
-  text-decoration-color: transparent;
+}
+.price table.isPicking .cell[aria-pressed="true"]::after,
+.price .who.isPicking .cell[aria-pressed="true"]::after {
+  border-bottom-color: transparent;
 }
 .price thead th,
 .price tbody th {
@@ -170,9 +183,9 @@
   outline-offset: 2px;
 }
 @media (hover: hover) {
-  .price table.isPicking .cell:not([aria-pressed="true"]):hover,
-  .price .who.isPicking .cell:not([aria-pressed="true"]):hover {
-    text-decoration-color: #111;
+  .price table.isPicking .cell:not([aria-pressed="true"]):hover::after,
+  .price .who.isPicking .cell:not([aria-pressed="true"]):hover::after {
+    border-bottom-color: #111;
   }
 }
 @media (max-width: 820px) {
