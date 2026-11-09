@@ -18,12 +18,7 @@ export function SiteHeader() {
         </span>
       </button>
       <a className="logo" href="#top" aria-label="Rave’s Parlor London, back to top">
-        <span className="logo-word" aria-hidden="true">
-          RAVE’S PARLOR
-        </span>
-        <span className="logo-city" aria-hidden="true">
-          LONDON
-        </span>
+        <span className="logo-mark" aria-hidden="true"></span>
       </a>
       <a className="book" href="#book">
         Book

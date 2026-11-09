@@ -470,7 +470,7 @@ export function initSiteBehavior() {
     mono: "/images/portrait-mono.jpg",
     parlor: "/images/parlor-reception.jpg",
   };
-  var CHEM = "Chemical services don’t include a haircut or finish — add one when you book.";
+  var CHEM = "Chemical services don’t include a haircut, wash or finish — add one when you book.";
   var MENU = {
     cut: {
       name: "Cut & Style",
@@ -479,16 +479,25 @@ export function initSiteBehavior() {
       mediaPos: "50% 30%",
       intro: [
         "Every appointment starts with a conversation about how you wear your hair. Cuts are shaped to your texture and routine, then finished so you leave ready.",
-        "Styling and up-dos are available for events, weddings and nights out.",
+        "Choose from Rave, John or Julian. Styling and up-dos are available for events, weddings and nights out.",
       ],
       items: [
         {
           name: "Cutting & Finishing",
-          cols: ["Men", "Ladies", "Under 12s"],
-          prices: ["£35", "£55", "£20"],
-          from: "£20",
-          desc: "A consultation, precision cut and finish, shaped around how you wear your hair day to day.",
+          cols: ["Gentleman", "Ladies", "Under 12s"],
+          rows: [
+            { label: "Rave", sub: "Mon, Thu, Fri, Sat & Sun", prices: ["£55", "£80", "£35"] },
+            {
+              label: "John",
+              sub: "Tue, Wed, Thu, Fri & occasional Sat",
+              prices: ["£45", "£60", "£30"],
+            },
+            { label: "Julian", sub: "Thu, Fri, Sat & Sun", prices: ["£40", "£65", "£30"] },
+          ],
+          from: "£30",
+          desc: "A consultation, precision cut, wash and finish with Rave, John or Julian.",
           ideal: "Regular trims, a change of shape, or a complete restyle.",
+          note: "Prices depend on your barber. All haircut services include wash and finishing.",
         },
         {
           name: "Cleansing & Styling",
@@ -496,6 +505,7 @@ export function initSiteBehavior() {
           from: "£30",
           desc: "A wash with a blow-dry or style — sleek, smooth or full of volume.",
           ideal: "A reset between cuts, or looking polished for an evening out.",
+          note: "Priced for ladies. The same with Rave, John and Julian.",
         },
         {
           name: "Up-do Hairdressing",
@@ -503,6 +513,7 @@ export function initSiteBehavior() {
           from: "£30",
           desc: "Pinned and set styles, from soft and loose to sculpted. Price depends on length and detail.",
           ideal: "Weddings, parties and special occasions.",
+          note: "Priced for ladies. The same with Rave, John and Julian.",
         },
       ],
     },
@@ -517,21 +528,21 @@ export function initSiteBehavior() {
       ],
       items: [
         {
-          name: "Tinting Colour",
+          name: "Root Retouching",
+          cols: ["Short", "Medium", "Long"],
+          prices: ["£80", "–", "–"],
+          from: "£80",
+          desc: "Colour applied to the regrowth at the roots, keeping your colour seamless between full colour appointments.",
+          ideal: "Covering regrowth and greys between full colour appointments.",
+          note: CHEM,
+        },
+        {
+          name: "Full Head Colour",
           cols: ["Short", "Medium", "Long"],
           prices: ["£80", "£100", "£120"],
           from: "£80",
           desc: "All-over colour, from rich natural shades to vivid statement tones.",
           ideal: "Covering greys, refreshing faded colour or a complete change.",
-          note: CHEM,
-        },
-        {
-          name: "Full Head Highlights",
-          cols: ["Short", "Medium", "Long"],
-          prices: ["£100", "£120", "£150"],
-          from: "£100",
-          desc: "Highlights woven through the whole head for brightness and dimension.",
-          ideal: "A noticeable lift with a natural, blended finish.",
           note: CHEM,
         },
         {
@@ -541,6 +552,15 @@ export function initSiteBehavior() {
           from: "£100",
           desc: "Highlights through the top and sides, where light naturally falls.",
           ideal: "A softer lift, or topping up between full head appointments.",
+          note: CHEM,
+        },
+        {
+          name: "Full Head Highlights",
+          cols: ["Short", "Medium", "Long"],
+          prices: ["£100", "£120", "£150"],
+          from: "£100",
+          desc: "Highlights woven through the whole head for brightness and dimension.",
+          ideal: "A noticeable lift with a natural, blended finish.",
           note: CHEM,
         },
         {
@@ -607,7 +627,7 @@ export function initSiteBehavior() {
       mediaPos: "40% 50%",
       intro: [
         "Olaplex repairs broken bonds inside the hair, protecting it through colour, bleach and perm services.",
-        "Add it to any chemical service.",
+        "Add it to any chemical service, or relax with a Kérastase scalp spa.",
       ],
       items: [
         {
@@ -617,6 +637,14 @@ export function initSiteBehavior() {
           single: true,
           desc: "Professional bond-building treatment: No.1 before your chemical service, No.2 to finish.",
           ideal: "Anyone colouring, lightening or perming — especially regular bleach.",
+        },
+        {
+          name: "Kérastase Scalp Relax Spa & Serum",
+          range: "£15",
+          from: "£15",
+          single: true,
+          desc: "A Kérastase scalp spa treatment with serum, to relax the scalp.",
+          ideal: "A calming treat alongside your haircut or chemical service.",
         },
       ],
     },
@@ -743,18 +771,31 @@ export function initSiteBehavior() {
     pr.textContent = "";
     if (item.cols) {
       var t = el("table"),
-        hr = el("tr"),
-        vr = el("tr");
+        hr = el("tr");
+      var rows = item.rows || [{ prices: item.prices }];
+      if (item.rows) {
+        t.className = "has-rows";
+        hr.appendChild(el("th"));
+      }
       item.cols.forEach(function (h) {
         hr.appendChild(el("th", null, h));
-      });
-      item.prices.forEach(function (v) {
-        vr.appendChild(el("td", null, v));
       });
       var th = el("thead");
       th.appendChild(hr);
       var tb = el("tbody");
-      tb.appendChild(vr);
+      rows.forEach(function (row) {
+        var vr = el("tr");
+        if (item.rows) {
+          var rh = el("th", null, row.label);
+          rh.scope = "row";
+          if (row.sub) rh.appendChild(el("small", null, row.sub));
+          vr.appendChild(rh);
+        }
+        row.prices.forEach(function (v) {
+          vr.appendChild(el("td", null, v));
+        });
+        tb.appendChild(vr);
+      });
       t.appendChild(th);
       t.appendChild(tb);
       pr.appendChild(t);

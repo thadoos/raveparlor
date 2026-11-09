@@ -11,7 +11,7 @@ const jost = Jost({
 export const metadata: Metadata = {
   title: "Rave’s Parlor London",
   description:
-    "Hair salon in New Malden, London. Cut, colour, perm and treatments, by appointment. Open daily 10:00 – 19:00.",
+    "Hair salon in New Malden, London. Cut, colour, perm and treatments, by appointment. Open Mon – Sat 10:00 – 19:00, Sun 10:00 – 18:00.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

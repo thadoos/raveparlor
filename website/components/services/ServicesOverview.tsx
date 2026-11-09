@@ -12,7 +12,7 @@ export function ServicesOverview() {
       <h2 className="svc-title reveal" id="services-title">
         <span>Our</span>
         <span className="svc-tag">
-          <span className="svc-tag-in">12 services</span>
+          <span className="svc-tag-in">14 services</span>
         </span>
         <span>Services</span>
       </h2>
@@ -33,7 +33,7 @@ export function ServicesOverview() {
           <span className="svc-info">
             <span className="svc-name">Cut &amp; Style</span>
             <span className="svc-count">
-              3 services<span className="svc-from"> · from £20</span>
+              3 services<span className="svc-from"> · from £30</span>
             </span>
             <svg className="svc-icon" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="6" cy="18" r="3"></circle>
@@ -58,7 +58,7 @@ export function ServicesOverview() {
           <span className="svc-info">
             <span className="svc-name">Colour &amp; Highlights</span>
             <span className="svc-count">
-              5 services<span className="svc-from"> · from £70</span>
+              6 services<span className="svc-from"> · from £70</span>
             </span>
             <svg className="svc-icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 3c3.5 4.6 6 8 6 11a6 6 0 0 1-12 0c0-3 2.5-6.4 6-11z"></path>
@@ -104,7 +104,7 @@ export function ServicesOverview() {
           <span className="svc-info">
             <span className="svc-name">Treatments</span>
             <span className="svc-count">
-              1 service<span className="svc-from"> · £30</span>
+              2 services<span className="svc-from"> · from £15</span>
             </span>
             <svg className="svc-icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 3v4M12 17v4M3 12h4M17 12h4M12 8.5 13.2 10.8 15.5 12 13.2 13.2 12 15.5 10.8 13.2 8.5 12 10.8 10.8z"></path>

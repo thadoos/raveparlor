@@ -40,7 +40,7 @@ export function HeroPair() {
             <div className="vignette"></div>
             <div className="scrim"></div>
             <figcaption className="cap">
-              <strong>Tinting Colour</strong>
+              <strong>Full Head Colour</strong>
               <a href="#prices">See prices</a>
             </figcaption>
           </div>

@@ -37,8 +37,8 @@ export function ServiceModal() {
               <a className="md-book" href="#book" data-close-nav>
                 Book now
               </a>
-              <a className="md-wa" href="https://wa.me/447871311362">
-                WhatsApp 07871 311 362
+              <a className="md-wa" href="https://wa.me/447789096148">
+                WhatsApp 07789 096148
               </a>
             </div>
           </div>

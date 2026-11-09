@@ -11,7 +11,7 @@ export function NavMenu() {
       </nav>
       <div className="menu-foot">
         <a href="https://www.instagram.com/ravesparlor_london">Instagram</a>
-        <a href="https://wa.me/447871311362">WhatsApp</a>
+        <a href="https://wa.me/447789096148">WhatsApp</a>
       </div>
     </div>
   );

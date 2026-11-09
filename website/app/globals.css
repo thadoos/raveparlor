@@ -187,25 +187,19 @@ figure {
 }
 .logo {
   justify-self: center;
-  text-align: center;
-  text-decoration: none;
-  font-family: var(--logo);
-  font-weight: 300;
-  line-height: 1;
-}
-.logo-word {
   display: block;
-  font-size: 24px;
-  letter-spacing: 0.2em;
-  margin-right: -0.2em;
-  white-space: nowrap;
+  line-height: 0;
 }
-.logo-city {
+/* the logo is a mask, so it takes the current text colour (dark, or white over photos) */
+.logo-mark {
   display: block;
-  font-size: 8px;
-  letter-spacing: 0.5em;
-  margin-right: -0.5em;
-  margin-top: 6px;
+  aspect-ratio: 941 / 234;
+  background: currentColor;
+  -webkit-mask: url("/images/logo.png") center / contain no-repeat;
+  mask: url("/images/logo.png") center / contain no-repeat;
+}
+.logo .logo-mark {
+  width: 176px;
 }
 .book {
   justify-self: end;
@@ -461,14 +455,7 @@ body {
   top: 50%;
   z-index: 2;
   transform: translateY(-50%);
-  text-align: center;
   color: #fff;
-  font-family: var(--logo);
-  font-weight: 300;
-  line-height: 1;
-  text-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.35),
-    0 2px 28px rgba(0, 0, 0, 0.45);
 }
 /* soft dark pool behind the wordmark so it reads over the busy interior */
 .wordmark::before {
@@ -489,20 +476,14 @@ body {
     rgba(0, 0, 0, 0)
   );
 }
-.wordmark-name {
+.wordmark-logo {
   display: block;
-  font-size: clamp(34px, 7.4vw, 128px);
-  letter-spacing: 0.12em;
-  margin-right: -0.12em;
-  white-space: nowrap;
+  width: clamp(260px, 46vw, 880px);
+  margin: 0 auto;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35)) drop-shadow(0 2px 28px rgba(0, 0, 0, 0.45));
 }
-.wordmark-city {
-  display: block;
-  margin-top: clamp(14px, 1.8vw, 28px);
-  font-size: clamp(11px, 1.4vw, 22px);
-  letter-spacing: 0.6em;
-  margin-right: -0.6em;
-  font-weight: 300;
+.wordmark .logo-mark {
+  width: 100%;
 }
 
 .pair-grid {
@@ -1094,6 +1075,13 @@ body {
   .mn-grid[data-n="3"] .mn-media.tall {
     grid-row: span 1;
   }
+  .mn-grid[data-n="2"] {
+    grid-auto-rows: minmax(clamp(360px, 30vw, 520px), auto);
+  }
+  .mn-grid[data-n="2"] .mn-media.tall {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
   .mn-grid[data-n="5"] .mn-card:last-child {
     grid-column: span 2;
   }
@@ -1313,6 +1301,29 @@ body {
   font-size: 18px;
   font-weight: 600;
 }
+.md-price table.has-rows {
+  max-width: 100%;
+}
+.md-price tbody th {
+  padding: 8px 16px 8px 0;
+  border-top: 1px solid #e3e3df;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #111;
+  vertical-align: top;
+}
+.md-price tbody th small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 400;
+  color: #777;
+}
+.md-price table.has-rows td {
+  vertical-align: top;
+}
 .md-desc {
   margin: 0 0 22px;
   font-size: 15px;
@@ -1470,7 +1481,7 @@ html.modal-open {
 }
 .row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(3, 88px);
+  grid-template-columns: minmax(0, 1fr) repeat(3, 96px);
   align-items: baseline;
   column-gap: 8px;
   padding: 14px 0;
@@ -1504,6 +1515,30 @@ html.modal-open {
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  color: #595959;
+}
+.group-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #595959;
+}
+.barber-head {
+  margin-top: 28px;
+}
+.row.head-row h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.row.head-row h4 small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
   color: #595959;
 }
 .note {
@@ -1654,14 +1689,8 @@ html.modal-open {
   .head {
     padding: 0 16px;
   }
-  .logo-word {
-    font-size: 16px;
-    letter-spacing: 0.16em;
-    margin-right: -0.16em;
-  }
-  .logo-city {
-    font-size: 7px;
-    margin-top: 5px;
+  .logo .logo-mark {
+    width: 136px;
   }
   .book {
     height: 34px;
@@ -1719,10 +1748,8 @@ html.modal-open {
     letter-spacing: 0.16em;
     bottom: 40px;
   }
-  .wordmark-name {
-    font-size: clamp(26px, 9vw, 40px);
-    letter-spacing: 0.1em;
-    margin-right: -0.1em;
+  .wordmark-logo {
+    width: min(78vw, 360px);
   }
 
   .prices {
@@ -1733,7 +1760,7 @@ html.modal-open {
     font-size: 30px;
   }
   .row {
-    grid-template-columns: minmax(0, 1fr) repeat(3, 52px);
+    grid-template-columns: minmax(0, 1fr) repeat(3, 64px);
     column-gap: 6px;
     font-size: 13px;
   }

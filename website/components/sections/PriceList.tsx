@@ -1,3 +1,11 @@
+import { Fragment } from "react";
+
+const BARBERS = [
+  { name: "Rave", days: "Mon, Thu, Fri, Sat & Sun", cut: ["£55", "£80", "£35"] },
+  { name: "John", days: "Tue, Wed, Thu, Fri & occasional Sat", cut: ["£45", "£60", "£30"] },
+  { name: "Julian", days: "Thu, Fri, Sat & Sun", cut: ["£40", "£65", "£30"] },
+];
+
 export function PriceList() {
   return (
     <section
@@ -16,24 +24,42 @@ export function PriceList() {
         <div className="group reveal" id="price-cut">
           <div className="row head-row">
             <h3>Hair Cut / Blow-dry</h3>
-            <span>Men</span>
-            <span>Ladies</span>
-            <span>Under 12s</span>
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
-          <div className="row">
-            <div>Cutting &amp; Finishing</div>
-            <span>£35</span>
-            <span>£55</span>
-            <span>£20</span>
-          </div>
-          <div className="row">
-            <div>Cleansing &amp; Styling</div>
-            <span className="span">£30 – £40</span>
-          </div>
-          <div className="row">
-            <div>Up-do Hairdressing</div>
-            <span className="span">£30 – £80</span>
-          </div>
+          <p className="group-note">All haircut services include wash and finishing.</p>
+          {BARBERS.map((b) => (
+            <Fragment key={b.name}>
+              <div className="row head-row barber-head">
+                <h4>
+                  {b.name}
+                  <small>Available: {b.days}</small>
+                </h4>
+                <span>Gentleman</span>
+                <span>Ladies</span>
+                <span>Under 12s</span>
+              </div>
+              <div className="row">
+                <div>Cutting &amp; Finishing</div>
+                <span>{b.cut[0]}</span>
+                <span>{b.cut[1]}</span>
+                <span>{b.cut[2]}</span>
+              </div>
+              <div className="row">
+                <div>Cleansing &amp; Styling</div>
+                <span>–</span>
+                <span>£30 – £40</span>
+                <span>–</span>
+              </div>
+              <div className="row">
+                <div>Up-do Hairdressing</div>
+                <span>–</span>
+                <span>£30 – £80</span>
+                <span>–</span>
+              </div>
+            </Fragment>
+          ))}
         </div>
 
         <div className="group reveal" id="price-colour">
@@ -44,22 +70,28 @@ export function PriceList() {
             <span>Long</span>
           </div>
           <div className="row">
-            <div>Tinting Colour</div>
+            <div>Root Retouching</div>
+            <span>£80</span>
+            <span>–</span>
+            <span>–</span>
+          </div>
+          <div className="row">
+            <div>Full Head Colour</div>
             <span>£80</span>
             <span>£100</span>
             <span>£120</span>
-          </div>
-          <div className="row">
-            <div>Full Head Highlights</div>
-            <span>£100</span>
-            <span>£120</span>
-            <span>£150</span>
           </div>
           <div className="row">
             <div>Half Head Highlights</div>
             <span>£100</span>
             <span>£110</span>
             <span>£130</span>
+          </div>
+          <div className="row">
+            <div>Full Head Highlights</div>
+            <span>£100</span>
+            <span>£120</span>
+            <span>£150</span>
           </div>
           <div className="row">
             <div>Technical Highlight</div>
@@ -108,13 +140,19 @@ export function PriceList() {
             <span></span>
           </div>
           <div className="row">
-            <div>Olaplex No.1 Pre-Chemical &amp; No.2 Rinse</div>
+            <div>
+              Olaplex Professional No.1 Pre Chemical Services &amp; No.2 Professional Rinsing Hair
+            </div>
             <span className="span">£30</span>
+          </div>
+          <div className="row">
+            <div>Kérastase Scalp Relax Spa And Serum</div>
+            <span className="span">£15</span>
           </div>
         </div>
 
         <p className="note reveal">
-          All chemical services exclude haircut and finishing.
+          All chemical services exclude haircut, wash and finishing.
           <br />
           所有電髮、染髮服務不包括剪髮和洗吹造型
         </p>

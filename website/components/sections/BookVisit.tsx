@@ -8,24 +8,34 @@ export function BookVisit() {
         <div className="reveal">
           <h3>Appointments</h3>
           <p>
-            By appointment
+            By appointment only
             <br />
-            Phone <a href="tel:+447789096148">07789 096148</a>
-            <br />
-            WhatsApp 07871 311 362
+            WhatsApp 07789 096148
           </p>
-          <a className="cta" href="https://wa.me/447871311362">
+          <a className="cta" href="https://wa.me/447789096148">
             Book on WhatsApp
           </a>
         </div>
         <div className="reveal">
           <h3>Opening hours</h3>
           <p>
-            Open daily
-            <br />
-            10:00 – 19:00
+            Mon – Sat 10:00 – 19:00
             <br />
             Last appointment 18:00
+            <br />
+            Sunday 10:00 – 18:00
+            <br />
+            Last appointment 17:00
+          </p>
+          <p
+            style={{
+              marginTop: "10px",
+              color: "#a6a6a3",
+              fontSize: "12px",
+              letterSpacing: ".08em",
+            }}
+          >
+            Closed Christmas Day, Boxing Day and New Year’s Day
           </p>
         </div>
         <div className="reveal">

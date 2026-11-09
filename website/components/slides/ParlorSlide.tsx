@@ -15,11 +15,12 @@ export function ParlorSlide() {
         />
         <div className="scrim"></div>
         <div className="wordmark" aria-hidden="true">
-          <span className="wordmark-name">RAVE’S PARLOR</span>
-          <span className="wordmark-city">LONDON</span>
+          <span className="wordmark-logo">
+            <span className="logo-mark"></span>
+          </span>
         </div>
         <div className="cap">
-          <strong>15 Coombe Road, New Malden</strong>Open daily · 10:00 – 19:00
+          <strong>15 Coombe Road, New Malden</strong>Mon – Sat 10:00 – 19:00 · Sun 10:00 – 18:00
         </div>
       </div>
     </section>
