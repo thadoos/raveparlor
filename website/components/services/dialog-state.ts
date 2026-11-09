@@ -1,7 +1,7 @@
 import type { CategoryKey } from "@/lib/data/services";
 
 /**
- * Lifecycle of the service dialog. Each stage maps to the state classes on `.md`:
+ * Lifecycle of the service dialog. Each stage maps to the state classes on the dialog (`show`, `ready` in ServiceDialog.module.css):
  *
  * - `closed`: not open
  * - `opening`: open, panel still at the card's rectangle, no `show` yet

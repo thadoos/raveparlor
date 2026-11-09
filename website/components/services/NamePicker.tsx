@@ -1,5 +1,7 @@
 import type { Selection } from "@/lib/booking/picker";
+import { cx } from "@/lib/cx";
 import type { Barber } from "@/lib/data/services";
+import styles from "./DialogPrice.module.css";
 import { PriceCell } from "./PriceCell";
 
 interface NamePickerProps {
@@ -12,7 +14,7 @@ interface NamePickerProps {
 /** For a single-price service with a barber choice: just the names, shown while picking. */
 export function NamePicker({ barbers, picking, selection, onPick }: NamePickerProps) {
   return (
-    <div className={picking ? "md-who is-picking" : "md-who"}>
+    <div className={cx(styles.who, picking && styles.isPicking)}>
       {barbers.map((barber, row) => (
         <PriceCell
           key={barber.name}

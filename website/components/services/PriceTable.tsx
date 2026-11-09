@@ -1,4 +1,5 @@
 import type { Selection } from "@/lib/booking/picker";
+import { cx } from "@/lib/cx";
 import {
   cutLabel,
   hasChoices,
@@ -7,6 +8,7 @@ import {
   type MenuCategory,
   type MenuItem,
 } from "@/lib/data/services";
+import styles from "./DialogPrice.module.css";
 import { PriceCell } from "./PriceCell";
 
 interface PriceTableProps {
@@ -26,9 +28,11 @@ export function PriceTable({ item, category, picking, selection, onPick }: Price
   const hasRows = !!item.rows;
   const rows = item.rows ?? [{ label: "", sub: "", prices: item.prices ?? [] }];
   const anyRow = category.barbers && item.rows ? item.rows.length : null;
-  const className = [hasRows && "has-rows", picking && "is-picking", selection && "has-sel"]
-    .filter(Boolean)
-    .join(" ");
+  const className = cx(
+    hasRows && styles.hasRows,
+    picking && styles.isPicking,
+    selection && styles.hasSel,
+  );
 
   function isSelected(row: number, col: number): boolean {
     return selection?.row === row && selection.col === col;
@@ -40,7 +44,7 @@ export function PriceTable({ item, category, picking, selection, onPick }: Price
         <tr>
           {hasRows && <th />}
           {cols.map((col, c) => (
-            <th key={col} className={selection?.col === c ? "is-on" : undefined}>
+            <th key={col} className={selection?.col === c ? styles.isOn : undefined}>
               {col}
             </th>
           ))}
@@ -48,7 +52,7 @@ export function PriceTable({ item, category, picking, selection, onPick }: Price
       </thead>
       <tbody>
         {rows.map((row, r) => (
-          <tr key={row.label || r} className={selection?.row === r ? "is-on" : undefined}>
+          <tr key={row.label || r} className={selection?.row === r ? styles.isOn : undefined}>
             {hasRows && (
               <th scope="row">
                 {row.label}
@@ -79,7 +83,7 @@ export function PriceTable({ item, category, picking, selection, onPick }: Price
           </tr>
         ))}
         {anyRow !== null && (
-          <tr className={selection?.row === anyRow ? "md-any is-on" : "md-any"}>
+          <tr className={cx(styles.any, selection?.row === anyRow && styles.isOn)}>
             <th scope="row">No preference</th>
             {cols.map((col, c) => {
               const min = minPriceForColumn(item, c);

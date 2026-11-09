@@ -1,0 +1,55 @@
+.back {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  cursor: pointer;
+}
+.back[hidden] {
+  display: none;
+}
+.actions {
+  margin-top: auto;
+  padding-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 22px;
+}
+.book {
+  display: inline-flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 30px;
+  background: #111;
+  color: #fff;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.book[aria-disabled="true"] {
+  opacity: 0.4;
+}
+.book:hover {
+  opacity: 0.82;
+  color: #fff;
+}
+@media (max-width: 820px) {
+  .actions {
+    position: sticky;
+    bottom: -32px;
+    margin: 8px -20px -32px;
+    padding: 14px 20px calc(20px + env(safe-area-inset-bottom));
+    width: calc(100% + 40px);
+    background: rgba(255, 255, 255, 0.5);
+    -webkit-backdrop-filter: blur(8px) saturate(1.2);
+    backdrop-filter: blur(8px) saturate(1.2);
+  }
+}

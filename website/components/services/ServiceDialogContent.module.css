@@ -1,0 +1,21 @@
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.cat {
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #777;
+}
+.name {
+  margin: 0 0 32px;
+  font-family: var(--logo);
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  font-size: clamp(32px, 3.6vw, 54px);
+}

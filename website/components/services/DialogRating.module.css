@@ -1,0 +1,13 @@
+.rating {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.rating span:first-child {
+  letter-spacing: 0.12em;
+}
+.src {
+  font-weight: 400;
+  color: #666;
+}

@@ -1,5 +1,6 @@
 import type { Selection } from "@/lib/booking/picker";
 import type { MenuCategory, MenuItem } from "@/lib/data/services";
+import styles from "./DialogPrice.module.css";
 import { NamePicker } from "./NamePicker";
 
 interface SinglePriceProps {
@@ -14,7 +15,7 @@ interface SinglePriceProps {
 export function SinglePrice({ item, category, picking, selection, onPick }: SinglePriceProps) {
   return (
     <>
-      <div className="one">{item.range}</div>
+      <div className={styles.one}>{item.range}</div>
       {category.barbers && (
         <NamePicker
           barbers={category.barbers}

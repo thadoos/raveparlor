@@ -1,0 +1,199 @@
+/* The price area of the dialog: the `.price` wrapper, the single price, the price table, the barber
+   names and the pickable cells. One module because the picker rules reach across all of them
+   (`.price table.isPicking .cell`). */
+.price {
+  margin: 0 0 20px;
+  width: 100%;
+}
+.price .one {
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.price table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 360px;
+  font-variant-numeric: tabular-nums;
+}
+.price th {
+  padding: 0 0 6px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #777;
+  text-align: left;
+}
+.price td {
+  padding: 8px 0;
+  border-top: 1px solid #e3e3df;
+  font-size: 18px;
+  font-weight: 600;
+}
+.price table.hasRows {
+  max-width: 100%;
+  table-layout: fixed;
+}
+.price table.hasRows thead th:first-child {
+  width: 31%;
+}
+.price tbody th {
+  padding: 8px 16px 8px 0;
+  border-top: 1px solid #e3e3df;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #111;
+  vertical-align: top;
+}
+.price tbody th small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 400;
+  color: #777;
+}
+.price table.hasRows td {
+  vertical-align: top;
+}
+/* per-barber rows: no dividers at all (neither under the header nor between barbers) */
+.price table.hasRows tbody th,
+.price table.hasRows tbody td {
+  border-top: 0;
+}
+.price.nudge {
+  animation: nudge 0.5s var(--ease);
+}
+@keyframes nudge {
+  20%,
+  60% {
+    transform: translateX(-5px);
+  }
+  40%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+.cell {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+  transition:
+    padding 0.45s var(--ease),
+    margin 0.45s var(--ease),
+    border-color 0.45s var(--ease),
+    background-color 0.25s var(--ease),
+    color 0.25s var(--ease);
+}
+.price tr.any {
+  display: none;
+}
+.price table.isPicking tr.any {
+  display: table-row;
+  animation: rowIn 0.5s var(--ease);
+}
+.who {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px 4px;
+  margin-top: 14px;
+}
+.who.isPicking {
+  display: flex;
+  animation: rowIn 0.5s var(--ease);
+}
+.who .cell:first-child {
+  margin-left: -12px;
+}
+@keyframes rowIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.price table.isPicking td {
+  padding-right: 8px;
+}
+.price table.isPicking.hasRows td {
+  vertical-align: middle;
+}
+.price table.isPicking tbody th {
+  vertical-align: middle;
+}
+.price table.isPicking .cell,
+.price .who.isPicking .cell {
+  display: inline-block;
+  width: auto;
+  padding: 8px 12px;
+  border-color: transparent;
+  text-decoration: underline dotted #b5b5b0;
+  text-underline-offset: 7px;
+  cursor: pointer;
+}
+.price table.isPicking .cell {
+  margin-left: -12px;
+}
+.price table.isPicking .cell[aria-pressed="true"],
+.price .who.isPicking .cell[aria-pressed="true"] {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+  text-decoration-color: transparent;
+}
+.price thead th,
+.price tbody th {
+  transition:
+    color 0.3s var(--ease),
+    box-shadow 0.3s var(--ease);
+}
+.price table.isPicking.hasSel tbody tr:not(.isOn) th {
+  color: #8a8a85;
+}
+.price table.isPicking.hasSel thead th:not(.isOn) {
+  color: #b5b5b0;
+}
+.price table.isPicking thead th.isOn {
+  color: #111;
+  font-weight: 700;
+}
+.cell:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .price table.isPicking .cell:not([aria-pressed="true"]):hover,
+  .price .who.isPicking .cell:not([aria-pressed="true"]):hover {
+    text-decoration-color: #111;
+  }
+}
+@media (max-width: 820px) {
+  .price table.hasRows thead th {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+  .price table.hasRows thead th:first-child {
+    width: 28%;
+  }
+  /* keep the price picker clear of the sticky Book bar when it scrolls into view */
+  .price {
+    scroll-margin: 70px 0 120px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cell,
+  .price.nudge,
+  .price tr.any,
+  .who {
+    transition: none;
+    animation: none;
+  }
+}

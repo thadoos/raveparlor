@@ -1,5 +1,7 @@
 import Image from "next/image";
+import { cx } from "@/lib/cx";
 import { positionClass } from "@/lib/data/images";
+import styles from "./ServiceGrid.module.css";
 
 interface ServiceMediaProps {
   src: string;
@@ -13,7 +15,7 @@ interface ServiceMediaProps {
 /** The photo beside a category's cards. */
 export function ServiceMedia({ src, position, tall, animate }: ServiceMediaProps) {
   return (
-    <div className={`mn-media${tall ? " tall" : ""}${animate ? " mn-in" : ""}`}>
+    <div className={cx(styles.media, tall && styles.tall, animate && styles.enter)}>
       <Image
         src={src}
         alt=""

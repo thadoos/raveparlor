@@ -1,4 +1,5 @@
 import type { MouseEventHandler, RefObject } from "react";
+import styles from "./DialogActions.module.css";
 
 interface DialogActionsProps {
   href: string;
@@ -21,17 +22,17 @@ export function DialogActions({
   onBack,
 }: DialogActionsProps) {
   return (
-    <div className="md-actions">
+    <div className={styles.actions}>
       <a
         ref={bookRef}
-        className="md-book"
+        className={styles.book}
         href={href}
         aria-disabled={blocked ? "true" : undefined}
         onClick={onBook}
       >
         {flipped ? "Continue on WhatsApp" : "Book now"}
       </a>
-      <button className="md-back-btn" type="button" hidden={!flipped} onClick={onBack}>
+      <button className={styles.back} type="button" hidden={!flipped} onClick={onBack}>
         Back
       </button>
     </div>

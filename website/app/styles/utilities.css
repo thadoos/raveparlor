@@ -1,0 +1,13 @@
+/* object-position of a photo, keyed by its data (see positionClass in lib/data/images.ts) */
+.pos-50-30 {
+  object-position: 50% 30%;
+}
+.pos-50-40 {
+  object-position: 50% 40%;
+}
+.pos-50-50 {
+  object-position: 50% 50%;
+}
+.pos-40-50 {
+  object-position: 40% 50%;
+}

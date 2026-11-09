@@ -1,11 +1,13 @@
 "use client";
 
 import { useRef } from "react";
+import { cx } from "@/lib/cx";
 import { useModalLock } from "@/lib/hooks/use-modal-lock";
 import { isShown } from "./dialog-state";
 import { ServiceDialogContent } from "./ServiceDialogContent";
 import { useServiceDialog } from "./services-context";
 import { useDialogMotion } from "./use-dialog-motion";
+import styles from "./ServiceDialog.module.css";
 
 /**
  * The service details: a native modal `<dialog>` (focus trap, top layer) whose panel expands out
@@ -23,14 +25,14 @@ export function ServiceDialog() {
   useModalLock(stage !== "closed");
   useDialogMotion(state, dialogRef, panelRef, closeRef);
 
-  const className = ["md", isShown(stage) && "show", stage === "ready" && "ready"]
-    .filter(Boolean)
-    .join(" ");
-
   return (
     <dialog
       ref={dialogRef}
-      className={className}
+      className={cx(
+        styles.dialog,
+        isShown(stage) && styles.show,
+        stage === "ready" && styles.ready,
+      )}
       id="md"
       data-tone-ignore
       aria-labelledby="md-name"
@@ -40,11 +42,11 @@ export function ServiceDialog() {
         close();
       }}
     >
-      <div className="md-backdrop" data-close onClick={close}></div>
-      <div className="md-panel" id="md-panel" ref={panelRef}>
+      <div className={styles.backdrop} data-close onClick={close}></div>
+      <div className={styles.panel} id="md-panel" ref={panelRef}>
         <button
           ref={closeRef}
-          className="md-close"
+          className={styles.close}
           type="button"
           aria-label="Close"
           data-close

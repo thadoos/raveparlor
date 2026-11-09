@@ -1,3 +1,5 @@
+import styles from "./DialogPrice.module.css";
+
 interface PriceCellProps {
   /** Text on the button. */
   label: string;
@@ -11,7 +13,7 @@ interface PriceCellProps {
 export function PriceCell({ label, picking, selected, onPick }: PriceCellProps) {
   return (
     <button
-      className="md-cell"
+      className={styles.cell}
       type="button"
       aria-pressed={selected}
       disabled={!picking}

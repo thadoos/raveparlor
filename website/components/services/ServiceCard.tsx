@@ -2,6 +2,7 @@
 
 import { useMemo, type KeyboardEvent, type MouseEvent } from "react";
 import { bookingHref } from "@/lib/booking/href";
+import { cx } from "@/lib/cx";
 import {
   MENU,
   cardAriaLabel,
@@ -10,6 +11,7 @@ import {
   type CategoryKey,
   type MenuItem,
 } from "@/lib/data/services";
+import styles from "./ServiceGrid.module.css";
 import { useServiceDialog } from "./services-context";
 
 interface ServiceCardProps {
@@ -60,7 +62,7 @@ export function ServiceCard({ categoryKey, index, item, animate }: ServiceCardPr
   return (
     <article
       ref={ref}
-      className={`mn-card${animate ? " mn-in" : ""}`}
+      className={cx(styles.card, animate && styles.enter)}
       tabIndex={0}
       data-i={index}
       data-open={hidden ? "" : undefined}
@@ -69,20 +71,20 @@ export function ServiceCard({ categoryKey, index, item, animate }: ServiceCardPr
       onKeyDown={onKeyDown}
     >
       <h3>{item.name}</h3>
-      <div className="mn-price">
+      <div className={styles.price}>
         {price.prefix && <small>{price.prefix}</small>}
         {price.text}
       </div>
       <p>{item.desc}</p>
-      <div className="mn-actions">
+      <div className={styles.actions}>
         <a
-          className="mn-booknow"
+          className={styles.booknow}
           href={bookingHref({ item, category, selection: null })}
           onClick={onBookNow}
         >
           Book now
         </a>
-        <button className="mn-more" type="button">
+        <button className={styles.more} type="button">
           Learn more
         </button>
       </div>

@@ -2,6 +2,7 @@
 
 import { useReducer, useRef, type MouseEvent } from "react";
 import { bookingHref } from "@/lib/booking/href";
+import { cx } from "@/lib/cx";
 import {
   bookIntent,
   initialPickerState,
@@ -17,6 +18,9 @@ import { DialogRating } from "./DialogRating";
 import type { DialogTarget } from "./dialog-state";
 import { PriceTable } from "./PriceTable";
 import { SinglePrice } from "./SinglePrice";
+import priceStyles from "./DialogPrice.module.css";
+import dialogStyles from "./ServiceDialog.module.css";
+import styles from "./ServiceDialogContent.module.css";
 import { useNudge } from "./use-nudge";
 
 interface ServiceDialogContentProps {
@@ -66,17 +70,21 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
   };
 
   return (
-    <div className="md-body">
+    <div className={dialogStyles.body}>
       <DialogMedia images={category.images} />
-      <div className="md-text">
+      <div className={styles.text}>
         <DialogRating />
-        <p className="md-cat" id="md-cat">
+        <p className={styles.cat} id="md-cat">
           {category.name}
         </p>
-        <h3 className="md-name" id="md-name">
+        <h3 className={styles.name} id="md-name">
           {item.name}
         </h3>
-        <div className={nudging ? "md-price nudge" : "md-price"} id="md-price" ref={priceRef}>
+        <div
+          className={cx(priceStyles.price, nudging && priceStyles.nudge)}
+          id="md-price"
+          ref={priceRef}
+        >
           {item.cols ? <PriceTable {...priceProps} /> : <SinglePrice {...priceProps} />}
         </div>
         <DialogDetails item={item} flipped={picker.flipped} />

@@ -4,6 +4,7 @@ import { MENU } from "@/lib/data/services";
 import { useReducedMotion } from "@/lib/hooks/use-media";
 import { ServiceCard } from "./ServiceCard";
 import { ServiceMedia } from "./ServiceMedia";
+import styles from "./ServiceGrid.module.css";
 import { useServiceCategory } from "./services-context";
 
 /**
@@ -19,7 +20,7 @@ export function ServiceGrid() {
 
   return (
     <div
-      className="mn-grid"
+      className={styles.grid}
       id="mn-grid"
       role="tabpanel"
       aria-labelledby="mn-title"

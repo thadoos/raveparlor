@@ -2,6 +2,7 @@
 
 import { useRef, type KeyboardEvent } from "react";
 import { CATEGORY_ORDER, MENU, adjacentCategory, type CategoryKey } from "@/lib/data/services";
+import styles from "./ServiceTabs.module.css";
 import { useServiceCategory } from "./services-context";
 
 /**
@@ -22,7 +23,7 @@ export function ServiceTabs() {
 
   return (
     <div
-      className="mn-tabs"
+      className={styles.tabs}
       role="tablist"
       aria-label="Service categories"
       data-deck-ignore
@@ -39,7 +40,7 @@ export function ServiceTabs() {
                 tabs.current.delete(key);
               };
             }}
-            className="mn-tab"
+            className={styles.tab}
             role="tab"
             type="button"
             id={`mn-tab-${key}`}

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import styles from "./DialogMedia.module.css";
 
 interface DialogMediaProps {
   images: readonly string[];
@@ -7,7 +8,7 @@ interface DialogMediaProps {
 /** The photos beside the details (phones show only the first). */
 export function DialogMedia({ images }: DialogMediaProps) {
   return (
-    <div className="md-media">
+    <div className={styles.media}>
       {images.map((src) => (
         <Image
           key={src}

@@ -1,10 +1,10 @@
 /* Global styles, in cascade order. Component styles live in CSS Modules next to the components
    (*.module.css); the partials below hold only what must stay global: tokens, the reset, the deck
-   and slide primitives that lib/deck toggles or reaches into, scroll reveal, and the service
-   menu/dialog (to be converted in a later phase). */
+   and slide primitives that lib/deck toggles or reaches into, scroll reveal, and the image
+   position utilities. */
 @import "./styles/tokens.css";
 @import "./styles/base.css";
 @import "./styles/deck.css";
 @import "./styles/slides.css";
 @import "./styles/motion.css";
-@import "./styles/services.css";
+@import "./styles/utilities.css";
