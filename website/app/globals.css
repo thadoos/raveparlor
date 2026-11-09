@@ -821,9 +821,6 @@ body {
     transform: none;
   }
 }
-.group {
-  scroll-margin-top: 96px;
-}
 @media (max-width: 1024px) {
   .svc-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1458,6 +1455,32 @@ html.modal-open {
   max-width: 880px;
   margin: 0 auto;
 }
+.wrap.wide {
+  max-width: 1280px;
+}
+.price-poster {
+  display: block;
+  line-height: 0;
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.04),
+    0 18px 48px rgba(0, 0, 0, 0.12);
+}
+.price-poster img {
+  width: 100%;
+  height: auto;
+}
+.poster-hint {
+  display: none;
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: #595959;
+}
+@media (max-width: 820px) {
+  .poster-hint {
+    display: block;
+  }
+}
 .eyebrow {
   margin: 0 0 14px;
   text-align: center;
@@ -1475,78 +1498,6 @@ html.modal-open {
   letter-spacing: 0.14em;
   margin-right: -0.14em;
   text-transform: uppercase;
-}
-.group {
-  margin: 0 0 56px;
-}
-.row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(3, 96px);
-  align-items: baseline;
-  column-gap: 8px;
-  padding: 14px 0;
-  border-bottom: 1px solid #e6e6e3;
-  font-size: 14px;
-  line-height: 1.45;
-}
-.row > span {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.row .span {
-  grid-column: 2 / 5;
-}
-.row small {
-  color: #595959;
-  font-size: 12px;
-}
-.row.head-row {
-  border-bottom-color: #111;
-  padding-bottom: 12px;
-}
-.row.head-row h3 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.row.head-row span {
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #595959;
-}
-.group-note {
-  margin: 10px 0 0;
-  font-size: 12px;
-  color: #595959;
-}
-.barber-head {
-  margin-top: 28px;
-}
-.row.head-row h4 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.row.head-row h4 small {
-  display: block;
-  margin-top: 4px;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  text-transform: none;
-  color: #595959;
-}
-.note {
-  margin: 8px 0 0;
-  text-align: center;
-  font-size: 12px;
-  line-height: 1.8;
-  color: #595959;
 }
 .reveal {
   opacity: 0;
@@ -1758,15 +1709,6 @@ html.modal-open {
   .title,
   .visit h2 {
     font-size: 30px;
-  }
-  .row {
-    grid-template-columns: minmax(0, 1fr) repeat(3, 64px);
-    column-gap: 6px;
-    font-size: 13px;
-  }
-  .row.head-row span {
-    font-size: 9px;
-    letter-spacing: 0.06em;
   }
   .visit {
     padding: 112px 16px 80px;
