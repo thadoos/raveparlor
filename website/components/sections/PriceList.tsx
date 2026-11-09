@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { PricePoster } from "./PricePoster";
 
 export function PriceList() {
   return (
@@ -15,22 +15,9 @@ export function PriceList() {
           Price List
         </h2>
 
-        <a
-          className="price-poster reveal"
-          href="/images/price-list.webp"
-          target="_blank"
-          rel="noopener"
-          aria-label="Open the full price list image in a new tab"
-        >
-          <Image
-            src="/images/price-list.webp"
-            alt="Rave’s Parlor London price list: hair cut and blow-dry prices for Rave, John and Julian, colour and highlights, perm, and hair treatments. All chemical services exclude haircut, wash and finishing."
-            width={1491}
-            height={1055}
-            sizes="(max-width: 1328px) 100vw, 1280px"
-          />
-        </a>
-        <p className="poster-hint reveal">Tap the price list to enlarge</p>
+        <div className="reveal">
+          <PricePoster />
+        </div>
       </div>
     </section>
   );
