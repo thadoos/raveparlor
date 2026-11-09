@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { PHOTOS, SLIDE_POSITIONS } from "@/lib/data/images";
 import { formatAddressShort, formatHoursSummary } from "@/lib/format";
+import styles from "./ParlorSlide.module.css";
 
 export function ParlorSlide() {
   return (
@@ -11,7 +12,7 @@ export function ParlorSlide() {
           alt={PHOTOS.parlorReception.alt}
           fill
           sizes="100vw"
-          className="m-reception"
+          className={styles.reception}
           style={{ objectPosition: SLIDE_POSITIONS.parlor }}
           loading="eager"
         />

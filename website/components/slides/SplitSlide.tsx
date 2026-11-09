@@ -1,10 +1,12 @@
 import Image from "next/image";
+import { cx } from "@/lib/cx";
 import { PHOTOS, SLIDE_POSITIONS } from "@/lib/data/images";
+import styles from "./SplitSlide.module.css";
 
 export function SplitSlide() {
   return (
-    <section className="slide split" data-tone="light" data-tone-m="dark">
-      <div className="layer split-grid">
+    <section className={cx("slide", styles.split)} data-tone="light" data-tone-m="dark">
+      <div className={cx("layer", styles.grid)}>
         <figure>
           <Image
             src={PHOTOS.portraitMono.src}
@@ -20,7 +22,7 @@ export function SplitSlide() {
             <a href="#prices">View the price list</a>
           </figcaption>
         </figure>
-        <div className="split-text">
+        <div className={styles.text}>
           <p>Cut · Colour · Perm · Treatment</p>
           <h2>By Appointment</h2>
           <a href="#prices">View the price list</a>

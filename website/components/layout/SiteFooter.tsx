@@ -2,10 +2,11 @@ import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
 import { FOOTER_LINKS } from "@/lib/data/nav";
 import { SITE } from "@/lib/data/site";
 import { formatAddress, formatCopyright, formatWhatsAppLine } from "@/lib/format";
+import styles from "./SiteFooter.module.css";
 
 export function SiteFooter() {
   return (
-    <footer className="foot" data-tone="light">
+    <footer className={styles.foot} data-tone="light">
       <nav aria-label="Footer">
         {FOOTER_LINKS.map((link) => (
           <a key={link.href} href={link.href}>

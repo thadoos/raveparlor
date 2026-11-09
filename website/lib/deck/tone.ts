@@ -20,12 +20,15 @@ export function sameTone(a: HeaderTone, b: HeaderTone): boolean {
   return a.dark === b.dark && a.blur === b.blur;
 }
 
-/** Reads the tone of whatever is painted under the header (ignoring the header and the modal). */
+/**
+ * Reads the tone of whatever is painted under the header (ignoring the header and anything marked
+ * `data-tone-ignore`, such as the service dialog).
+ */
 export function computeTone(head: HTMLElement, phone: boolean): HeaderTone {
   const y = head.offsetHeight / 2;
   const hits = document.elementsFromPoint(window.innerWidth / 2, y);
   for (const hit of hits) {
-    if (head.contains(hit) || hit.closest(".md")) continue;
+    if (head.contains(hit) || hit.closest("[data-tone-ignore]")) continue;
     const host = hit.closest("[data-tone]");
     if (host) {
       return { dark: toneOf(host, phone) === "dark", blur: hit.closest("[data-blur]") !== null };

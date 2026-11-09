@@ -1,0 +1,68 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  background: #efeeea;
+}
+.grid figure {
+  position: relative;
+  overflow: hidden;
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 48px;
+  text-align: center;
+  color: var(--color-ink);
+}
+.text p {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #555;
+}
+.text h2 {
+  margin: 0;
+  font-family: var(--logo);
+  font-weight: 200;
+  font-size: 44px;
+  letter-spacing: 0.14em;
+  margin-right: -0.14em;
+  text-transform: uppercase;
+}
+.text a {
+  margin-top: 8px;
+  padding: 6px 4px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-underline-offset: 5px;
+}
+/* desktop: the text column carries the caption; `.cap` and `.scrim` are shared (styles/slides.css) */
+.split :global(.cap) {
+  display: none;
+}
+.split :global(.scrim) {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  /* the split becomes a full-screen photo with its caption */
+  .grid {
+    display: block;
+  }
+  .grid figure {
+    position: absolute;
+    inset: 0;
+  }
+  .text {
+    display: none;
+  }
+  .split :global(.cap),
+  .split :global(.scrim) {
+    display: block;
+  }
+}

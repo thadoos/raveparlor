@@ -32,6 +32,7 @@ export function ServiceDialog() {
       ref={dialogRef}
       className={className}
       id="md"
+      data-tone-ignore
       aria-labelledby="md-name"
       onCancel={(e) => {
         // Escape: run the animated close instead of closing at once

@@ -6,7 +6,7 @@ const THRESHOLD = 0.15;
 export interface RevealControls {
   /** Attach to the element that fades in (as its `ref`). */
   attach: RefCallback<HTMLElement>;
-  /** `reveal in` while visible, `reveal` while waiting to scroll into view (see `.reveal` in globals.css). */
+  /** `reveal in` while visible, `reveal` while waiting to scroll into view (see `.reveal` in app/styles/motion.css). */
   className: string;
 }
 

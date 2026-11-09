@@ -1,0 +1,84 @@
+.menu {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-menu);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 56px;
+  background: rgba(244, 244, 241, 0.84);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--dur-base) var(--ease),
+    visibility 0s var(--dur-base);
+}
+.menu.open {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--dur-base) var(--ease),
+    visibility 0s;
+}
+.menu nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.menu nav a {
+  padding: 8px 16px;
+  text-decoration: none;
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.5s var(--ease),
+    transform 0.5s var(--ease);
+}
+.menu.open nav a {
+  opacity: 1;
+  transform: none;
+}
+.menu.open nav a:nth-child(2) {
+  transition-delay: 0.04s;
+}
+.menu.open nav a:nth-child(3) {
+  transition-delay: 0.08s;
+}
+.menu.open nav a:nth-child(4) {
+  transition-delay: 0.12s;
+}
+.menu.open nav a:nth-child(5) {
+  transition-delay: 0.16s;
+}
+.menu nav a:hover {
+  opacity: 0.6;
+}
+.foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.foot a {
+  padding: 6px 12px;
+  text-decoration: none;
+  color: var(--color-ink);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu,
+  .menu nav a {
+    transition: none;
+  }
+}

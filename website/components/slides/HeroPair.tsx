@@ -1,10 +1,12 @@
 import Image from "next/image";
+import { cx } from "@/lib/cx";
 import { PHOTOS, SLIDE_POSITIONS } from "@/lib/data/images";
+import styles from "./HeroPair.module.css";
 
 export function HeroPair() {
   return (
     <section className="slide pair is-current" id="top" data-tone="light">
-      <div className="layer pair-grid">
+      <div className={cx("layer", styles.pairGrid)}>
         <figure className="half is-current" id="gallery" data-tone="light">
           <div className="layer">
             <Image
@@ -12,7 +14,7 @@ export function HeroPair() {
               alt={PHOTOS.portraitColour.alt}
               fill
               sizes="(max-width: 820px) 100vw, 50vw"
-              className="m-left"
+              className={styles.mLeft}
               style={{ objectPosition: SLIDE_POSITIONS.heroLeft }}
               loading="eager"
               fetchPriority="high"
@@ -46,7 +48,7 @@ export function HeroPair() {
             </figcaption>
           </div>
         </figure>
-        <div className="vignette pair-vignette"></div>
+        <div className={cx("vignette", styles.pairVignette)}></div>
       </div>
     </section>
   );

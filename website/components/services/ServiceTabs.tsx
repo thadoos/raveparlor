@@ -21,7 +21,13 @@ export function ServiceTabs() {
   }
 
   return (
-    <div className="mn-tabs" role="tablist" aria-label="Service categories" onKeyDown={onKeyDown}>
+    <div
+      className="mn-tabs"
+      role="tablist"
+      aria-label="Service categories"
+      data-deck-ignore
+      onKeyDown={onKeyDown}
+    >
       {CATEGORY_ORDER.map((key) => {
         const selected = key === category;
         return (

@@ -1,0 +1,100 @@
+/* The page is a fixed deck of full-screen slides moved with GPU transforms
+   (the same approach as Swiper, which ysl.com uses). Nothing scrolls the page,
+   so drags track the finger exactly and nothing fights the browser's own scrolling.
+   The final slide (.rest) scrolls normally inside itself.
+
+   lib/deck/controller.ts finds slides by `.slide` / `.half` and toggles `is-current`,
+   `is-under`, `is-far`, `moving` and `pre` on them, so all of these stay global class names. */
+.deck {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--color-deck);
+  touch-action: none;
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--color-deck);
+  transform: translate3d(0, 100%, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.slide.is-under,
+.slide.is-current {
+  transform: none;
+}
+.slide.is-far {
+  visibility: hidden;
+}
+.slide.scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.slide.moving,
+.half.moving {
+  box-shadow: 0 -24px 70px rgba(0, 0, 0, 0.22);
+}
+.half {
+  position: relative;
+  overflow: hidden;
+}
+.rest {
+  background: var(--color-paper);
+}
+
+/* Incoming screen: photo settles from a slight zoom, captions rise in
+   (the matching transitions are on .layer img, .cap and .wordmark in slides.css) */
+.pre .layer img {
+  transform: scale(1.1);
+}
+.pre .cap {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.pre .wordmark {
+  opacity: 0;
+  transform: translateY(calc(-50% + 36px));
+}
+@media (prefers-reduced-motion: reduce) {
+  .pre .layer img {
+    transform: none;
+  }
+  .pre .cap {
+    opacity: 1;
+    transform: none;
+  }
+  .pre .wordmark {
+    opacity: 1;
+    transform: translateY(-50%);
+  }
+}
+
+@media (max-width: 820px) {
+  /* the desktop pair becomes two full-screen slides */
+  .pair {
+    display: contents;
+  }
+  .pair > .layer {
+    display: contents;
+  }
+  .half {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--color-deck);
+    transform: translate3d(0, 100%, 0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+  .half.is-under,
+  .half.is-current {
+    transform: none;
+  }
+  .half.is-far {
+    visibility: hidden;
+  }
+}

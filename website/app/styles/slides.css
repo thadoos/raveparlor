@@ -1,0 +1,175 @@
+/* Primitives shared by the full-screen slides (HeroPair, SplitSlide, ParlorSlide) and the
+   header logo. They stay global because the `.pre` / `.half` rules in deck.css and the slide
+   modules reach into them. */
+.layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.layer img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: 50% 60%;
+  backface-visibility: hidden;
+  transition: transform 1.2s var(--ease);
+}
+/* light wash at the top of the opening photos so the dark logo stays legible */
+.topfade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 190px;
+  z-index: var(--z-raised);
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.72),
+    rgba(255, 255, 255, 0.42) 45%,
+    rgba(255, 255, 255, 0)
+  );
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent);
+  mask-image: linear-gradient(to bottom, #000 35%, transparent);
+}
+/* vignette blur: sharp in the middle, softening out toward the edges and corners */
+.vignette {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  -webkit-mask-image: radial-gradient(
+    ellipse 66% 70% at 50% 50%,
+    transparent 42%,
+    rgba(0, 0, 0, 0.6) 70%,
+    #000 94%
+  );
+  mask-image: radial-gradient(
+    ellipse 66% 70% at 50% 50%,
+    transparent 42%,
+    rgba(0, 0, 0, 0.6) 70%,
+    #000 94%
+  );
+}
+/* desktop: one vignette across both photos (HeroPair's `.pair-vignette`) */
+.half .vignette {
+  display: none;
+}
+.scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 36%;
+  pointer-events: none;
+  z-index: var(--z-raised);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0));
+}
+.cap {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 48px;
+  z-index: var(--z-above);
+  text-align: center;
+  color: var(--color-paper);
+  font-size: 13px;
+  line-height: 1.8;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+  transition:
+    opacity 0.7s var(--ease) 0.2s,
+    transform 0.7s var(--ease) 0.2s;
+}
+.cap strong {
+  display: block;
+  font-weight: 500;
+}
+.cap a {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 6px 4px;
+  text-underline-offset: 5px;
+}
+.cap a:hover {
+  opacity: 0.7;
+}
+.wordmark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  z-index: var(--z-above);
+  transform: translateY(-50%);
+  color: var(--color-paper);
+  transition:
+    opacity 0.9s var(--ease) 0.15s,
+    transform 0.9s var(--ease) 0.15s;
+}
+/* soft dark pool behind the wordmark so it reads over the busy interior */
+.wordmark::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(1500px, 135vw);
+  height: min(620px, 95vh);
+  transform: translate(-50%, -50%);
+  z-index: var(--z-behind);
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    rgba(0, 0, 0, 0.55),
+    rgba(0, 0, 0, 0.38) 45%,
+    rgba(0, 0, 0, 0.12) 78%,
+    rgba(0, 0, 0, 0)
+  );
+}
+.wordmark-logo {
+  display: block;
+  width: clamp(260px, 46vw, 880px);
+  margin: 0 auto;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35)) drop-shadow(0 2px 28px rgba(0, 0, 0, 0.45));
+}
+/* the logo is a mask, so it takes the current text colour (dark, or white over photos);
+   used by the header (SiteHeader.module.css sets its width) and the wordmark below */
+.logo-mark {
+  display: block;
+  aspect-ratio: 941 / 234;
+  background: currentColor;
+  -webkit-mask: url("/images/logo.png") center / contain no-repeat;
+  mask: url("/images/logo.png") center / contain no-repeat;
+}
+.wordmark .logo-mark {
+  width: 100%;
+}
+
+@media (max-width: 820px) {
+  /* phone: each portrait gets its own vignette */
+  .half .vignette {
+    display: block;
+  }
+  .cap {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    bottom: 40px;
+  }
+  .wordmark-logo {
+    width: min(78vw, 360px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer img,
+  .cap,
+  .wordmark {
+    transition: none;
+  }
+}

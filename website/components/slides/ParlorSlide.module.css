@@ -1,0 +1,6 @@
+@media (max-width: 820px) {
+  /* next/image sets object-position inline, so overriding it needs !important */
+  .reception {
+    object-position: 38% 50% !important;
+  }
+}

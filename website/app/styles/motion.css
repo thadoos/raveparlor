@@ -1,0 +1,21 @@
+/* Scroll reveal: components/ui/Reveal.tsx and lib/hooks/use-reveal.ts toggle `reveal` / `in`.
+   Without JS (or with reduced motion) the element simply stays visible.
+   Other reduced-motion rules sit next to the transition or animation they switch off. */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s var(--ease),
+    transform 0.9s var(--ease);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

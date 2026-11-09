@@ -40,7 +40,7 @@ export function MenuProvider({ children }: MenuProviderProps) {
   }, []);
   const close = useCallback(() => setOpen(false), []);
 
-  // CSS still keys off `html.menu-open`
+  // mirrored onto <html> for lib/deck/overlay.ts (the deck stands down while the menu is open)
   useEffect(() => {
     document.documentElement.classList.toggle("menu-open", open);
     if (open && focusOnOpen.current) {

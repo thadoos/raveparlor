@@ -1,8 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { cx } from "@/lib/cx";
 import type { CategoryKey } from "@/lib/data/services";
 import { useReveal } from "@/lib/hooks/use-reveal";
+import styles from "./ServicesOverview.module.css";
 import { useServiceCategory } from "./services-context";
 
 interface CategoryLinkProps {
@@ -20,7 +22,7 @@ export function CategoryLink({ category, children }: CategoryLinkProps) {
   return (
     <a
       ref={attach}
-      className={`svc-card ${revealClass}`}
+      className={cx(styles.card, revealClass)}
       href="#service-menu"
       data-cat={category}
       onClick={() => setCategory(category, { animate: false })}

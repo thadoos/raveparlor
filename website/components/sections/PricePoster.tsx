@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRef, useState, type MouseEvent, type TouchEvent } from "react";
 import { useModalLock } from "@/lib/hooks/use-modal-lock";
+import styles from "./PricePoster.module.css";
 
 const PARTS = ["Hair Cut / Blow-dry", "Colour, Perm & Treatments"] as const;
 const SWIPE_MIN_PX = 40;
@@ -28,10 +29,11 @@ function Icon({ path }: { path: string }) {
  * The price list poster. Clicking it opens a full-screen viewer (never navigates away): the whole
  * poster on wide screens, and on phones one half at a time with arrows and swipe to slide between
  * the halves. Close with the X button, Esc, or by clicking the dark area. The link href stays as a
- * no-JS fallback. Styles: `.price-poster` and `.pv-*` in globals.css.
+ * no-JS fallback.
  */
 export function PricePoster() {
   const dialog = useRef<HTMLDialogElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
   const touchX = useRef<number | null>(null);
   const [part, setPart] = useState<0 | 1>(0);
   const [viewing, setViewing] = useState(false);
@@ -60,7 +62,7 @@ export function PricePoster() {
   return (
     <>
       <a
-        className="price-poster"
+        className={styles.poster}
         href="/images/price-list.webp"
         target="_blank"
         rel="noopener"
@@ -75,31 +77,30 @@ export function PricePoster() {
           sizes="(max-width: 1328px) 100vw, 1280px"
         />
       </a>
-      <p className="poster-hint">Tap the price list to enlarge</p>
+      <p className={styles.hint}>Tap the price list to enlarge</p>
 
       <dialog
         ref={dialog}
-        className="pv"
+        className={styles.viewer}
         data-part={part}
         aria-label="Price list"
         onClose={() => setViewing(false)}
         onClick={(e) => {
-          const t = e.target as HTMLElement;
-          if (t === e.currentTarget || t.classList.contains("pv-stage")) dialog.current?.close();
+          if (e.target === e.currentTarget || e.target === stage.current) dialog.current?.close();
         }}
       >
         <button
           type="button"
-          className="pv-close"
+          className={styles.close}
           aria-label="Close price list"
           onClick={() => dialog.current?.close()}
         >
           <Icon path="M6 6l12 12M18 6 6 18" />
         </button>
 
-        <div className="pv-stage">
-          <div className="pv-view" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-            <div className="pv-track">
+        <div className={styles.stage} ref={stage}>
+          <div className={styles.view} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+            <div className={styles.track}>
               <Image
                 src="/images/price-list.webp"
                 alt={ALT}
@@ -111,23 +112,23 @@ export function PricePoster() {
           </div>
         </div>
 
-        <div className="pv-nav">
+        <div className={styles.nav}>
           <button
             type="button"
-            className="pv-btn"
+            className={styles.btn}
             onClick={() => setPart(0)}
             disabled={part === 0}
             aria-label="Show hair cut prices"
           >
             <Icon path="M15 5 8 12l7 7" />
           </button>
-          <p className="pv-label" aria-live="polite">
+          <p className={styles.label} aria-live="polite">
             {PARTS[part]}
             <span>{part + 1} / 2</span>
           </p>
           <button
             type="button"
-            className="pv-btn"
+            className={styles.btn}
             onClick={() => setPart(1)}
             disabled={part === 1}
             aria-label="Show colour, perm and treatment prices"

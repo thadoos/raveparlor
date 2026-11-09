@@ -1,0 +1,38 @@
+/* Design tokens. Component styles read these; nothing here styles an element. */
+:root {
+  /* Theme colours: the header flips them over dark photos (see SiteHeader.module.css) */
+  --ink: #111;
+  --paper: #fff;
+
+  --head-h: 72px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --logo: var(--font-jost), "Helvetica Neue", Arial, sans-serif;
+
+  /* Fixed colours: unlike --ink/--paper they never flip with the header tone */
+  --color-ink: #111;
+  --color-paper: #fff;
+  --color-deck: #16171a;
+  --color-muted: #595959;
+  --color-offwhite: #f2f2f0;
+  --color-offwhite-muted: #a6a6a3;
+
+  /* Durations */
+  --dur-fast: 0.3s;
+  --dur-base: 0.45s;
+  --dur-slow: 0.6s;
+
+  /* Stacking: slides get an inline z-index from the deck controller, these order what is inside */
+  --z-behind: -1;
+  --z-raised: 1;
+  --z-above: 2;
+  --z-menu: 40;
+  --z-header: 50;
+
+  --layout-max: 1600px;
+}
+@media (max-width: 820px) {
+  :root {
+    --head-h: 60px;
+  }
+}

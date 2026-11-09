@@ -56,7 +56,8 @@ interface TouchState {
 const SLIDE_SELECTOR = ".slide, .half";
 const DESKTOP_SLIDES = ".slide";
 const PHONE_SLIDES = ".slide:not(.pair), .half";
-const IGNORED_KEY_TARGETS = "input, textarea, select, .mn-tabs";
+/** Keys typed into these (or inside a `data-deck-ignore` element) are not slide navigation. */
+const IGNORED_KEY_TARGETS = "input, textarea, select, [data-deck-ignore]";
 
 /**
  * Full-screen slide paging, moved with transforms (like Swiper). Framework-free: it owns the

@@ -10,11 +10,12 @@ import {
   formatRatingLine,
   formatWhatsAppLine,
 } from "@/lib/format";
+import styles from "./BookVisit.module.css";
 
 export function BookVisit() {
   return (
-    <section className="visit" id="book" data-tone="dark" aria-labelledby="book-title">
-      <div className="visit-grid">
+    <section className={styles.visit} id="book" data-tone="dark" aria-labelledby="book-title">
+      <div className={styles.grid}>
         <Reveal as="h2" id="book-title">
           Book &amp; Visit
         </Reveal>
@@ -25,7 +26,7 @@ export function BookVisit() {
             <br />
             {formatWhatsAppLine()}
           </p>
-          <a className="cta" href={whatsappLink(BOOK_MESSAGE)}>
+          <a className={styles.cta} href={whatsappLink(BOOK_MESSAGE)}>
             Book on WhatsApp
           </a>
         </Reveal>
@@ -41,7 +42,7 @@ export function BookVisit() {
               </Fragment>
             ))}
           </p>
-          <p className="visit-note">{formatClosedDays()}</p>
+          <p className={styles.note}>{formatClosedDays()}</p>
         </Reveal>
         <Reveal>
           <h3>Find us</h3>
@@ -50,8 +51,8 @@ export function BookVisit() {
             <br />
             {formatAddressLines()[1]}
           </p>
-          <p className="visit-note">{formatRatingLine()}</p>
-          <a className="cta" href={SITE.mapsUrl}>
+          <p className={styles.note}>{formatRatingLine()}</p>
+          <a className={styles.cta} href={SITE.mapsUrl}>
             Directions
           </a>
         </Reveal>
