@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { Reveal } from "@/components/ui/Reveal";
 import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
 import { SITE } from "@/lib/data/site";
 import {
@@ -14,10 +15,10 @@ export function BookVisit() {
   return (
     <section className="visit" id="book" data-tone="dark" aria-labelledby="book-title">
       <div className="visit-grid">
-        <h2 id="book-title" className="reveal">
+        <Reveal as="h2" id="book-title">
           Book &amp; Visit
-        </h2>
-        <div className="reveal">
+        </Reveal>
+        <Reveal>
           <h3>Appointments</h3>
           <p>
             By appointment only
@@ -27,8 +28,8 @@ export function BookVisit() {
           <a className="cta" href={whatsappLink(BOOK_MESSAGE)}>
             Book on WhatsApp
           </a>
-        </div>
-        <div className="reveal">
+        </Reveal>
+        <Reveal>
           <h3>Opening hours</h3>
           <p>
             {SITE.hours.map((hours, i) => (
@@ -41,8 +42,8 @@ export function BookVisit() {
             ))}
           </p>
           <p className="visit-note">{formatClosedDays()}</p>
-        </div>
-        <div className="reveal">
+        </Reveal>
+        <Reveal>
           <h3>Find us</h3>
           <p>
             {formatAddressLines()[0]}
@@ -53,7 +54,7 @@ export function BookVisit() {
           <a className="cta" href={SITE.mapsUrl}>
             Directions
           </a>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

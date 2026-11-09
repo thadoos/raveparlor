@@ -4,4 +4,4 @@ Next.js app for Rave's Parlor London. See the [root README](../README.md) for th
 
 - `app/globals.css` holds all styling.
 - `components/` holds the page sections, composed in `app/page.tsx`.
-- `lib/site-behavior.js` drives the full-screen slide deck, menu, service menu and detail panel on the rendered markup. `components/SiteBehavior.tsx` starts it and cleans up on unmount.
+- `components/deck/` and `lib/deck/` run the full-screen slide deck; `components/services/` is the service menu and its detail dialog; `lib/booking/` holds the booking picker logic.

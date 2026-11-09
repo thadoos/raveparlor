@@ -1,3 +1,4 @@
+import { Reveal } from "@/components/ui/Reveal";
 import { PricePoster } from "./PricePoster";
 
 export function PriceList() {
@@ -10,14 +11,16 @@ export function PriceList() {
       aria-labelledby="prices-title"
     >
       <div className="wrap wide">
-        <p className="eyebrow reveal">Rave’s Parlor London</p>
-        <h2 className="title reveal" id="prices-title">
+        <Reveal as="p" className="eyebrow">
+          Rave’s Parlor London
+        </Reveal>
+        <Reveal as="h2" className="title" id="prices-title">
           Price List
-        </h2>
+        </Reveal>
 
-        <div className="reveal">
+        <Reveal>
           <PricePoster />
-        </div>
+        </Reveal>
       </div>
     </section>
   );

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   CATEGORY_ORDER,
+  adjacentCategory,
   MENU,
   cardAriaLabel,
   categoryStats,
@@ -8,6 +9,7 @@ import {
   hasChoices,
   isPickable,
   isPrice,
+  minPriceForColumn,
   priceLabel,
   totalServices,
   type CategoryKey,
@@ -117,5 +119,26 @@ describe("cardAriaLabel", () => {
     expect(cardAriaLabel(item("perm", "Ion Straightening"))).toBe(
       "Ion Straightening, from £120. Open details",
     );
+  });
+});
+
+describe("minPriceForColumn", () => {
+  it("is the lowest price in the column across the barbers", () => {
+    const cutting = item("cut", "Cutting & Finishing");
+    expect([0, 1, 2].map((col) => minPriceForColumn(cutting, col))).toEqual([40, 60, 30]);
+  });
+
+  it("is null without per-barber rows", () => {
+    expect(minPriceForColumn(item("colour", "Full Head Colour"), 0)).toBeNull();
+    expect(minPriceForColumn(item("cut", "Cutting & Finishing"), 5)).toBeNull();
+  });
+});
+
+describe("adjacentCategory", () => {
+  it("steps through the categories and wraps around", () => {
+    expect(adjacentCategory("cut", 1)).toBe("colour");
+    expect(adjacentCategory("treat", 1)).toBe("cut");
+    expect(adjacentCategory("cut", -1)).toBe("treat");
+    expect(adjacentCategory("perm", -1)).toBe("colour");
   });
 });

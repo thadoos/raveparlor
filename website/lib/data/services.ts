@@ -260,8 +260,28 @@ export function cutLabel(cols: readonly string[], index: number): string {
   return cols.join("|") === "Short|Medium|Long" ? `${cols[index]} length` : cols[index];
 }
 
+/** The amount in pounds of a price string such as "£80" or "£100 – £220+" (its first number). */
+function priceAmount(value: string): number {
+  return parseInt(value.replace(/[^\d]/g, ""), 10);
+}
+
 function fromAmount(item: MenuItem): number {
-  return parseInt(item.from.replace(/[^\d]/g, ""), 10);
+  return priceAmount(item.from);
+}
+
+/** Lowest price in a column across the barbers' rows, in pounds; null when no row has a price there. */
+export function minPriceForColumn(item: MenuItem, col: number): number | null {
+  const amounts = (item.rows ?? [])
+    .map((row) => row.prices[col])
+    .filter(isPrice)
+    .map(priceAmount);
+  return amounts.length > 0 ? Math.min(...amounts) : null;
+}
+
+/** The category one step before (-1) or after (+1) `current`, wrapping around at either end. */
+export function adjacentCategory(current: CategoryKey, step: 1 | -1): CategoryKey {
+  const count = CATEGORY_ORDER.length;
+  return CATEGORY_ORDER[(CATEGORY_ORDER.indexOf(current) + step + count) % count];
 }
 
 export interface CategoryStats {

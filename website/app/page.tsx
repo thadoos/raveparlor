@@ -5,15 +5,15 @@ import { HeroPair } from "@/components/slides/HeroPair";
 import { ParlorSlide } from "@/components/slides/ParlorSlide";
 import { PriceList } from "@/components/sections/PriceList";
 import { ServiceMenu } from "@/components/services/ServiceMenu";
-import { ServiceModal } from "@/components/services/ServiceModal";
+import { ServiceDialog } from "@/components/services/ServiceDialog";
 import { ServicesOverview } from "@/components/services/ServicesOverview";
-import { SiteBehavior } from "@/components/SiteBehavior";
+import { ServicesProvider } from "@/components/services/ServicesProvider";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SplitSlide } from "@/components/slides/SplitSlide";
 
 export default function Home() {
   return (
-    <>
+    <ServicesProvider>
       <AppShell>
         <Deck>
           <h1 className="sr">Rave’s Parlor London – hair salon</h1>
@@ -32,8 +32,7 @@ export default function Home() {
         </Deck>
       </AppShell>
 
-      <ServiceModal />
-      <SiteBehavior />
-    </>
+      <ServiceDialog />
+    </ServicesProvider>
   );
 }

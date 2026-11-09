@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type MouseEvent, type TouchEvent } from "react";
+import { useRef, useState, type MouseEvent, type TouchEvent } from "react";
+import { useModalLock } from "@/lib/hooks/use-modal-lock";
 
 const PARTS = ["Hair Cut / Blow-dry", "Colour, Perm & Treatments"] as const;
 const SWIPE_MIN_PX = 40;
@@ -33,14 +34,15 @@ export function PricePoster() {
   const dialog = useRef<HTMLDialogElement>(null);
   const touchX = useRef<number | null>(null);
   const [part, setPart] = useState<0 | 1>(0);
+  const [viewing, setViewing] = useState(false);
 
-  // The deck script stands down (no slide wheel/touch/key handling) while `modal-open` is set.
-  useEffect(() => () => document.documentElement.classList.remove("modal-open"), []);
+  // The deck stands down (no slide wheel/touch/key handling) while the viewer is open.
+  useModalLock(viewing);
 
   function open(e: MouseEvent<HTMLAnchorElement>) {
     e.preventDefault();
     setPart(0);
-    document.documentElement.classList.add("modal-open");
+    setViewing(true);
     dialog.current?.showModal();
   }
 
@@ -80,7 +82,7 @@ export function PricePoster() {
         className="pv"
         data-part={part}
         aria-label="Price list"
-        onClose={() => document.documentElement.classList.remove("modal-open")}
+        onClose={() => setViewing(false)}
         onClick={(e) => {
           const t = e.target as HTMLElement;
           if (t === e.currentTarget || t.classList.contains("pv-stage")) dialog.current?.close();

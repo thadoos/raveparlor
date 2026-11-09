@@ -52,3 +52,8 @@ export const OVERVIEW_IMAGES: Record<CategoryKey, OverviewCardImage> = {
   perm: { photo: "portraitMono", objectPosition: "50% 40%" },
   treat: { photo: "parlorReception", objectPosition: "40% 50%" },
 };
+
+/** CSS utility class (`.pos-50-30` in globals.css) that sets `object-position: 50% 30%`. */
+export function positionClass(position: string): string {
+  return `pos-${position.replace(/%/g, "").trim().split(/\s+/).join("-")}`;
+}

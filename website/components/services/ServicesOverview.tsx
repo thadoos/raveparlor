@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { OVERVIEW_IMAGES, PHOTOS } from "@/lib/data/images";
+import { Reveal } from "@/components/ui/Reveal";
+import { OVERVIEW_IMAGES, PHOTOS, positionClass } from "@/lib/data/images";
 import {
   CATEGORY_ORDER,
   MENU,
@@ -9,6 +10,7 @@ import {
   type CategoryKey,
 } from "@/lib/data/services";
 import { formatPrice, formatServiceCount } from "@/lib/format";
+import { CategoryLink } from "./CategoryLink";
 
 const ICONS: Record<CategoryKey, ReactNode> = {
   cut: (
@@ -44,20 +46,20 @@ export function ServicesOverview() {
       data-blur
       aria-labelledby="services-title"
     >
-      <h2 className="svc-title reveal" id="services-title">
+      <Reveal as="h2" className="svc-title" id="services-title">
         <span>Our</span>
         <span className="svc-tag">
           <span className="svc-tag-in">{formatServiceCount(totalServices)}</span>
         </span>
         <span>Services</span>
-      </h2>
+      </Reveal>
       <div className="svc-grid">
         {CATEGORY_ORDER.map((key) => {
           const category = MENU[key];
           const stats = categoryStats(category);
           const image = OVERVIEW_IMAGES[key];
           return (
-            <a key={key} className="svc-card reveal" href="#service-menu" data-cat={key}>
+            <CategoryLink key={key} category={key}>
               <span className="svc-media">
                 <span className="svc-go" aria-hidden="true">
                   View →
@@ -67,7 +69,7 @@ export function ServicesOverview() {
                   alt=""
                   fill
                   sizes="(max-width: 1024px) 50vw, 25vw"
-                  style={{ objectPosition: image.objectPosition }}
+                  className={positionClass(image.objectPosition)}
                 />
               </span>
               <span className="svc-info">
@@ -78,7 +80,7 @@ export function ServicesOverview() {
                 </span>
                 {ICONS[key]}
               </span>
-            </a>
+            </CategoryLink>
           );
         })}
       </div>
