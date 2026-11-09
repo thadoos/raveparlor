@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { DECK_ID } from "@/lib/deck/constants";
 import { useDeck } from "./use-deck";
 
 interface DeckProps {
@@ -20,7 +21,7 @@ export function Deck({ children }: DeckProps) {
   }, [controller]);
 
   return (
-    <main className="deck" id="deck" ref={ref}>
+    <main className="deck" id={DECK_ID} ref={ref} tabIndex={-1}>
       {children}
     </main>
   );

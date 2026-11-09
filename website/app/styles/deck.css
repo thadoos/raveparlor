@@ -12,6 +12,10 @@
   background: var(--color-deck);
   touch-action: none;
 }
+/* focused programmatically by the skip link: no ring around the whole screen */
+.deck:focus {
+  outline: none;
+}
 .slide {
   position: absolute;
   inset: 0;

@@ -1,0 +1,20 @@
+/* Visually hidden until it receives keyboard focus, then drawn above everything (header: 50). */
+.skip {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 12px 20px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skip:focus {
+  clip-path: none;
+}

@@ -1,3 +1,6 @@
+/** `id` of the deck element (the skip link's target). */
+export const DECK_ID = "deck";
+
 /** Milliseconds per screen for wheel, keys and in-page links. */
 export const DURATION = 450;
 /** Gentle in-out easing for programmatic moves. */

@@ -9,7 +9,12 @@ export interface Address {
   postcode: string;
 }
 
+export type DayOfWeek =
+  "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
+
 export interface OpeningHours {
+  /** The days these hours apply to (structured counterpart of `days`, used for JSON-LD). */
+  dayOfWeek: readonly DayOfWeek[];
   /** Full label, e.g. "Mon – Sat" or "Sunday". */
   days: string;
   /** Abbreviated label for tight spaces, e.g. "Mon – Sat" or "Sun". */
@@ -51,6 +56,7 @@ export const SITE: SiteInfo = {
   whatsappNumber: WHATSAPP_NUMBER,
   hours: [
     {
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
       days: "Mon – Sat",
       shortDays: "Mon – Sat",
       open: "10:00",
@@ -58,6 +64,7 @@ export const SITE: SiteInfo = {
       lastAppointment: "18:00",
     },
     {
+      dayOfWeek: ["Sunday"],
       days: "Sunday",
       shortDays: "Sun",
       open: "10:00",
@@ -71,3 +78,28 @@ export const SITE: SiteInfo = {
   mapsUrl: "https://maps.app.goo.gl/5DsbgsoeiHCW4rab9",
   copyrightStartYear: "2026",
 };
+
+export interface SiteUrlEnv {
+  NEXT_PUBLIC_SITE_URL?: string;
+  /** Set by Vercel to the production domain, without a protocol. */
+  VERCEL_PROJECT_PRODUCTION_URL?: string;
+}
+
+const LOCAL_SITE_URL = "http://localhost:3000";
+
+/**
+ * The canonical origin of the site, without a trailing slash: `NEXT_PUBLIC_SITE_URL` if set, else
+ * the Vercel production domain, else the local dev server.
+ */
+export function resolveSiteUrl(env: SiteUrlEnv): string {
+  const explicit = env.NEXT_PUBLIC_SITE_URL?.trim();
+  const vercel = env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  const url = explicit || (vercel ? `https://${vercel}` : LOCAL_SITE_URL);
+  return url.replace(/\/+$/, "");
+}
+
+/** Read the variables by their literal names so Next can inline the public one. */
+export const SITE_URL = resolveSiteUrl({
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+});

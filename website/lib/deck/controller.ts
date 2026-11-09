@@ -1,4 +1,5 @@
 import {
+  DECK_ID,
   DURATION,
   EASE,
   EASE_OUT,
@@ -420,6 +421,12 @@ export class DeckController {
     const link = target.closest('a[href^="#"]');
     if (!link) return;
     const id = (link.getAttribute("href") ?? "").slice(1);
+    if (id === DECK_ID) {
+      // the skip link: move focus to the deck itself, never page to the first slide
+      e.preventDefault();
+      this.deck?.focus({ preventScroll: true });
+      return;
+    }
     const el = id === "top" ? (this.slides[0] ?? null) : document.getElementById(id);
     if (!el) return;
     e.preventDefault();

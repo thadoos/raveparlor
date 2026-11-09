@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import { useRef, useState, type MouseEvent, type TouchEvent } from "react";
+import { PHOTOS } from "@/lib/data/images";
 import { useModalLock } from "@/lib/hooks/use-modal-lock";
+import poster from "@/public/images/price-list.webp";
 import styles from "./PricePoster.module.css";
 
 const PARTS = ["Hair Cut / Blow-dry", "Colour, Perm & Treatments"] as const;
 const SWIPE_MIN_PX = 40;
-const ALT =
-  "Rave’s Parlor London price list: hair cut and blow-dry prices for Rave, John and Julian, colour and highlights, perm, and hair treatments. All chemical services exclude haircut, wash and finishing.";
+const ALT = PHOTOS.priceList.alt;
 
 function Icon({ path }: { path: string }) {
   return (
@@ -66,16 +67,9 @@ export function PricePoster() {
         href="/images/price-list.webp"
         target="_blank"
         rel="noopener"
-        aria-label="View the full price list"
         onClick={open}
       >
-        <Image
-          src="/images/price-list.webp"
-          alt={ALT}
-          width={1491}
-          height={1055}
-          sizes="(max-width: 1328px) 100vw, 1280px"
-        />
+        <Image src={poster} alt={ALT} sizes="(max-width: 1328px) 100vw, 1280px" />
       </a>
       <p className={styles.hint}>Tap the price list to enlarge</p>
 
@@ -101,13 +95,7 @@ export function PricePoster() {
         <div className={styles.stage} ref={stage}>
           <div className={styles.view} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
             <div className={styles.track}>
-              <Image
-                src="/images/price-list.webp"
-                alt={ALT}
-                width={1491}
-                height={1055}
-                sizes="(max-width: 820px) 180vw, 1500px"
-              />
+              <Image src={poster} alt={ALT} sizes="(max-width: 820px) 180vw, 1500px" />
             </div>
           </div>
         </div>
@@ -124,7 +112,9 @@ export function PricePoster() {
           </button>
           <p className={styles.label} aria-live="polite">
             {PARTS[part]}
-            <span>{part + 1} / 2</span>
+            <span>
+              {part + 1} / {PARTS.length}
+            </span>
           </p>
           <button
             type="button"

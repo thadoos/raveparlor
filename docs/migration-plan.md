@@ -11,6 +11,7 @@ of the global `modal-open` class, and a ~2,000-line global stylesheet.
 ## Review findings (what is necessary)
 
 **P1**
+
 1. The script mutates React-owned DOM (hydration/Strict Mode/HMR risk; two writers of `html.modal-open`).
 2. The service menu is empty in the server HTML (no prices/services for crawlers or no-JS; empty `<h2>`).
 3. All service/barber/price data lives only inside the script. Hours, address, phone, rating, nav and
@@ -66,30 +67,50 @@ in typed modules shared by server and client; `<dialog>` for both modals; React 
 of `document.querySelector`; imperative DOM (refs + Web Animations API) only for 1:1 touch-follow and
 FLIP animation, where re-renders per frame would be wrong.
 
+## Status
+
+Phases 0-7 are done. The site is idiomatic Next.js: typed data modules, React state instead of DOM
+mutation, native `<dialog>`, a framework-free deck controller, CSS Modules for static components, and
+metadata/SEO/a11y/config in place.
+
+Deliberate follow-ups (not blockers):
+
+- **Fonts:** three static Jost weights (200/300/400); check real usage and consider the variable font.
+- **Images:** the four off-screen slides still load their images eagerly; make them lazy (or
+  priority-ranked) and move the remaining photos to static imports.
+- **Price list as real text:** the prices exist as text in `lib/data/services.ts` and as an image
+  (`PricePoster`); render a text/table version for crawlers and screen readers.
+- **Tests for browser behaviour:** the deck, header tone and dialog animation are only exercised by
+  hand; add Playwright (or similar) coverage. Unit tests currently cover the pure logic in `lib/`.
+- **Icons:** `app/icon.png`, `app/apple-icon.png` and `app/opengraph-image.png` are placeholders
+  generated from the wordmark; replace them with proper artwork.
+- **Landmarks:** the footer still lives inside `<main>` (the deck), and `tel:` links are intentionally
+  absent because the number is WhatsApp-only.
+
 ## Phases (each ends lint + typecheck + build, and is its own commit)
 
-0. **Data and contact.** `lib/data/*` (site info, nav, images, services incl. barbers/prices, derived
+0. **Data and contact.** (done) `lib/data/*` (site info, nav, images, services incl. barbers/prices, derived
    counts/"from" values); `serviceMessage` takes an options object; replace hard-coded duplicates in
    TSX. Unit tests for pure logic.
-1. **Hooks and overlay state.** `useMedia`/`useReducedMotion`; a context for `menuOpen`/`modalOpen`
+1. **Hooks and overlay state.** (done) `useMedia`/`useReducedMotion`; a context for `menuOpen`/`modalOpen`
    that mirrors `html.menu-open`/`modal-open` (CSS still keys off them). Removes the double owner.
-2. **Header and menu.** Client `SiteHeader`/`NavMenu`: burger state, focus handling, Escape, `inert`
+2. **Header and menu.** (done) Client `SiteHeader`/`NavMenu`: burger state, focus handling, Escape, `inert`
    closed menu, header tone hook (same `elementsFromPoint` algorithm, rAF throttled).
-3. **Deck.** `DeckProvider` + `Slide`; paging controller in `lib/deck` (wheel, touch follow-the-finger,
+3. **Deck.** (done) `DeckProvider` + `Slide`; paging controller in `lib/deck` (wheel, touch follow-the-finger,
    keys, in-page links, inner-scroll hand-off, phone/desktop slide lists, reduced motion). Native
    non-passive listeners via refs. Same constants/thresholds as the original.
-4. **Services.** `ServiceMenu` renders the default category on the server; client tabs (roving
+4. **Services.** (done) `ServiceMenu` renders the default category on the server; client tabs (roving
    tabindex, ids, `aria-controls`); cards with refs; `ServiceDialog` as native `<dialog>` with FLIP
    expand/collapse via WAAPI (same durations/easings); `BookingPicker` as a hook + `PriceTable`
    (derived selection state, no DOM class toggling); keep exact behaviour from the spec.
-5. **Cleanup.** `Reveal` component (IntersectionObserver, visible by default without JS); delete
+5. **Cleanup.** (done) `Reveal` component (IntersectionObserver, visible by default without JS); delete
    `SiteBehavior.tsx`, `lib/site-behavior.js`, `allowJs`.
-6. **Styles.** Tokens + base split; CSS Modules for static components (footer, book/visit, price
+6. **Styles.** (done) Tokens + base split; CSS Modules for static components (footer, book/visit, price
    list/poster, overview, header/menu, slides) with `:global(...)` for state classes on `<html>`/
    `#head`/slides; remove redundant rules; one reduced-motion strategy.
-7. **SEO, a11y, config.** Metadata/OG/viewport/icons/manifest/robots/sitemap; JSON-LD (only with data
-   that is true and current); skip link, heading fixes, `tel:` links; `engines`, stricter tsconfig,
-   README updates.
+7. **SEO, a11y, config.** (done) Metadata/OG/viewport/icons/manifest/robots/sitemap; JSON-LD (only with data
+   that is true and current); skip link, heading fixes; `engines`, lint rules, README updates. No
+   `tel:` links (the number is WhatsApp-only); `allowJs` stays because Next re-adds it on build.
 
 ## Behaviour that must be preserved (from the specs)
 

@@ -49,10 +49,12 @@ export function ServicesOverview() {
       aria-labelledby="services-title"
     >
       <Reveal as="h2" className={styles.title} id="services-title">
-        <span>Our</span>
-        <span className={styles.tag}>
+        {/* The count is decoration (the cards state their own counts); the spaces keep the
+            accessible name "Our Services" and are not rendered inside the flex container. */}
+        <span>Our</span>{" "}
+        <span className={styles.tag} aria-hidden="true">
           <span className={styles.tagIn}>{formatServiceCount(totalServices)}</span>
-        </span>
+        </span>{" "}
         <span>Services</span>
       </Reveal>
       <div className={styles.grid}>
