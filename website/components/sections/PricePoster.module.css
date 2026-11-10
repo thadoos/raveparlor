@@ -42,6 +42,10 @@
   overflow: hidden;
 }
 /* The dialog already covers the viewport, so it fades the dark in itself (see use-poster-motion). */
+.viewer:focus {
+  outline: none;
+}
+
 .viewer::backdrop {
   background: transparent;
 }

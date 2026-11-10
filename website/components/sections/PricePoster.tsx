@@ -94,6 +94,7 @@ export function PricePoster() {
         className={styles.viewer}
         data-part={part}
         aria-label="Price list"
+        tabIndex={-1}
         onClose={motion.handleClosed}
         onCancel={(e) => {
           // Escape: run the animated close instead of closing at once

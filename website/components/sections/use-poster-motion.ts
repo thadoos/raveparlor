@@ -96,6 +96,8 @@ export function usePosterMotion({
     flushSync(showViewer);
     const thumb = elements.thumb.current?.getBoundingClientRect();
     dialog.showModal();
+    // showModal focuses the close button, which draws a focus ring on touch until the next tap
+    dialog.focus({ preventScroll: true });
     const view = elements.view.current;
     const viewBox = view?.getBoundingClientRect();
 
