@@ -40,6 +40,12 @@
     border-color: #bdbdb7;
   }
 }
+/* touch: no extra outline ring after programmatic focus */
+@media (hover: none) {
+  .card:focus-visible {
+    outline: none;
+  }
+}
 .card h3 {
   margin: 0 0 10px;
   font-size: clamp(14px, 1.1vw, 17px);

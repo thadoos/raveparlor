@@ -78,6 +78,12 @@
 .dialog.ready .close {
   opacity: 1;
 }
+/* touch: no outline ring after programmatic focus */
+@media (hover: none) {
+  .close:focus-visible {
+    outline: none;
+  }
+}
 .close svg {
   width: 20px;
   height: 20px;
