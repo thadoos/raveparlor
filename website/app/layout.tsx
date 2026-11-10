@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   title: { default: SITE.brandName, template: `%s | ${SITE.brandName}` },
   description: DESCRIPTION,
   alternates: { canonical: "/" },
+  // Stop mobile browsers wrapping the phone number in a link before hydration (causes a mismatch)
+  formatDetection: { telephone: false },
   openGraph: {
     type: "website",
     siteName: SITE.brandName,
