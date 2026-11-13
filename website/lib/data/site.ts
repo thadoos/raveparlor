@@ -73,7 +73,7 @@ export const SITE: SiteInfo = {
     },
   ],
   closedDays: ["Christmas Day", "Boxing Day", "New Year’s Day"],
-  googleRating: { score: "4.9", reviews: 200 },
+  googleRating: { score: "4.9", reviews: 202 },
   instagramUrl: "https://www.instagram.com/ravesparlor_london",
   mapsUrl: "https://maps.app.goo.gl/5DsbgsoeiHCW4rab9",
   copyrightStartYear: "2026",

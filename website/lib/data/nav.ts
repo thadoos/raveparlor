@@ -8,6 +8,7 @@ export interface NavLink {
 const HOME: NavLink = { href: "#top", label: "Home" };
 const GALLERY: NavLink = { href: "#gallery", label: "Gallery" };
 const PARLOR: NavLink = { href: "#parlor", label: "The Parlor" };
+const REVIEWS: NavLink = { href: "#reviews", label: "Reviews" };
 const SERVICES: NavLink = { href: "#services", label: "Services" };
 const PRICES: NavLink = { href: "#prices", label: "Price List" };
 
@@ -16,6 +17,7 @@ export const MENU_LINKS: readonly NavLink[] = [
   HOME,
   GALLERY,
   PARLOR,
+  REVIEWS,
   SERVICES,
   PRICES,
   { href: "#book", label: "Book & Visit" },

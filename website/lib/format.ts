@@ -45,13 +45,13 @@ export function formatWhatsAppLine(): string {
   return `WhatsApp ${SITE.phoneDisplay}`;
 }
 
-/** "4.9 on Google · 200 reviews" */
+/** "4.9 on Google · 202 reviews" */
 export function formatRatingLine(): string {
   const { score, reviews } = SITE.googleRating;
   return `${score} on Google · ${reviews} reviews`;
 }
 
-/** "· 200 Google reviews" */
+/** "· 202 Google reviews" */
 export function formatGoogleReviews(): string {
   return `· ${SITE.googleRating.reviews} Google reviews`;
 }

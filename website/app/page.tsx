@@ -4,6 +4,7 @@ import { Deck } from "@/components/deck/Deck";
 import { HeroPair } from "@/components/slides/HeroPair";
 import { ParlorSlide } from "@/components/slides/ParlorSlide";
 import { PriceList } from "@/components/sections/PriceList";
+import { ReviewsSlide } from "@/components/slides/ReviewsSlide";
 import { ServiceMenu } from "@/components/services/ServiceMenu";
 import { ServiceDialog } from "@/components/services/ServiceDialog";
 import { ServicesOverview } from "@/components/services/ServicesOverview";
@@ -20,6 +21,7 @@ export default function Home() {
           <HeroPair />
           <SplitSlide />
           <ParlorSlide />
+          <ReviewsSlide />
           <ServicesOverview />
 
           {/* Final slide: scrolls normally inside itself */}
