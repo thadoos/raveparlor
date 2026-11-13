@@ -24,7 +24,7 @@ export function ReviewsSlide() {
               ★★★★★
             </span>
             <span className={styles.score}>
-              {`${SITE.googleRating.score} ${formatGoogleReviews()}`}
+              {`${SITE.googleRating.score} out of 5 ${formatGoogleReviews()}`}
             </span>
             <span className={styles.more}>Read them on Google</span>
           </a>
