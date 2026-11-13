@@ -1,6 +1,7 @@
 /**
- * PLACEHOLDER quotes for layout only. Replace with real Google reviews (copied verbatim, with the
- * reviewer's name as shown on Google) before launch.
+ * Real Google reviews from the salon's Maps listing, copied word for word with the reviewer's name
+ * as shown on Google. Long reviews are cut down to one or two whole sentences. Staff names are left
+ * out on purpose.
  */
 
 export interface Review {
@@ -10,25 +11,25 @@ export interface Review {
 
 export const REVIEWS: readonly Review[] = [
   {
-    quote:
-      "Best cut I've had in years. She listened, took her time, and I left feeling like myself.",
-    author: "Sarah M.",
+    quote: "Exceptional experience! The staff were all friendly and patient.",
+    author: "Diyaco Shwany",
   },
   {
     quote:
-      "Booked a colour correction after a bad experience elsewhere. Couldn't be happier with the result.",
-    author: "Priya K.",
+      "He took the time to understand what I wanted and, even more importantly, helped me choose and design a hairstyle that really suits me.",
+    author: "Nathan Tse",
   },
   {
-    quote: "Calm, friendly, and the attention to detail is unreal.",
-    author: "James T.",
+    quote:
+      "The stylist took the time to design the perfect hairstyle for me, and the head massage during the shampoo nearly put me to sleep.",
+    author: "s yancy",
   },
   {
-    quote: "My curls have never looked better. Already booked my next appointment.",
-    author: "Amara O.",
+    quote: "He pays so much attention to detail and always gets the cut just right.",
+    author: "Yiran Wang",
   },
   {
-    quote: "Worth the trip to New Malden every single time.",
-    author: "Daniel R.",
+    quote: "Finally found a hairdresser I really love!",
+    author: "Hoi Lun Cheung",
   },
 ];
