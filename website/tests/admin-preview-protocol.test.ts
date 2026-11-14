@@ -38,6 +38,14 @@ describe("parseFromPreview", () => {
     expect(parseFromPreview({ type: "edit", target: "item:colour.roots" })).not.toBeNull();
   });
 
+  it("accepts an edit message for a service photo", () => {
+    expect(parseFromPreview({ type: "edit", target: "itemPhoto:cut.cutting.1" })).not.toBeNull();
+  });
+
+  it("rejects an edit message for a photo index out of range", () => {
+    expect(parseFromPreview({ type: "edit", target: "itemPhoto:cut.cutting.5" })).toBeNull();
+  });
+
   it("rejects an edit message with an unknown or missing target", () => {
     expect(parseFromPreview({ type: "edit", target: "image:../../x" })).toBeNull();
     expect(parseFromPreview({ type: "edit", target: 42 })).toBeNull();

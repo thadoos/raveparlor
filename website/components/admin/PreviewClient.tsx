@@ -50,9 +50,16 @@ export function PreviewClient({ initial }: PreviewClientProps) {
 
     // Capture phase on document runs before the deck's bubble-phase link handling and React's
     // own listeners, so an editable click never navigates, opens a dialog or moves the deck.
+    // Clicks inside the service dialog arrive here too: top layer changes painting, not the DOM.
     function onClick(event: MouseEvent) {
-      const el =
-        event.target instanceof Element ? event.target.closest("[data-edit-target]") : null;
+      const clicked = event.target instanceof Element ? event.target : null;
+      // WhatsApp links never leave the preview, but still reach React ("Book now" flips the
+      // dialog into its booking step).
+      if (clicked?.closest('a[href^="https://wa.me/"]')) {
+        event.preventDefault();
+        return;
+      }
+      const el = clicked?.closest("[data-edit-target]");
       if (!el) return;
       event.preventDefault();
       event.stopPropagation();

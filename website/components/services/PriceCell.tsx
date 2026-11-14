@@ -1,8 +1,9 @@
+import type { ReactNode } from "react";
 import styles from "./DialogPrice.module.css";
 
 interface PriceCellProps {
   /** Text on the button. */
-  label: string;
+  label: ReactNode;
   /** Whether the visitor is choosing: cells are only enabled then. */
   picking: boolean;
   selected: boolean;

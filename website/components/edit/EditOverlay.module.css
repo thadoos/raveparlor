@@ -1,6 +1,13 @@
 /* The hover highlight around an editable region. Never takes clicks. */
 .box {
   position: fixed;
+  /* undo the popover defaults: the inline style places it */
+  inset: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  color: inherit;
   z-index: 2147483000;
   pointer-events: none;
   outline: 2px solid #2f6fed;

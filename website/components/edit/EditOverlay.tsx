@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import styles from "./EditOverlay.module.css";
 
 interface Box {
@@ -63,6 +63,19 @@ const IDLE_FRAMES = 10;
  */
 export function EditOverlay() {
   const [box, setBox] = useState<Box | null>(null);
+  // Bumped whenever the hovered region changes, to re-raise the outline (below).
+  const [hoverCount, setHoverCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const shown = box !== null;
+
+  // A manual popover sits in the top layer, so the outline paints above a modal <dialog> (the
+  // service dialog). Showing it again moves it to the top, above a dialog opened since.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (el.matches(":popover-open")) el.hidePopover();
+    el.showPopover();
+  }, [shown, hoverCount]);
 
   useEffect(() => {
     let hovered: Element | null = null;
@@ -85,7 +98,9 @@ export function EditOverlay() {
     }
 
     function onPointerMove(e: PointerEvent) {
-      hovered = e.target instanceof Element ? e.target.closest("[data-edit-target]") : null;
+      const next = e.target instanceof Element ? e.target.closest("[data-edit-target]") : null;
+      if (next !== hovered) setHoverCount((n) => n + 1);
+      hovered = next;
       wake();
     }
 
@@ -114,6 +129,8 @@ export function EditOverlay() {
   if (!box) return null;
   return (
     <div
+      ref={ref}
+      popover="manual"
       className={styles.box}
       data-tone-ignore
       aria-hidden="true"

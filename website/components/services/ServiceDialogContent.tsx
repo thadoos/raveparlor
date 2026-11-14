@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducer, useRef, type MouseEvent } from "react";
+import { useEditTargetProps } from "@/components/edit/edit-context";
 import { useSiteView } from "@/components/site/site-view-context";
 import { bookingHref } from "@/lib/booking/href";
 import { cx } from "@/lib/cx";
@@ -42,6 +43,12 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
   const priceRef = useRef<HTMLDivElement>(null);
   const bookRef = useRef<HTMLAnchorElement>(null);
   const pickable = isPickable(item);
+  // An attribute rather than an Editable wrapper: a span can't hold the price table.
+  const priceEditProps = useEditTargetProps({
+    kind: "item",
+    category: target.category,
+    item: item.key,
+  });
 
   function onBook(e: MouseEvent<HTMLAnchorElement>) {
     const intent = bookIntent(picker, pickable);
@@ -72,7 +79,7 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
 
   return (
     <div className={dialogStyles.body}>
-      <DialogMedia photos={item.photos} />
+      <DialogMedia category={target.category} item={item.key} photos={item.photos} />
       <div className={styles.text}>
         <DialogRating site={site} />
         <p className={styles.cat} id="md-cat">
@@ -85,6 +92,7 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
           className={cx(priceStyles.price, nudging && priceStyles.nudge)}
           id="md-price"
           ref={priceRef}
+          {...priceEditProps}
         >
           {item.options.length > 0 ? (
             <PriceTable {...priceProps} />
@@ -92,7 +100,7 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
             <SinglePrice {...priceProps} />
           )}
         </div>
-        <DialogDetails item={item} flipped={picker.flipped} />
+        <DialogDetails category={target.category} item={item} flipped={picker.flipped} />
         <DialogActions
           href={bookingHref({
             item,

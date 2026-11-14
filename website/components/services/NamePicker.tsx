@@ -1,3 +1,4 @@
+import { Editable } from "@/components/edit/Editable";
 import type { Selection } from "@/lib/booking/picker";
 import { cx } from "@/lib/cx";
 import type { PriceRow } from "@/lib/data/services";
@@ -8,20 +9,47 @@ interface NamePickerProps {
   /** The barbers' rows of a service without options (one price each). */
   rows: readonly PriceRow[];
   picking: boolean;
-  /** Show the list outside the booking step too (when the barbers' prices differ). */
+  /**
+   * The barbers' prices differ: the list shows outside the booking step too, with each price.
+   * Otherwise the one price shows above and the list has names only.
+   */
   listed: boolean;
   selection: Selection | null;
   onPick: (selection: Selection) => void;
 }
 
-/** For a service without options and a barber choice: each barber with their price. */
+interface NameProps {
+  row: PriceRow;
+}
+
+/** A barber's name (an edit target in the admin preview). */
+function Name({ row }: NameProps) {
+  return row.barberId ? (
+    <Editable target={{ kind: "barber", id: row.barberId }}>{row.label}</Editable>
+  ) : (
+    row.label
+  );
+}
+
+/**
+ * For a service without options and a barber choice: each barber, with their price when the
+ * barbers' prices differ.
+ */
 export function NamePicker({ rows, picking, listed, selection, onPick }: NamePickerProps) {
   return (
     <div className={cx(styles.who, picking && styles.isPicking, listed && styles.isListed)}>
       {rows.map((row, r) => (
         <PriceCell
           key={row.barberId ?? r}
-          label={`${row.label} · ${row.prices[0] ?? "–"}`}
+          label={
+            listed ? (
+              <>
+                <Name row={row} /> · {row.prices[0] ?? "–"}
+              </>
+            ) : (
+              <Name row={row} />
+            )
+          }
           picking={picking}
           selected={selection?.row === r}
           onPick={() => onPick({ barberId: row.barberId, cut: null, row: r, col: 0 })}
