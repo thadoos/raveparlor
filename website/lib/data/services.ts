@@ -1,8 +1,9 @@
+import type { CategoryKey } from "@/lib/content/schema";
 import { PHOTOS } from "@/lib/data/images";
 
 /** Service menu data (prices from the shop price list) and helpers derived from it. */
 
-export type CategoryKey = "cut" | "colour" | "perm" | "treat";
+export type { CategoryKey } from "@/lib/content/schema";
 
 export interface Barber {
   name: string;

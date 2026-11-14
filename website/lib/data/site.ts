@@ -1,3 +1,4 @@
+import type { OpeningHours } from "@/lib/content/schema";
 /** Business details shared by every component. Server-safe: no side effects, no browser APIs. */
 
 /** Business WhatsApp number, in international format without the plus. */
@@ -9,20 +10,7 @@ export interface Address {
   postcode: string;
 }
 
-export type DayOfWeek =
-  "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
-
-export interface OpeningHours {
-  /** The days these hours apply to (structured counterpart of `days`, used for JSON-LD). */
-  dayOfWeek: readonly DayOfWeek[];
-  /** Full label, e.g. "Mon – Sat" or "Sunday". */
-  days: string;
-  /** Abbreviated label for tight spaces, e.g. "Mon – Sat" or "Sun". */
-  shortDays: string;
-  open: string;
-  close: string;
-  lastAppointment: string;
-}
+export type { DayOfWeek, OpeningHours } from "@/lib/content/schema";
 
 export interface GoogleRating {
   score: string;
