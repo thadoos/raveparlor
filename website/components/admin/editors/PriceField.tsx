@@ -9,6 +9,8 @@ interface PriceFieldProps {
   label: string;
   value: string;
   onChange: (price: string) => void;
+  /** False refuses a new price: the field goes back to `value`. */
+  accept?: (price: string) => boolean;
   /** Keeps the label for screen readers only, e.g. in a grid whose headers already show it. */
   hideLabel?: boolean;
 }
@@ -16,12 +18,13 @@ interface PriceFieldProps {
 const INVALID = "Use a price like £80, £30 – £40 or £100+, or – for none.";
 
 /** A price, normalized to "£80" / "£30 – £40" on blur. Invalid text never reaches the draft. */
-export function PriceField({ label, value, onChange, hideLabel }: PriceFieldProps) {
+export function PriceField({ label, value, onChange, accept, hideLabel }: PriceFieldProps) {
   const id = useId();
   const field = useNormalizedField({
     value,
     normalize: normalizePrice,
     onCommit: onChange,
+    accept,
     invalidMessage: INVALID,
   });
   return (

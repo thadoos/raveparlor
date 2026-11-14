@@ -8,16 +8,43 @@ import type {
   OpeningHours,
   SiteContent,
 } from "@/lib/content/schema";
+import { allCells } from "@/lib/content/prices";
 
 /**
  * Pure edits on a draft. Each returns a new SiteContent and never mutates its input; untouched
  * branches are shared with the input, so React can compare them by reference. An edit that doesn't
  * fit the content (unknown barber, missing cell or photo, invalid options) returns the input itself.
+ * So does an edit to prices, options or barbers that would leave a service without a real price
+ * (every cell "–"); the `...DropsLastPrice` checks let an editor tell the owner why first.
  */
 
 const NOT_OFFERED = "–";
 
+/** What the editors say when an edit is refused because a service would be left without a price. */
+export const NEEDS_PRICE = "A service needs at least one price.";
+
 type Photos = ItemContent["photos"];
+
+/** False when every cell of the item is "–" (not offered): checkStructure rejects that. */
+function hasPrice(item: ItemContent, barbers: readonly Barber[]): boolean {
+  const cells = allCells(item, barbers);
+  return cells.length === 0 || cells.some((cell) => cell !== NOT_OFFERED);
+}
+
+/** True when `next` changed some item into one with no real price. */
+function dropsLastPrice(c: SiteContent, next: SiteContent): boolean {
+  if (next === c) return false;
+  return (Object.keys(next.services) as CategoryKey[]).some((category) =>
+    Object.entries(next.services[category].items).some(
+      ([key, item]) => item !== c.services[category].items[key] && !hasPrice(item, next.barbers),
+    ),
+  );
+}
+
+/** `next`, unless it leaves a service without a real price: then `c`. */
+function keepingPrices(c: SiteContent, next: SiteContent): SiteContent {
+  return dropsLastPrice(c, next) ? c : next;
+}
 
 /** Cells per price row: one per option, or a single cell for an item without options. */
 function rowWidth(item: ItemContent): number {
@@ -76,8 +103,20 @@ export function addBarber(c: SiteContent, barber: Omit<Barber, "id">, id: string
   return { ...withRows, barbers: [...c.barbers, { id, ...barber }] };
 }
 
-/** Removes the barber and their row from every item. */
+/**
+ * Removes the barber and their row from every item. Returns the input when they are the only
+ * barber with a price for some service.
+ */
 export function removeBarber(c: SiteContent, id: string): SiteContent {
+  return keepingPrices(c, removeBarberRows(c, id));
+}
+
+/** True when removeBarber is refused because it would leave a service without a price. */
+export function removeBarberDropsLastPrice(c: SiteContent, id: string): boolean {
+  return dropsLastPrice(c, removeBarberRows(c, id));
+}
+
+function removeBarberRows(c: SiteContent, id: string): SiteContent {
   const withoutRows = updateEveryItem(c, (item) => {
     const rows = item.prices.barbers;
     if (!rows || !Object.hasOwn(rows, id)) return item;
@@ -152,9 +191,30 @@ function mapRows(prices: ItemPrices, edit: (row: string[]) => string[]): ItemPri
  * Labels are trimmed. Validated here rather than by the editor, so the draft always keeps the
  * option rules checkStructure enforces: blank labels, labels equal ignoring case and surrounding
  * space, a mapping of the wrong length, or old indices that are out of range or repeated all
- * return `c` unchanged.
+ * return `c` unchanged. So does removing the options that hold the item's only prices.
  */
 export function setOptions(
+  c: SiteContent,
+  category: CategoryKey,
+  itemKey: string,
+  options: string[],
+  mapping: (number | null)[],
+): SiteContent {
+  return keepingPrices(c, remapOptions(c, category, itemKey, options, mapping));
+}
+
+/** True when setOptions is refused because the item would have no price left. */
+export function setOptionsDropsLastPrice(
+  c: SiteContent,
+  category: CategoryKey,
+  itemKey: string,
+  options: string[],
+  mapping: (number | null)[],
+): boolean {
+  return dropsLastPrice(c, remapOptions(c, category, itemKey, options, mapping));
+}
+
+function remapOptions(
   c: SiteContent,
   category: CategoryKey,
   itemKey: string,
@@ -182,9 +242,29 @@ export function setOptions(
 
 /**
  * Switches whether the item's prices depend on the barber. On: every barber starts with a copy of
- * the base row. Off: the first barber's row becomes the base row. Keeps `c` when already set.
+ * the base row. Off: the first barber's row becomes the base row. Keeps `c` when already set, or
+ * when turning it off would leave no price (the first barber has none).
  */
 export function setByBarber(
+  c: SiteContent,
+  category: CategoryKey,
+  itemKey: string,
+  on: boolean,
+): SiteContent {
+  return keepingPrices(c, switchByBarber(c, category, itemKey, on));
+}
+
+/** True when setByBarber is refused because the item would have no price left. */
+export function setByBarberDropsLastPrice(
+  c: SiteContent,
+  category: CategoryKey,
+  itemKey: string,
+  on: boolean,
+): boolean {
+  return dropsLastPrice(c, switchByBarber(c, category, itemKey, on));
+}
+
+function switchByBarber(
   c: SiteContent,
   category: CategoryKey,
   itemKey: string,
@@ -205,9 +285,33 @@ export function setByBarber(
 
 /**
  * Sets one price cell: the barber's row, or the base row when `barberId` is null. A row that
- * doesn't fit the item's barber axis, or a cell index outside the row, keeps `c`.
+ * doesn't fit the item's barber axis, a cell index outside the row, or a "–" that would clear the
+ * item's last price keeps `c`.
  */
 export function setPrice(
+  c: SiteContent,
+  category: CategoryKey,
+  itemKey: string,
+  barberId: string | null,
+  index: number,
+  value: string,
+): SiteContent {
+  return keepingPrices(c, setCell(c, category, itemKey, barberId, index, value));
+}
+
+/** True when setPrice is refused because the item would have no price left. */
+export function setPriceDropsLastPrice(
+  c: SiteContent,
+  category: CategoryKey,
+  itemKey: string,
+  barberId: string | null,
+  index: number,
+  value: string,
+): boolean {
+  return dropsLastPrice(c, setCell(c, category, itemKey, barberId, index, value));
+}
+
+function setCell(
   c: SiteContent,
   category: CategoryKey,
   itemKey: string,
@@ -230,8 +334,30 @@ export function setPrice(
   });
 }
 
-/** Copies one barber's row to every barber. Unknown barbers and items without the axis keep `c`. */
+/**
+ * Copies one barber's row to every barber. Unknown barbers, items without the axis and a row with no
+ * price (it would leave the item with none) keep `c`.
+ */
 export function applyRowToAllBarbers(
+  c: SiteContent,
+  category: CategoryKey,
+  itemKey: string,
+  barberId: string,
+): SiteContent {
+  return keepingPrices(c, copyRowToAll(c, category, itemKey, barberId));
+}
+
+/** True when applyRowToAllBarbers is refused because the item would have no price left. */
+export function applyRowDropsLastPrice(
+  c: SiteContent,
+  category: CategoryKey,
+  itemKey: string,
+  barberId: string,
+): boolean {
+  return dropsLastPrice(c, copyRowToAll(c, category, itemKey, barberId));
+}
+
+function copyRowToAll(
   c: SiteContent,
   category: CategoryKey,
   itemKey: string,

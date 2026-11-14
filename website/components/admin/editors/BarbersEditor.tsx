@@ -4,7 +4,13 @@ import { useRef, useState } from "react";
 import type { FormEvent, PointerEvent as ReactPointerEvent } from "react";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { dragOffsets, dragTargetIndex } from "@/lib/admin/drag-reorder";
-import { addBarber, moveBarber, removeBarber } from "@/lib/admin/draft-ops";
+import {
+  addBarber,
+  moveBarber,
+  NEEDS_PRICE,
+  removeBarber,
+  removeBarberDropsLastPrice,
+} from "@/lib/admin/draft-ops";
 import { newId } from "@/lib/admin/uuid";
 import { normalizeWhatsApp } from "@/lib/content/normalize";
 import type { Barber } from "@/lib/content/schema";
@@ -28,6 +34,8 @@ interface Drag {
 export function BarbersEditor({ draft, apply }: EditorProps) {
   const [open, setOpen] = useState<string | null>(null);
   const [removing, setRemoving] = useState<Barber | null>(null);
+  /** The barber whose removal was refused: the only one with prices for some service. */
+  const [blocked, setBlocked] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   // The DOM order never changes mid-drag (moving the capturing node would drop pointer capture):
   // the preview is drawn with translateY and the move is applied on release. Handlers read the
@@ -143,12 +151,24 @@ export function BarbersEditor({ draft, apply }: EditorProps) {
                     type="button"
                     className={`admin-button ${shared.secondary}`}
                     disabled={barbers.length === 1}
-                    onClick={() => setRemoving(barber)}
+                    onClick={() => {
+                      if (removeBarberDropsLastPrice(draft, barber.id)) setBlocked(barber.id);
+                      else {
+                        setBlocked(null);
+                        setRemoving(barber);
+                      }
+                    }}
                   >
                     Remove barber
                   </button>
                   {barbers.length === 1 ? (
                     <p className={shared.note}>The site needs at least one barber.</p>
+                  ) : null}
+                  {blocked === barber.id ? (
+                    <p className={fields.error} role="alert">
+                      {NEEDS_PRICE} {barber.name || "This barber"} is the only barber with prices
+                      for a service: give another barber prices for it in Services first.
+                    </p>
                   ) : null}
                 </div>
               ) : null}

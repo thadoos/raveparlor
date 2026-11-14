@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
-import { setOptions } from "@/lib/admin/draft-ops";
+import { NEEDS_PRICE, setOptions, setOptionsDropsLastPrice } from "@/lib/admin/draft-ops";
 import {
   addOption,
   moveOption,
@@ -31,6 +31,7 @@ interface OptionsEditorProps extends EditorProps {
 export function OptionsEditor({ draft, apply, category, item }: OptionsEditorProps) {
   const labelId = useId();
   const [removing, setRemoving] = useState<number | null>(null);
+  const [blocked, setBlocked] = useState(false);
   const data = draft.services[category].items[item];
   const options = data.options;
 
@@ -45,6 +46,11 @@ export function OptionsEditor({ draft, apply, category, item }: OptionsEditorPro
     });
 
   function remove(index: number) {
+    const next = removeOption(options, index);
+    // Removing the column that holds every price is refused: say so instead of asking to confirm.
+    const lastPrice = setOptionsDropsLastPrice(draft, category, item, next.options, next.mapping);
+    setBlocked(lastPrice);
+    if (lastPrice) return;
     if (optionHasPrice(data, index)) setRemoving(index);
     else commit((o) => removeOption(o, index));
   }
@@ -96,6 +102,12 @@ export function OptionsEditor({ draft, apply, category, item }: OptionsEditorPro
           ))}
         </ol>
       )}
+
+      {blocked ? (
+        <p className={fields.error} role="alert">
+          {NEEDS_PRICE} Give another option a price before removing this one.
+        </p>
+      ) : null}
 
       <AddOption
         validate={(label) => optionLabelError(options, label)}

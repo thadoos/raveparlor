@@ -58,13 +58,7 @@ export function ServiceItemEditor({
 
       <OptionsEditor {...editor} />
 
-      <div
-        ref={pricesRef}
-        className={styles.prices}
-        tabIndex={-1}
-        role="group"
-        aria-label="Prices"
-      >
+      <div ref={pricesRef} className={styles.prices} tabIndex={-1} role="group" aria-label="Prices">
         <BarberOptionToggle {...editor} />
         <PriceGrid {...editor} />
         {data.byBarber ? (

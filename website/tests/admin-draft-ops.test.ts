@@ -6,6 +6,7 @@ import {
   clearItemNote,
   moveBarber,
   removeBarber,
+  removeBarberDropsLastPrice,
   removeItemPhoto,
   setByBarber,
   setChemicalNote,
@@ -18,7 +19,9 @@ import {
   setItemPhoto,
   setItemPhotoAlt,
   setOptions,
+  setOptionsDropsLastPrice,
   setPrice,
+  setPriceDropsLastPrice,
   updateBarber,
 } from "@/lib/admin/draft-ops";
 import { DEFAULT_CONTENT } from "@/lib/content/defaults";
@@ -48,6 +51,17 @@ function expectValid(c: SiteContent) {
 /** Every barber row of a cut item. */
 function rows(c: SiteContent, item: (typeof BARBER_ITEMS)[number]) {
   return c.services.cut.items[item].prices.barbers ?? {};
+}
+
+/** The default content with only John offering Cutting & Finishing, and only as "Ladies". */
+function onlyJohnCuts(): SiteContent {
+  const c = content();
+  c.services.cut.items.cutting.prices.barbers = {
+    [RAVE.id]: ["–", "–", "–"],
+    [JOHN.id]: ["–", "£60", "–"],
+    [JULIAN.id]: ["–", "–", "–"],
+  };
+  return c;
 }
 
 describe("barber operations", () => {
@@ -385,5 +399,49 @@ describe("other operations", () => {
       op(input);
       expect(input).toEqual(snapshot);
     }
+  });
+});
+
+describe("keeping at least one price per service", () => {
+  it("setOptions returns the input when removing an option leaves no price", () => {
+    const c = content();
+    // Root Retouching only has a Short price
+    expect(setOptionsDropsLastPrice(c, "colour", "roots", ["Medium", "Long"], [1, 2])).toBe(true);
+    expect(setOptions(c, "colour", "roots", ["Medium", "Long"], [1, 2])).toBe(c);
+    expect(setOptionsDropsLastPrice(c, "colour", "roots", ["Short", "Long"], [0, 2])).toBe(false);
+    expect(setOptions(c, "colour", "roots", ["Short", "Long"], [0, 2])).not.toBe(c);
+  });
+
+  it("setPrice returns the input when it clears an item's last price", () => {
+    const c = content();
+    expect(setPriceDropsLastPrice(c, "colour", "roots", null, 0, "–")).toBe(true);
+    expect(setPrice(c, "colour", "roots", null, 0, "–")).toBe(c);
+
+    const john = onlyJohnCuts();
+    expect(setPriceDropsLastPrice(john, "cut", "cutting", JOHN.id, 1, "–")).toBe(true);
+    expect(setPrice(john, "cut", "cutting", JOHN.id, 1, "–")).toBe(john);
+    expect(setPriceDropsLastPrice(john, "cut", "cutting", JOHN.id, 1, "£65")).toBe(false);
+    expect(setPriceDropsLastPrice(c, "colour", "roots", null, 1, "–")).toBe(false);
+  });
+
+  it("removeBarber returns the input when they are the only barber with prices for a service", () => {
+    const c = onlyJohnCuts();
+    expect(removeBarberDropsLastPrice(c, JOHN.id)).toBe(true);
+    expect(removeBarber(c, JOHN.id)).toBe(c);
+    expect(removeBarberDropsLastPrice(c, RAVE.id)).toBe(false);
+    const next = removeBarber(c, RAVE.id);
+    expect(next.barbers.map((b) => b.id)).toEqual([JOHN.id, JULIAN.id]);
+    expectValid(next);
+  });
+
+  it("setByBarber off returns the input when the first barber has no prices", () => {
+    const c = onlyJohnCuts();
+    expect(setByBarber(c, "cut", "cutting", false)).toBe(c);
+  });
+
+  it("applyRowToAllBarbers returns the input when the copied row has no prices", () => {
+    const c = onlyJohnCuts();
+    expect(applyRowToAllBarbers(c, "cut", "cutting", RAVE.id)).toBe(c);
+    expect(applyRowToAllBarbers(c, "cut", "cutting", JOHN.id)).not.toBe(c);
   });
 });
