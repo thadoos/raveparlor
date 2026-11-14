@@ -1,4 +1,5 @@
 import { deepEqual } from "@/lib/admin/changes";
+import type { EditTarget } from "@/lib/admin/target-key";
 import { CATEGORY_KEYS } from "@/lib/content/schema";
 import type { SiteContent } from "@/lib/content/schema";
 import { MENU_STRUCTURE } from "@/lib/content/structure";
@@ -7,6 +8,8 @@ import { MENU_STRUCTURE } from "@/lib/content/structure";
 export interface ContentWarning {
   kind: "poster" | "staleBarberName";
   message: string;
+  /** The editor that fixes it, so the publish dialog can link there. */
+  target?: EditTarget;
 }
 
 const POSTER_MESSAGE = "Prices changed. Remember to upload an updated price poster.";
@@ -40,25 +43,45 @@ function wordPattern(name: string): RegExp {
   return new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegExp(name)}(?![\\p{L}\\p{N}])`, "iu");
 }
 
+interface CopyField {
+  label: string;
+  text: string;
+  target: EditTarget;
+}
+
 /** Every copy field in the draft, labelled with its service and field. */
-function copyFields(c: SiteContent): { label: string; text: string }[] {
-  const fields: { label: string; text: string }[] = [];
+function copyFields(c: SiteContent): CopyField[] {
+  const fields: CopyField[] = [];
   for (const category of CATEGORY_KEYS) {
     const structure = MENU_STRUCTURE[category];
     const content = c.services[category];
     content.intro.forEach((text, i) =>
-      fields.push({ label: `${structure.name} intro (paragraph ${i + 1})`, text }),
+      fields.push({
+        label: `${structure.name} intro (paragraph ${i + 1})`,
+        text,
+        target: { kind: "intro", category },
+      }),
     );
     for (const item of structure.items) {
       const data = content.items[item.key];
       if (!data) continue;
       for (const [key, name] of ITEM_FIELDS) {
         const text = data[key];
-        if (text) fields.push({ label: `${item.name} ${name}`, text });
+        if (text) {
+          fields.push({
+            label: `${item.name} ${name}`,
+            text,
+            target: { kind: "item", category, item: item.key },
+          });
+        }
       }
     }
   }
-  fields.push({ label: "The chemical services note", text: c.sharedNotes.chemical });
+  fields.push({
+    label: "The chemical services note",
+    text: c.sharedNotes.chemical,
+    target: { kind: "chemicalNote" },
+  });
   return fields;
 }
 
@@ -68,7 +91,11 @@ export function contentWarnings(published: SiteContent, draft: SiteContent): Con
     pricesChanged(published, draft) &&
     published.images.priceList.path === draft.images.priceList.path
   ) {
-    warnings.push({ kind: "poster", message: POSTER_MESSAGE });
+    warnings.push({
+      kind: "poster",
+      message: POSTER_MESSAGE,
+      target: { kind: "image", slot: "priceList" },
+    });
   }
 
   const remaining = new Set(draft.barbers.map((b) => b.name.trim().toLowerCase()));
@@ -85,6 +112,7 @@ export function contentWarnings(published: SiteContent, draft: SiteContent): Con
         warnings.push({
           kind: "staleBarberName",
           message: `${field.label} mentions ${name}, who is no longer a barber.`,
+          target: field.target,
         });
       }
     }

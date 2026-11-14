@@ -22,7 +22,11 @@ describe("contentWarnings", () => {
       setPrice(published, "cut", "cutting", published.barbers[0].id, 0, "£60"),
     );
     expect(warnings).toEqual([
-      { kind: "poster", message: "Prices changed. Remember to upload an updated price poster." },
+      {
+        kind: "poster",
+        message: "Prices changed. Remember to upload an updated price poster.",
+        target: { kind: "image", slot: "priceList" },
+      },
     ]);
   });
 
@@ -54,6 +58,12 @@ describe("contentWarnings", () => {
       "Cutting & Finishing description mentions John, who is no longer a barber.",
       "Cleansing & Styling note mentions John, who is no longer a barber.",
       "Up-do Hairdressing note mentions John, who is no longer a barber.",
+    ]);
+    expect(warnings.map((w) => w.target)).toEqual([
+      { kind: "intro", category: "cut" },
+      { kind: "item", category: "cut", item: "cutting" },
+      { kind: "item", category: "cut", item: "cleansing" },
+      { kind: "item", category: "cut", item: "updo" },
     ]);
   });
 

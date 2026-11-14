@@ -126,6 +126,17 @@
   margin-top: 16px;
   color: #8a5a00;
 }
+.warningLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
 .list li + li,
 .warnings li + li {
   margin-top: 4px;

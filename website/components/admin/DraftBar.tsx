@@ -7,6 +7,7 @@ import { signOut } from "@/app/(admin)/admin/actions";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import type { DraftEditor } from "@/components/admin/use-draft-editor";
 import { deepEqual, summarizeChanges } from "@/lib/admin/changes";
+import type { EditTarget } from "@/lib/admin/targets";
 import styles from "./DraftBar.module.css";
 
 export type EditorMode = "form" | "visual";
@@ -15,6 +16,8 @@ interface DraftBarProps {
   editor: DraftEditor;
   mode: EditorMode;
   onModeChange: (mode: EditorMode) => void;
+  /** Opens the editor a publish warning points at. */
+  onOpenTarget: (target: EditTarget) => void;
 }
 
 const MODES: { value: EditorMode; label: string }[] = [
@@ -34,7 +37,7 @@ function statusText(dirty: boolean, changeCount: number, differsFromLive: boolea
 }
 
 /** Sticky save/publish/discard bar: bottom of the screen on phones, top from 820px. */
-export function DraftBar({ editor, mode, onModeChange }: DraftBarProps) {
+export function DraftBar({ editor, mode, onModeChange, onOpenTarget }: DraftBarProps) {
   const {
     draft,
     saved,
@@ -171,8 +174,23 @@ export function DraftBar({ editor, mode, onModeChange }: DraftBarProps) {
         )}
         {warnings.length > 0 ? (
           <ul className={styles.warnings}>
-            {warnings.map((warning, index) => (
-              <li key={index}>{warning.message}</li>
+            {warnings.map(({ message, target }, index) => (
+              <li key={index}>
+                {target ? (
+                  <button
+                    type="button"
+                    className={styles.warningLink}
+                    onClick={() => {
+                      setConfirming(null);
+                      onOpenTarget(target);
+                    }}
+                  >
+                    {message}
+                  </button>
+                ) : (
+                  message
+                )}
+              </li>
             ))}
           </ul>
         ) : null}

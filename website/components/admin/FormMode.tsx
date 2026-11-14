@@ -1,99 +1,78 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useCallback, useMemo } from "react";
 import { EditorFor } from "@/components/admin/editors/EditorFor";
 import type { EditorProps } from "@/components/admin/editors/types";
-import { IMAGE_GROUPS, targetKey, targetLabel } from "@/lib/admin/targets";
+import { FormShell } from "@/components/admin/form/FormShell";
+import styles from "@/components/admin/form/FormShell.module.css";
+import {
+  FORM_SECTIONS,
+  dirtySections,
+  selectionTarget,
+  targetSelection,
+} from "@/lib/admin/form-selection";
+import type { FormSelection } from "@/lib/admin/form-selection";
+import { IMAGE_GROUPS, imageSlotLabel, targetKey, targetLabel } from "@/lib/admin/targets";
 import type { EditTarget } from "@/lib/admin/targets";
-import { CATEGORY_KEYS } from "@/lib/content/schema";
-import { MENU_STRUCTURE } from "@/lib/content/structure";
-import styles from "./FormMode.module.css";
+import type { SiteContent } from "@/lib/content/schema";
 
-const SECTIONS = [
-  { id: "form-barbers", title: "Barbers" },
-  { id: "form-services", title: "Services and prices" },
-  { id: "form-hours", title: "Opening hours" },
-  { id: "form-business", title: "Business" },
-  { id: "form-images", title: "Images" },
-] as const;
-
-const cardId = (target: EditTarget) => `edit-${targetKey(target)}`;
-
-function openTarget(target: EditTarget) {
-  document.getElementById(cardId(target))?.scrollIntoView({ behavior: "smooth", block: "start" });
+interface FormModeProps extends EditorProps {
+  /** The draft as last saved, for the changed-section dots. */
+  saved: SiteContent;
+  selection: FormSelection;
+  onSelect: (next: FormSelection) => void;
 }
 
-/** Every editor on one page, as section cards: one column on phones, two from 820px. */
-export function FormMode({ draft, apply }: EditorProps) {
-  const card = (target: EditTarget) => (
-    <section
-      key={targetKey(target)}
-      id={cardId(target)}
-      className={styles.card}
-      aria-label={targetLabel(target, draft)}
-    >
-      <h3 className={styles.cardTitle}>{targetLabel(target, draft)}</h3>
-      <EditorFor target={target} draft={draft} apply={apply} onOpenTarget={openTarget} />
-    </section>
+/** Form editing: one section (or one service) at a time inside the sidebar shell. */
+export function FormMode({ draft, saved, apply, selection, onSelect }: FormModeProps) {
+  const dirty = useMemo(() => dirtySections(saved, draft), [saved, draft]);
+  const openTarget = useCallback(
+    (target: EditTarget) => onSelect(targetSelection(target)),
+    [onSelect],
   );
 
-  return (
-    <div className={styles.form}>
-      <nav className={styles.nav} aria-label="Sections">
-        {SECTIONS.map((section) => (
-          <a key={section.id} href={`#${section.id}`} className={styles.navLink}>
-            {section.title}
-          </a>
-        ))}
-      </nav>
+  const target = selectionTarget(selection);
+  const sectionLabel = FORM_SECTIONS.find((s) => s.id === selection.section)?.label ?? "";
 
-      <Section id="form-barbers" title="Barbers">
-        {card({ kind: "barbers" })}
-      </Section>
-
-      <Section id="form-services" title="Services and prices">
-        {CATEGORY_KEYS.map((category) => (
-          <div key={category} className={styles.group}>
-            <h3 className={styles.groupTitle}>{MENU_STRUCTURE[category].name}</h3>
-            <div className={styles.grid}>
-              {card({ kind: "intro", category })}
-              {MENU_STRUCTURE[category].items.map((item) =>
-                card({ kind: "item", category, item: item.key }),
-              )}
-            </div>
-          </div>
-        ))}
-      </Section>
-
-      <Section id="form-hours" title="Opening hours">
-        {card({ kind: "hours" })}
-      </Section>
-
-      <Section id="form-business" title="Business">
-        {card({ kind: "business" })}
-      </Section>
-
-      <Section id="form-images" title="Images">
+  let body = null;
+  if (selection.section === "photos") {
+    body = (
+      <div className={styles.photoGroups}>
         {IMAGE_GROUPS.map((group) => (
-          <div key={group.title} className={styles.group}>
+          <section key={group.title} className={styles.photoGroup} aria-label={group.title}>
             <h3 className={styles.groupTitle}>{group.title}</h3>
-            <div className={styles.grid}>
-              {group.slots.map((slot) => card({ kind: "image", slot }))}
+            <div className={styles.photoGrid}>
+              {group.slots.map((slot) => (
+                <section key={slot} className={styles.photoCard} aria-label={imageSlotLabel(slot)}>
+                  <h4 className={styles.photoTitle}>{imageSlotLabel(slot)}</h4>
+                  <EditorFor target={{ kind: "image", slot }} draft={draft} apply={apply} />
+                </section>
+              ))}
             </div>
-          </div>
+          </section>
         ))}
-      </Section>
-    </div>
-  );
-}
+      </div>
+    );
+  } else if (target) {
+    body = (
+      <EditorFor
+        key={targetKey(target)}
+        target={target}
+        draft={draft}
+        apply={apply}
+        onOpenTarget={openTarget}
+      />
+    );
+  }
 
-function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <section id={id} className={styles.section} aria-labelledby={`${id}-title`}>
-      <h2 id={`${id}-title`} className={styles.sectionTitle}>
-        {title}
-      </h2>
-      <div className={styles.grid}>{children}</div>
-    </section>
+    <FormShell
+      selection={selection}
+      dirty={dirty}
+      onSelect={onSelect}
+      title={target ? targetLabel(target, draft) : sectionLabel}
+    >
+      {body}
+    </FormShell>
   );
 }

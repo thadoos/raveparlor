@@ -3,9 +3,12 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { DraftBar } from "@/components/admin/DraftBar";
 import type { EditorMode } from "@/components/admin/DraftBar";
+import { useFormSelection } from "@/components/admin/form/use-form-selection";
 import { FormMode } from "@/components/admin/FormMode";
 import { useDraftEditor } from "@/components/admin/use-draft-editor";
 import { VisualMode } from "@/components/admin/VisualMode";
+import { targetSelection } from "@/lib/admin/form-selection";
+import type { EditTarget } from "@/lib/admin/targets";
 import { cx } from "@/lib/cx";
 import type { SiteContent } from "@/lib/content/schema";
 import styles from "./AdminApp.module.css";
@@ -56,13 +59,29 @@ function useEditorMode(): [EditorMode, (mode: EditorMode) => void] {
 export function AdminApp({ initial }: AdminAppProps) {
   const editor = useDraftEditor(initial);
   const [mode, setMode] = useEditorMode();
+  const [selection, select] = useFormSelection();
+
+  // Publish warnings link here: they open their editor in form mode.
+  const openTarget = useCallback(
+    (target: EditTarget) => {
+      setMode("form");
+      select(targetSelection(target));
+    },
+    [setMode, select],
+  );
 
   return (
     <div className={cx(styles.app, mode === "visual" && styles.isVisual)}>
-      <DraftBar editor={editor} mode={mode} onModeChange={setMode} />
+      <DraftBar editor={editor} mode={mode} onModeChange={setMode} onOpenTarget={openTarget} />
       <main className={cx(styles.main, mode === "visual" && styles.visualMain)}>
         {mode === "form" ? (
-          <FormMode draft={editor.draft} apply={editor.apply} />
+          <FormMode
+            draft={editor.draft}
+            saved={editor.saved}
+            apply={editor.apply}
+            selection={selection}
+            onSelect={select}
+          />
         ) : (
           <VisualMode draft={editor.draft} apply={editor.apply} />
         )}
