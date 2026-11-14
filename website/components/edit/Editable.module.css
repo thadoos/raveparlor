@@ -1,0 +1,5 @@
+/* No box of its own, so the wrapped content keeps its layout. The cursor is inherited by it. */
+.editable {
+  display: contents;
+  cursor: pointer;
+}

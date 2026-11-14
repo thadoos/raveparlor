@@ -1,3 +1,4 @@
+import { Editable } from "@/components/edit/Editable";
 import type { Selection } from "@/lib/booking/picker";
 import { cx } from "@/lib/cx";
 import {
@@ -55,8 +56,17 @@ export function PriceTable({ item, category, picking, selection, onPick }: Price
           <tr key={row.label || r} className={selection?.row === r ? styles.isOn : undefined}>
             {hasRows && (
               <th scope="row">
-                {row.label}
-                {row.sub && <small>{row.sub}</small>}
+                {row.barberId ? (
+                  <Editable target={{ kind: "barber", id: row.barberId }}>
+                    {row.label}
+                    {row.sub && <small>{row.sub}</small>}
+                  </Editable>
+                ) : (
+                  <>
+                    {row.label}
+                    {row.sub && <small>{row.sub}</small>}
+                  </>
+                )}
               </th>
             )}
             {row.prices.map((price, c) => (

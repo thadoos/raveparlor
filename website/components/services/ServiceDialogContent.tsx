@@ -73,7 +73,7 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
 
   return (
     <div className={dialogStyles.body}>
-      <DialogMedia images={category.images} />
+      <DialogMedia category={target.category} images={category.images} />
       <div className={styles.text}>
         <DialogRating site={site} />
         <p className={styles.cat} id="md-cat">

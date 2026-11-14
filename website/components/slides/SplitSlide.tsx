@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Editable } from "@/components/edit/Editable";
 import { cx } from "@/lib/cx";
 import type { ResolvedImage } from "@/lib/content/view";
 import styles from "./SplitSlide.module.css";
@@ -12,14 +13,16 @@ export function SplitSlide({ image }: SplitSlideProps) {
     <section className={cx("slide", styles.split)} data-tone="light" data-tone-m="dark">
       <div className={cx("layer", styles.grid)}>
         <figure>
-          <Image
-            src={image.src}
-            alt={image.alt}
-            fill
-            sizes="(max-width: 820px) 100vw, 50vw"
-            style={{ objectPosition: image.position }}
-            loading="eager"
-          />
+          <Editable target={{ kind: "image", slot: "split" }}>
+            <Image
+              src={image.src}
+              alt={image.alt}
+              fill
+              sizes="(max-width: 820px) 100vw, 50vw"
+              style={{ objectPosition: image.position }}
+              loading="eager"
+            />
+          </Editable>
           <div className="scrim"></div>
           <figcaption className="cap">
             <strong>By appointment</strong>

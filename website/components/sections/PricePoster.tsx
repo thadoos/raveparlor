@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState, type MouseEvent, type TouchEvent } from "react";
+import { Editable } from "@/components/edit/Editable";
 import { useSiteView } from "@/components/site/site-view-context";
 import { useModalLock } from "@/lib/hooks/use-modal-lock";
 import styles from "./PricePoster.module.css";
@@ -84,13 +85,15 @@ export function PricePoster() {
         rel="noopener"
         onClick={open}
       >
-        <Image
-          src={poster.src}
-          alt={poster.alt}
-          width={poster.width}
-          height={poster.height}
-          sizes="(max-width: 1328px) 100vw, 1280px"
-        />
+        <Editable target={{ kind: "image", slot: "priceList" }}>
+          <Image
+            src={poster.src}
+            alt={poster.alt}
+            width={poster.width}
+            height={poster.height}
+            sizes="(max-width: 1328px) 100vw, 1280px"
+          />
+        </Editable>
       </a>
       <p className={styles.hint}>Tap the price list to enlarge</p>
 

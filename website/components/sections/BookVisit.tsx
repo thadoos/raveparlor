@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { Editable } from "@/components/edit/Editable";
 import { Reveal } from "@/components/ui/Reveal";
 import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
 import type { SiteInfo } from "@/lib/data/site";
@@ -26,11 +27,13 @@ export function BookVisit({ site }: BookVisitProps) {
         </Reveal>
         <Reveal>
           <h3>Appointments</h3>
-          <p>
-            By appointment only
-            <br />
-            {formatWhatsAppLine(site)}
-          </p>
+          <Editable target={{ kind: "business" }}>
+            <p>
+              By appointment only
+              <br />
+              {formatWhatsAppLine(site)}
+            </p>
+          </Editable>
           <a
             className={styles.cta}
             href={whatsappLink(site.whatsappNumber, BOOK_MESSAGE)}
@@ -42,17 +45,19 @@ export function BookVisit({ site }: BookVisitProps) {
         </Reveal>
         <Reveal>
           <h3>Opening hours</h3>
-          <p>
-            {site.hours.map((hours, i) => (
-              <Fragment key={hours.days}>
-                {i > 0 && <br />}
-                {formatHours(hours)}
-                <br />
-                {formatLastAppointment(hours)}
-              </Fragment>
-            ))}
-          </p>
-          <p className={styles.note}>{formatClosedDays(site)}</p>
+          <Editable target={{ kind: "hours" }}>
+            <p>
+              {site.hours.map((hours, i) => (
+                <Fragment key={hours.days}>
+                  {i > 0 && <br />}
+                  {formatHours(hours)}
+                  <br />
+                  {formatLastAppointment(hours)}
+                </Fragment>
+              ))}
+            </p>
+            <p className={styles.note}>{formatClosedDays(site)}</p>
+          </Editable>
         </Reveal>
         <Reveal>
           <h3>Find us</h3>

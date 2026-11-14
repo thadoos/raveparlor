@@ -1,0 +1,14 @@
+/* The hover highlight around an editable region. Never takes clicks. */
+.box {
+  position: fixed;
+  z-index: 2147483000;
+  pointer-events: none;
+  outline: 2px solid #2f6fed;
+  outline-offset: -1px;
+  background: rgba(47, 111, 237, 0.08);
+  transition:
+    top 0.08s linear,
+    left 0.08s linear,
+    width 0.08s linear,
+    height 0.08s linear;
+}

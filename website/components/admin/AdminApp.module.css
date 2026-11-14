@@ -18,3 +18,15 @@
     padding: 40px 32px 64px;
   }
 }
+
+/* Visual mode: exactly one screen tall; the preview fills what the draft bar leaves. */
+.isVisual {
+  height: 100vh;
+  height: 100svh;
+}
+.main.visualMain {
+  display: flex;
+  min-height: 0;
+  max-width: none;
+  padding: 0;
+}

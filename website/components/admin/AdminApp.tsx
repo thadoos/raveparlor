@@ -5,6 +5,8 @@ import { DraftBar } from "@/components/admin/DraftBar";
 import type { EditorMode } from "@/components/admin/DraftBar";
 import { FormMode } from "@/components/admin/FormMode";
 import { useDraftEditor } from "@/components/admin/use-draft-editor";
+import { VisualMode } from "@/components/admin/VisualMode";
+import { cx } from "@/lib/cx";
 import type { SiteContent } from "@/lib/content/schema";
 import styles from "./AdminApp.module.css";
 
@@ -56,13 +58,13 @@ export function AdminApp({ initial }: AdminAppProps) {
   const [mode, setMode] = useEditorMode();
 
   return (
-    <div className={styles.app}>
+    <div className={cx(styles.app, mode === "visual" && styles.isVisual)}>
       <DraftBar editor={editor} mode={mode} onModeChange={setMode} />
-      <main className={styles.main}>
+      <main className={cx(styles.main, mode === "visual" && styles.visualMain)}>
         {mode === "form" ? (
           <FormMode draft={editor.draft} apply={editor.apply} />
         ) : (
-          <p className="admin-label">Visual editor coming soon.</p>
+          <VisualMode draft={editor.draft} apply={editor.apply} />
         )}
       </main>
     </div>

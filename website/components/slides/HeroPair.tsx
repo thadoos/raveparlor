@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Editable } from "@/components/edit/Editable";
 import { cx } from "@/lib/cx";
 import type { ResolvedImage } from "@/lib/content/view";
 import styles from "./HeroPair.module.css";
@@ -14,16 +15,18 @@ export function HeroPair({ left, right }: HeroPairProps) {
       <div className={cx("layer", styles.pairGrid)}>
         <figure className="half is-current" id="gallery" data-tone="light">
           <div className="layer">
-            <Image
-              src={left.src}
-              alt={left.alt}
-              fill
-              sizes="(max-width: 820px) 100vw, 50vw"
-              className={styles.mLeft}
-              style={{ objectPosition: left.position }}
-              loading="eager"
-              fetchPriority="high"
-            />
+            <Editable target={{ kind: "image", slot: "heroLeft" }}>
+              <Image
+                src={left.src}
+                alt={left.alt}
+                fill
+                sizes="(max-width: 820px) 100vw, 50vw"
+                className={styles.mLeft}
+                style={{ objectPosition: left.position }}
+                loading="eager"
+                fetchPriority="high"
+              />
+            </Editable>
             <div className="topfade"></div>
             <div className="vignette"></div>
             <div className="scrim"></div>
@@ -35,15 +38,17 @@ export function HeroPair({ left, right }: HeroPairProps) {
         </figure>
         <figure className="half" data-tone="light">
           <div className="layer">
-            <Image
-              src={right.src}
-              alt={right.alt}
-              fill
-              sizes="(max-width: 820px) 100vw, 50vw"
-              style={{ objectPosition: right.position }}
-              loading="eager"
-              fetchPriority="high"
-            />
+            <Editable target={{ kind: "image", slot: "heroRight" }}>
+              <Image
+                src={right.src}
+                alt={right.alt}
+                fill
+                sizes="(max-width: 820px) 100vw, 50vw"
+                style={{ objectPosition: right.position }}
+                loading="eager"
+                fetchPriority="high"
+              />
+            </Editable>
             <div className="topfade"></div>
             <div className="vignette"></div>
             <div className="scrim"></div>

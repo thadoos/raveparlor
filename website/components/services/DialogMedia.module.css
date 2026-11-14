@@ -15,7 +15,8 @@
   .media img {
     aspect-ratio: 4 / 3;
   }
-  .media img + img {
+  /* by position, not img + img: in the admin preview each photo sits in a wrapper */
+  .media > :nth-child(n + 2) {
     display: none;
   }
 }

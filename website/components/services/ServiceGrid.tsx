@@ -28,6 +28,7 @@ export function ServiceGrid() {
     >
       <ServiceMedia
         key={`${token}:media`}
+        category={key}
         image={category.media}
         tall={category.items.length >= 2}
         animate={animate}

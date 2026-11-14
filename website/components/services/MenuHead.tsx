@@ -1,5 +1,6 @@
 "use client";
 
+import { Editable } from "@/components/edit/Editable";
 import { useSiteView } from "@/components/site/site-view-context";
 import styles from "./MenuHead.module.css";
 import { useServiceCategory } from "./services-context";
@@ -13,11 +14,13 @@ export function MenuHead() {
       <h2 className={styles.title} id="mn-title">
         {name}
       </h2>
-      <div className={styles.intro} id="mn-intro">
-        {intro.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
-        ))}
-      </div>
+      <Editable target={{ kind: "intro", category }}>
+        <div className={styles.intro} id="mn-intro">
+          {intro.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </div>
+      </Editable>
     </div>
   );
 }

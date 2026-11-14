@@ -1,3 +1,4 @@
+import { Editable } from "@/components/edit/Editable";
 import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
 import { FOOTER_LINKS } from "@/lib/data/nav";
 import type { SiteInfo } from "@/lib/data/site";
@@ -26,7 +27,10 @@ export function SiteFooter({ site }: SiteFooterProps) {
           WhatsApp
         </a>
       </nav>
-      <p>{`${formatAddress(site)} · ${formatWhatsAppLine(site)}`}</p>
+      {/* The whole line, not just the number, so the public markup stays a single text node */}
+      <Editable target={{ kind: "business" }}>
+        <p>{`${formatAddress(site)} · ${formatWhatsAppLine(site)}`}</p>
+      </Editable>
       <p>{formatCopyright(site)}</p>
     </footer>
   );

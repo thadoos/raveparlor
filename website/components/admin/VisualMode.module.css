@@ -1,0 +1,12 @@
+/* Fills the area beside the draft bar. A row, so the desktop editor panel squeezes the preview. */
+.visual {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.frame {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: var(--color-deck);
+}

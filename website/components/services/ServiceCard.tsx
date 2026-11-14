@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, type KeyboardEvent, type MouseEvent } from "react";
+import { useEditTargetProps } from "@/components/edit/edit-context";
 import { useSiteView } from "@/components/site/site-view-context";
 import { bookingHref } from "@/lib/booking/href";
 import { cx } from "@/lib/cx";
@@ -31,6 +32,8 @@ export function ServiceCard({ categoryKey, index, item, animate }: ServiceCardPr
   const { site, menu } = useSiteView();
   const category = menu[categoryKey];
   const ref = useMemo(() => registerCard(categoryKey, index), [registerCard, categoryKey, index]);
+  // An attribute rather than an Editable wrapper: the grid styles cards with :last-child.
+  const editProps = useEditTargetProps({ kind: "item", category: categoryKey, item: item.key });
   const price = priceLabel(item);
   const pickable = isPickable(item, category);
   // the card stays hidden behind the dialog that expands out of it
@@ -70,6 +73,7 @@ export function ServiceCard({ categoryKey, index, item, animate }: ServiceCardPr
       aria-label={cardAriaLabel(item)}
       onClick={() => openDetails(false)}
       onKeyDown={onKeyDown}
+      {...editProps}
     >
       <h3>{item.name}</h3>
       <div className={styles.price}>

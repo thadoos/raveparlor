@@ -1,0 +1,95 @@
+/* Phones: a bottom sheet over the preview, above the draft bar. */
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: calc(var(--z-header) + 10);
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+  max-height: 70svh;
+  border-top: 1px solid var(--color-ink);
+  background: var(--color-paper);
+  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s var(--ease);
+}
+.sheet:focus {
+  outline: none;
+}
+.handle {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 4px;
+  cursor: grab;
+  touch-action: none;
+}
+.grip {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-offwhite-muted);
+}
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 0 16px;
+  border-bottom: 1px solid var(--color-offwhite);
+}
+.title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.close:hover,
+.close:focus-visible {
+  background: var(--color-offwhite);
+}
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+}
+
+/* Desktop: a 420px panel on the right; the preview shrinks beside it (VisualMode is a flex row). */
+@media (min-width: 820px) {
+  .sheet {
+    position: static;
+    flex: 0 0 420px;
+    width: 420px;
+    max-height: none;
+    border-top: 0;
+    border-left: 1px solid var(--color-offwhite-muted);
+    box-shadow: none;
+    transform: none !important;
+  }
+  .handle {
+    display: none;
+  }
+  .head {
+    padding: 12px 8px 12px 24px;
+  }
+  .body {
+    padding: 24px;
+  }
+}

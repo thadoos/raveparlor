@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { Editable } from "@/components/edit/Editable";
 import { Reveal } from "@/components/ui/Reveal";
 import type { ImageSlot } from "@/lib/content/schema";
 import type { ResolvedImage } from "@/lib/content/view";
@@ -71,18 +72,20 @@ export function ServicesOverview({ menu, images }: ServicesOverviewProps) {
           const image = images[`overview.${key}`];
           return (
             <CategoryLink key={key} category={key}>
-              <span className={styles.media}>
-                <span className={styles.go} aria-hidden="true">
-                  View →
+              <Editable target={{ kind: "image", slot: `overview.${key}` }}>
+                <span className={styles.media}>
+                  <span className={styles.go} aria-hidden="true">
+                    View →
+                  </span>
+                  <Image
+                    src={image.src}
+                    alt=""
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 25vw"
+                    className={image.position && positionClass(image.position)}
+                  />
                 </span>
-                <Image
-                  src={image.src}
-                  alt=""
-                  fill
-                  sizes="(max-width: 1024px) 50vw, 25vw"
-                  className={image.position && positionClass(image.position)}
-                />
-              </span>
+              </Editable>
               <span className={styles.info}>
                 <span className={styles.name}>{category.name}</span>
                 <span className={styles.count}>
