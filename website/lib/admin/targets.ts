@@ -38,9 +38,13 @@ export function parseTargetKey(key: string): EditTarget | null {
     case "image":
       return rest !== null && isSlot(rest) ? { kind, slot: rest } : null;
     case "item": {
-      const parts = rest?.split(".");
+      const hash = rest?.indexOf("#") ?? -1;
+      const parts = (hash === -1 ? rest : rest?.slice(0, hash))?.split(".");
       if (parts?.length !== 2 || !isItem(parts[0], parts[1])) return null;
-      return { kind, category: parts[0], item: parts[1] };
+      if (hash === -1) return { kind, category: parts[0], item: parts[1] };
+      return rest?.slice(hash + 1) === "pricing"
+        ? { kind, category: parts[0], item: parts[1], focus: "pricing" }
+        : null;
     }
     case "itemPhoto": {
       const parts = rest?.split(".");

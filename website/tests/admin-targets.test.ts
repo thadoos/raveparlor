@@ -15,6 +15,12 @@ const ALL_TARGETS: EditTarget[] = [
       category,
       item: item.key,
     })),
+    ...MENU_STRUCTURE[category].items.map((item): EditTarget => ({
+      kind: "item",
+      category,
+      item: item.key,
+      focus: "pricing",
+    })),
     ...MENU_STRUCTURE[category].items.flatMap((item) =>
       ([0, 1] as const).map((index): EditTarget => ({
         kind: "itemPhoto",
@@ -41,6 +47,9 @@ describe("edit targets", () => {
     expect(targetKey({ kind: "item", category: "colour", item: "roots" })).toBe(
       "item:colour.roots",
     );
+    expect(
+      targetKey({ kind: "item", category: "colour", item: "roots", focus: "pricing" }),
+    ).toBe("item:colour.roots#pricing");
     expect(targetKey({ kind: "image", slot: "heroLeft" })).toBe("image:heroLeft");
     expect(targetKey({ kind: "barber", id: "abc" })).toBe("barber:abc");
     expect(targetKey({ kind: "itemPhoto", category: "cut", item: "cutting", index: 1 })).toBe(
@@ -50,6 +59,9 @@ describe("edit targets", () => {
 
   it("rejects unknown kinds, categories, items and slots", () => {
     expect(parseTargetKey("item:colour.nope")).toBeNull();
+    expect(parseTargetKey("item:colour.roots#foo")).toBeNull();
+    expect(parseTargetKey("item:colour.roots#")).toBeNull();
+    expect(parseTargetKey("item:colour.nope#pricing")).toBeNull();
     expect(parseTargetKey("item:nope.roots")).toBeNull();
     expect(parseTargetKey("intro:nope")).toBeNull();
     expect(parseTargetKey("image:nope")).toBeNull();

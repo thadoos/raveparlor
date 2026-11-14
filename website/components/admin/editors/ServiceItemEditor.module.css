@@ -1,3 +1,9 @@
+.prices {
+  scroll-margin-top: 8px;
+}
+.prices:focus {
+  outline: none;
+}
 .prices,
 .photos {
   display: flex;

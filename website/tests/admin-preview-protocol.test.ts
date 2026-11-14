@@ -42,6 +42,11 @@ describe("parseFromPreview", () => {
     expect(parseFromPreview({ type: "edit", target: "itemPhoto:cut.cutting.1" })).not.toBeNull();
   });
 
+  it("accepts an edit message for a service's pricing and rejects unknown hints", () => {
+    expect(parseFromPreview({ type: "edit", target: "item:cut.cutting#pricing" })).not.toBeNull();
+    expect(parseFromPreview({ type: "edit", target: "item:cut.cutting#foo" })).toBeNull();
+  });
+
   it("rejects an edit message for a photo index out of range", () => {
     expect(parseFromPreview({ type: "edit", target: "itemPhoto:cut.cutting.5" })).toBeNull();
   });

@@ -32,6 +32,7 @@ export function EditorFor({ target, draft, apply, onOpenTarget }: EditorForProps
           apply={apply}
           category={target.category}
           item={target.item}
+          focus={target.focus}
           onOpenTarget={onOpenTarget}
         />
       );

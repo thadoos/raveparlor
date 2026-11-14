@@ -94,6 +94,11 @@
     background-color 0.25s var(--ease),
     color 0.25s var(--ease);
 }
+/* Admin preview only (nothing has data-edit-target on the public site): browsers send no click
+   for a disabled button, so let clicks fall through to the editable price area around it. */
+[data-edit-target] .cell:disabled {
+  pointer-events: none;
+}
 .price tr.any {
   display: none;
 }

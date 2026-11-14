@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { clearItemNote, setItemContent } from "@/lib/admin/draft-ops";
 import type { ItemCopyPatch } from "@/lib/admin/draft-ops";
 import type { EditTarget } from "@/lib/admin/targets";
@@ -18,6 +19,8 @@ import styles from "./ServiceItemEditor.module.css";
 interface ServiceItemEditorProps extends EditorProps {
   category: CategoryKey;
   item: string;
+  /** "pricing" scrolls the price grid into view and focuses it (from the dialog's price area). */
+  focus?: "pricing";
   /** Opens another editor. Without it, links fall back to the form-mode section anchor. */
   onOpenTarget?: (target: EditTarget) => void;
 }
@@ -28,8 +31,19 @@ export function ServiceItemEditor({
   apply,
   category,
   item,
+  focus,
   onOpenTarget,
 }: ServiceItemEditorProps) {
+  const pricesRef = useRef<HTMLDivElement>(null);
+
+  // The group itself takes focus, not its first input: on phones an input would raise the keyboard.
+  useEffect(() => {
+    if (focus !== "pricing") return;
+    const prices = pricesRef.current;
+    prices?.focus({ preventScroll: true });
+    prices?.scrollIntoView({ block: "start" });
+  }, [focus]);
+
   const structure = MENU_STRUCTURE[category].items.find((i) => i.key === item);
   const items = draft.services[category].items;
   const data = Object.hasOwn(items, item) ? items[item] : undefined;
@@ -44,7 +58,13 @@ export function ServiceItemEditor({
 
       <OptionsEditor {...editor} />
 
-      <div className={styles.prices}>
+      <div
+        ref={pricesRef}
+        className={styles.prices}
+        tabIndex={-1}
+        role="group"
+        aria-label="Prices"
+      >
         <BarberOptionToggle {...editor} />
         <PriceGrid {...editor} />
         {data.byBarber ? (

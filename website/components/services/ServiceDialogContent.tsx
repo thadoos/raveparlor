@@ -48,6 +48,7 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
     kind: "item",
     category: target.category,
     item: item.key,
+    focus: "pricing",
   });
 
   function onBook(e: MouseEvent<HTMLAnchorElement>) {

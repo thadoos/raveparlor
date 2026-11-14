@@ -72,7 +72,8 @@ export function EditOverlay() {
   // service dialog). Showing it again moves it to the top, above a dialog opened since.
   useLayoutEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    // Without popover support the outline stays a fixed box (below a modal dialog).
+    if (!el || typeof el.showPopover !== "function") return;
     if (el.matches(":popover-open")) el.hidePopover();
     el.showPopover();
   }, [shown, hoverCount]);

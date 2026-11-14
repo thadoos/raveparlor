@@ -9,7 +9,13 @@ import type { CategoryKey, ImageSlot } from "@/lib/content/schema";
 export type EditTarget =
   | { kind: "barbers" }
   | { kind: "barber"; id: string }
-  | { kind: "item"; category: CategoryKey; item: string }
+  | {
+      kind: "item";
+      category: CategoryKey;
+      item: string;
+      /** Where the editor opens: "pricing" scrolls to the price grid (the dialog's price area). */
+      focus?: "pricing";
+    }
   | { kind: "itemPhoto"; category: CategoryKey; item: string; index: 0 | 1 }
   | { kind: "intro"; category: CategoryKey }
   | { kind: "hours" }
@@ -17,7 +23,8 @@ export type EditTarget =
   | { kind: "chemicalNote" }
   | { kind: "image"; slot: ImageSlot };
 
-/** A stable string for a target, e.g. "item:colour.roots", "itemPhoto:cut.cutting.1",
+/** A stable string for a target, e.g. "item:colour.roots", "item:colour.roots#pricing",
+ *  "itemPhoto:cut.cutting.1",
  *  "image:heroLeft" or "barber:<id>". */
 export function targetKey(t: EditTarget): string {
   switch (t.kind) {
@@ -29,7 +36,7 @@ export function targetKey(t: EditTarget): string {
     case "barber":
       return `barber:${t.id}`;
     case "item":
-      return `item:${t.category}.${t.item}`;
+      return `item:${t.category}.${t.item}${t.focus ? `#${t.focus}` : ""}`;
     case "itemPhoto":
       return `itemPhoto:${t.category}.${t.item}.${t.index}`;
     case "intro":

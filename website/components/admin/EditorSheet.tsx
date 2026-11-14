@@ -34,8 +34,10 @@ export function EditorSheet({ title, focusKey, onClose, children }: EditorSheetP
     };
   }, []);
 
+  // Unless the editor already moved focus inside (its effects run first), e.g. to its prices.
   useEffect(() => {
-    ref.current?.focus({ preventScroll: true });
+    const sheet = ref.current;
+    if (sheet && !sheet.contains(document.activeElement)) sheet.focus({ preventScroll: true });
   }, [focusKey]);
 
   useEffect(() => {
