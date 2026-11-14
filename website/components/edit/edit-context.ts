@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { targetKey } from "@/lib/admin/targets";
-import type { EditTarget } from "@/lib/admin/targets";
+import { targetKey } from "@/lib/admin/target-key";
+import type { EditTarget } from "@/lib/admin/target-key";
 
 export interface EditContextValue {
   onEdit(target: EditTarget): void;

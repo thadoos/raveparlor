@@ -1,17 +1,10 @@
 import { CATEGORY_KEYS, IMAGE_SLOTS } from "@/lib/content/schema";
 import type { CategoryKey, ImageSlot, SiteContent } from "@/lib/content/schema";
 import { MENU_STRUCTURE } from "@/lib/content/structure";
+import type { EditTarget } from "@/lib/admin/target-key";
 
-/** What an editor edits. Form mode and visual mode both address editors through these. */
-export type EditTarget =
-  | { kind: "barbers" }
-  | { kind: "barber"; id: string }
-  | { kind: "item"; category: CategoryKey; item: string }
-  | { kind: "intro"; category: CategoryKey }
-  | { kind: "hours" }
-  | { kind: "business" }
-  | { kind: "chemicalNote" }
-  | { kind: "image"; slot: ImageSlot };
+export { targetKey } from "@/lib/admin/target-key";
+export type { EditTarget } from "@/lib/admin/target-key";
 
 function isCategory(value: string): value is CategoryKey {
   return (CATEGORY_KEYS as readonly string[]).includes(value);
@@ -19,25 +12,6 @@ function isCategory(value: string): value is CategoryKey {
 
 function isSlot(value: string): value is ImageSlot {
   return (IMAGE_SLOTS as readonly string[]).includes(value);
-}
-
-/** A stable string for a target, e.g. "item:colour.roots", "image:heroLeft" or "barber:<id>". */
-export function targetKey(t: EditTarget): string {
-  switch (t.kind) {
-    case "barbers":
-    case "hours":
-    case "business":
-    case "chemicalNote":
-      return t.kind;
-    case "barber":
-      return `barber:${t.id}`;
-    case "item":
-      return `item:${t.category}.${t.item}`;
-    case "intro":
-      return `intro:${t.category}`;
-    case "image":
-      return `image:${t.slot}`;
-  }
 }
 
 /** The inverse of targetKey. Unknown kinds, categories, items and slots give null. */

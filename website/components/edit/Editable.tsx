@@ -1,8 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { targetKey } from "@/lib/admin/targets";
-import type { EditTarget } from "@/lib/admin/targets";
+import { targetKey } from "@/lib/admin/target-key";
+import type { EditTarget } from "@/lib/admin/target-key";
 import styles from "./Editable.module.css";
 import { useEditContext } from "./edit-context";
 
