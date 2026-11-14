@@ -60,6 +60,33 @@ describe("parseSiteContent", () => {
     if (!r.ok) expect(r.issues.some((i) => i.startsWith("business.hours"))).toBe(true);
   });
 
+  it("accepts an uploaded storage key image path", () =>
+    expect(
+      mutated(
+        (c) =>
+          (c.images["dialog.cut.0"] = {
+            ...c.images["dialog.cut.0"]!,
+            path: "dialog.cut.0/0f8fad5b-d9cb-469f-a165-70867728950e.webp",
+          }),
+      ).ok,
+    ).toBe(true));
+
+  it("accepts a bundled /images path", () =>
+    expect(
+      mutated((c) => (c.images.heroLeft = { ...c.images.heroLeft!, path: "/images/sub/a-b_c.jpg" }))
+        .ok,
+    ).toBe(true));
+
+  it.each([
+    "https://x/y.jpg",
+    "//host/x.jpg",
+    "/",
+    "heroLeft/not-a-uuid.webp",
+    "heroLeft/0f8fad5b-d9cb-469f-a165-70867728950e.png",
+  ])("rejects image path %s", (path) =>
+    expect(mutated((c) => (c.images.heroLeft = { ...c.images.heroLeft!, path })).ok).toBe(false),
+  );
+
   it("rejects missing image slot", () =>
     expect(mutated((c) => delete c.images.priceList).ok).toBe(false));
 

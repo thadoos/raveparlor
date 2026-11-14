@@ -65,8 +65,12 @@ const openingHoursSchema = z
   });
 export type OpeningHours = z.infer<typeof openingHoursSchema>;
 
+/** A bundled file under /images, or an uploaded storage key: `<slot>/<uuid>.<webp|jpg>`
+ *  (see ImageSlotEditor). Anything else (URLs, protocol-relative "//host", bare "/") is rejected. */
+const IMAGE_PATH_PATTERN = /^(\/images\/[\w./-]+|[\w.]+\/[0-9a-f-]{36}\.(webp|jpg))$/;
+
 const imageRefSchema = z.object({
-  path: textSchema,
+  path: z.string().regex(IMAGE_PATH_PATTERN, "Image path must be /images/... or an uploaded photo"),
   alt: z.string(),
   width: z.number().int().positive(),
   height: z.number().int().positive(),

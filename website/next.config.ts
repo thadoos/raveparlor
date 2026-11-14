@@ -27,14 +27,15 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         ],
       },
-      {
-        // The admin preview only ever runs inside the admin's own iframe.
-        source: "/preview",
+      // The admin preview only ever runs inside the admin's own iframe; the admin itself is never
+      // framed by another site (clickjacking).
+      ...["/preview", "/admin", "/admin/:path*"].map((source) => ({
+        source,
         headers: [
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
         ],
-      },
+      })),
     ];
   },
 };
