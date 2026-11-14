@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PRICE_PATTERN, WHATSAPP_PATTERN } from "@/lib/content/normalize";
 
 /** Editable site content: schema, derived types and validation. Canonical values only. */
 
@@ -32,7 +33,6 @@ export const IMAGE_SLOTS = [
 ] as const;
 export type ImageSlot = (typeof IMAGE_SLOTS)[number];
 
-const PRICE_PATTERN = /^(–|£\d+\+?( – £\d+\+?)?)$/;
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 const priceSchema = z.string().regex(PRICE_PATTERN, "Price must look like £80 or £30 – £40");
@@ -74,7 +74,7 @@ const imageRefSchema = z.object({
 });
 export type ImageRef = z.infer<typeof imageRefSchema>;
 
-const whatsAppSchema = z.string().regex(/^[1-9]\d{7,14}$/, "WhatsApp number must be digits only, e.g. 447789096148");
+const whatsAppSchema = z.string().regex(WHATSAPP_PATTERN, "WhatsApp number must be digits only, e.g. 447789096148");
 
 const barberSchema = z.object({
   id: z.uuid(),

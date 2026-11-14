@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { formatUkPhone, normalizePrice, normalizeWhatsApp } from "@/lib/content/normalize";
 
 describe("normalizeWhatsApp", () => {
-  it.each(["07789 096148", "+44 7789 096148", "0044 7789 096148", "447789096148", "+44 (0)7789-096148"])(
+  it.each(["07789 096148", "+44 7789 096148", "0044 7789 096148", "447789096148", "+44 (0)7789-096148", "+44 07789 096148", "+44 (0)7789 096148", "0044 07789 096148"])(
     "normalizes %s",
     (input) => expect(normalizeWhatsApp(input)).toBe("447789096148"),
   );
@@ -23,8 +23,9 @@ describe("normalizePrice", () => {
     ["£30 – £40", "£30 – £40"],
     ["-", "–"],
     ["–", "–"],
+    ["£100—£220", "£100 – £220"],
   ])("%s -> %s", (input, out) => expect(normalizePrice(input)).toBe(out));
-  it.each(["", "free", "£", "£80 – ", "£-5"])("rejects %s", (input) =>
+  it.each(["", "free", "£", "£80 – ", "£-5", "080", "£080 – £100"])("rejects %s", (input) =>
     expect(normalizePrice(input)).toBeNull(),
   );
 });
