@@ -3,7 +3,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { ADMIN_PATH, LOGIN_PATH, requireAdmin } from "@/lib/admin/auth";
+import { ADMIN_PATH, LOGIN_PATH, getAdmin, requireAdmin } from "@/lib/admin/auth";
+import { runDraftAction } from "@/lib/admin/draft-action";
+import type { ActionResult } from "@/lib/admin/draft-action";
 import { CONTENT_TAG } from "@/lib/content/published";
 import { parseSiteContent } from "@/lib/content/schema";
 import type { SiteContent } from "@/lib/content/schema";
@@ -90,8 +92,11 @@ export async function changePassword(_prev: AuthState, formData: FormData): Prom
 }
 
 // Draft content ------------------------------------------------------------------------------
+// The editor's actions never redirect: a redirect would unmount the editor and lose unsaved
+// edits. They answer with an ActionResult instead (see runDraftAction). loadDraft only runs in the
+// page loader, so it keeps the redirecting check.
 
-export type ActionResult = { ok: true } | { ok: false; error: string };
+export type { ActionResult };
 
 async function readContent(
   supabase: SupabaseClient,
@@ -140,44 +145,47 @@ export async function loadDraft(): Promise<{ draft: SiteContent; published: Site
 }
 
 export async function saveDraft(content: SiteContent): Promise<ActionResult> {
-  await requireAdmin();
-  return writeDraft(await createServerSupabase(), content);
+  return runDraftAction("saveDraft", getAdmin, async () =>
+    writeDraft(await createServerSupabase(), content),
+  );
 }
 
 /** Saves the given content as the draft, publishes it atomically, then expires the site's cache. */
 export async function publishDraft(
   content: SiteContent,
 ): Promise<ActionResult & { publishedAt?: string }> {
-  await requireAdmin();
-  const supabase = await createServerSupabase();
-  const saved = await writeDraft(supabase, content);
-  if (!saved.ok) return saved;
+  return runDraftAction("publishDraft", getAdmin, async () => {
+    const supabase = await createServerSupabase();
+    const saved = await writeDraft(supabase, content);
+    if (!saved.ok) return saved;
 
-  const { data, error } = await supabase.rpc("publish_draft");
-  if (error) {
-    console.error("publishDraft failed:", error.message);
-    return { ok: false, error: "The draft was saved, but publishing failed. Try again." };
-  }
-  updateTag(CONTENT_TAG);
-  return { ok: true, publishedAt: typeof data === "string" ? data : undefined };
+    const { data, error } = await supabase.rpc("publish_draft");
+    if (error) {
+      console.error("publishDraft failed:", error.message);
+      return { ok: false, error: "The draft was saved, but publishing failed. Try again." };
+    }
+    updateTag(CONTENT_TAG);
+    return { ok: true, publishedAt: typeof data === "string" ? data : undefined };
+  });
 }
 
 /** Resets the draft to what's live and returns it. */
 export async function discardDraft(): Promise<ActionResult & { content?: SiteContent }> {
-  await requireAdmin();
-  const supabase = await createServerSupabase();
-  const { error } = await supabase.rpc("discard_draft");
-  if (error) {
-    console.error("discardDraft failed:", error.message);
-    return { ok: false, error: "Couldn't discard the draft. Try again." };
-  }
-  try {
-    return { ok: true, content: await readContent(supabase, "draft") };
-  } catch (e) {
-    console.error("discardDraft reload failed:", e);
-    return {
-      ok: false,
-      error: "The draft was discarded, but reloading it failed. Refresh the page.",
-    };
-  }
+  return runDraftAction("discardDraft", getAdmin, async () => {
+    const supabase = await createServerSupabase();
+    const { error } = await supabase.rpc("discard_draft");
+    if (error) {
+      console.error("discardDraft failed:", error.message);
+      return { ok: false, error: "Couldn't discard the draft. Try again." };
+    }
+    try {
+      return { ok: true, content: await readContent(supabase, "draft") };
+    } catch (e) {
+      console.error("discardDraft reload failed:", e);
+      return {
+        ok: false,
+        error: "The draft was discarded, but reloading it failed. Refresh the page.",
+      };
+    }
+  });
 }

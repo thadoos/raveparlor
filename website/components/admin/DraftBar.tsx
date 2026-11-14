@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { signOut } from "@/app/(admin)/admin/actions";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
@@ -22,6 +23,10 @@ const MODES: { value: EditorMode; label: string }[] = [
 ];
 
 const DISCARD_MESSAGE = "Throw away all draft changes and go back to what's live?";
+const LEAVE_MESSAGE = "You have unsaved changes. Leave anyway?";
+const PASSWORD_PATH = "/admin/password";
+
+type Confirming = "publish" | "discard" | "password" | "signOut";
 
 function statusText(dirty: boolean, changeCount: number, differsFromLive: boolean): string {
   if (dirty) return changeCount > 0 ? `Unsaved changes (${changeCount})` : "Unsaved changes";
@@ -43,7 +48,8 @@ export function DraftBar({ editor, mode, onModeChange }: DraftBarProps) {
     publish,
     discard,
   } = editor;
-  const [confirming, setConfirming] = useState<"publish" | "discard" | null>(null);
+  const router = useRouter();
+  const [confirming, setConfirming] = useState<Confirming | null>(null);
 
   const differsFromLive = useMemo(() => !deepEqual(saved, published), [saved, published]);
   const publishLines = useMemo(
@@ -83,10 +89,27 @@ export function DraftBar({ editor, mode, onModeChange }: DraftBarProps) {
               <span aria-hidden="true">•••</span>
             </summary>
             <div className={styles.menuPanel}>
-              <Link href="/admin/password" className={styles.menuItem}>
+              {/* In-app navigation skips beforeunload, so both exits confirm while there are unsaved edits. */}
+              <Link
+                href={PASSWORD_PATH}
+                className={styles.menuItem}
+                onClick={(event) => {
+                  const newTab = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+                  if (!dirty || newTab) return;
+                  event.preventDefault();
+                  setConfirming("password");
+                }}
+              >
                 Change password
               </Link>
-              <form action={signOut}>
+              <form
+                action={signOut}
+                onSubmit={(event) => {
+                  if (!dirty) return;
+                  event.preventDefault();
+                  setConfirming("signOut");
+                }}
+              >
                 <button type="submit" className={styles.menuItem}>
                   Sign out
                 </button>
@@ -163,6 +186,19 @@ export function DraftBar({ editor, mode, onModeChange }: DraftBarProps) {
         onConfirm={() => {
           setConfirming(null);
           void discard();
+        }}
+      />
+
+      <ConfirmDialog
+        open={confirming === "password" || confirming === "signOut"}
+        title={LEAVE_MESSAGE}
+        confirmLabel="Leave"
+        onCancel={() => setConfirming(null)}
+        onConfirm={() => {
+          const target = confirming;
+          setConfirming(null);
+          if (target === "password") router.push(PASSWORD_PATH);
+          else void signOut();
         }}
       />
     </div>

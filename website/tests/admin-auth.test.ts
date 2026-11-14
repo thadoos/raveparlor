@@ -14,6 +14,14 @@ describe("proxyDecision", () => {
     ["/preview", true, "next"],
     ["/", false, "next"],
   ] as const)("%s with user=%s gives %s", (pathname, hasUser, expected) => {
-    expect(proxyDecision(pathname, hasUser)).toBe(expected);
+    expect(proxyDecision(pathname, hasUser, false)).toBe(expected);
   });
+
+  it.each(["/admin", "/admin/login", "/admin/password", "/preview"])(
+    "lets Server Actions on %s through whatever the session",
+    (pathname) => {
+      expect(proxyDecision(pathname, false, true)).toBe("next");
+      expect(proxyDecision(pathname, true, true)).toBe("next");
+    },
+  );
 });

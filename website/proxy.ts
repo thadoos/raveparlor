@@ -31,7 +31,9 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const decision = proxyDecision(request.nextUrl.pathname, user !== null);
+  // Server Actions are POSTs carrying the Next-Action header.
+  const isServerAction = request.method === "POST" && request.headers.has("next-action");
+  const decision = proxyDecision(request.nextUrl.pathname, user !== null, isServerAction);
   if (decision !== "next") {
     const target = request.nextUrl.clone();
     target.pathname = decision === "login" ? LOGIN_PATH : ADMIN_PATH;
