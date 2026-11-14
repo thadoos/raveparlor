@@ -54,6 +54,12 @@ describe("parseSiteContent", () => {
   it("rejects lastAppointment outside open..close", () =>
     expect(mutated((c) => (c.business.hours[0].lastAppointment = "20:00")).ok).toBe(false));
 
+  it("requires at least one opening hours entry", () => {
+    const r = mutated((c) => (c.business.hours = []));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.issues.some((i) => i.startsWith("business.hours"))).toBe(true);
+  });
+
   it("rejects missing image slot", () =>
     expect(mutated((c) => delete c.images.priceList).ok).toBe(false));
 

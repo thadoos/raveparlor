@@ -23,6 +23,10 @@
   text-underline-offset: 3px;
   cursor: pointer;
 }
+.textButton:disabled {
+  color: var(--color-muted);
+  cursor: not-allowed;
+}
 .secondary {
   background: transparent;
   color: var(--color-ink);

@@ -1,6 +1,7 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { setHours } from "@/lib/admin/draft-ops";
 import type { DayOfWeek, OpeningHours, SiteContent } from "@/lib/content/schema";
 import { TextField } from "./TextField";
@@ -49,23 +50,22 @@ function entryErrors(h: OpeningHours): string[] {
 /** Opening hours: one entry per group of days with the same times. */
 export function HoursEditor({ draft, apply }: EditorProps) {
   const hours = draft.business.hours;
+  const [removing, setRemoving] = useState<number | null>(null);
+  const isLast = hours.length === 1;
   return (
     <div className={shared.stack}>
       {hours.map((entry, index) => (
         <HoursEntry
           key={index}
           entry={entry}
+          canRemove={!isLast}
           onChange={(patch) => apply((c) => updateEntry(c, index, patch))}
-          onRemove={() =>
-            apply((c) =>
-              setHours(
-                c,
-                c.business.hours.filter((_, i) => i !== index),
-              ),
-            )
-          }
+          onRemove={() => setRemoving(index)}
         />
       ))}
+      {isLast ? (
+        <p className={shared.note}>The site needs at least one set of opening hours.</p>
+      ) : null}
       <button
         type="button"
         className={`admin-button ${shared.secondary}`}
@@ -73,17 +73,40 @@ export function HoursEditor({ draft, apply }: EditorProps) {
       >
         Add opening hours
       </button>
+
+      <ConfirmDialog
+        open={removing !== null}
+        title={`Remove ${(removing !== null && hours[removing]?.days) || "these hours"}?`}
+        confirmLabel="Remove"
+        onConfirm={() => {
+          const index = removing;
+          setRemoving(null);
+          if (index === null) return;
+          apply((c) =>
+            c.business.hours.length > 1
+              ? setHours(
+                  c,
+                  c.business.hours.filter((_, i) => i !== index),
+                )
+              : c,
+          );
+        }}
+        onCancel={() => setRemoving(null)}
+      >
+        They disappear from the site once you publish.
+      </ConfirmDialog>
     </div>
   );
 }
 
 interface HoursEntryProps {
   entry: OpeningHours;
+  canRemove: boolean;
   onChange: (patch: Partial<OpeningHours>) => void;
   onRemove: () => void;
 }
 
-function HoursEntry({ entry, onChange, onRemove }: HoursEntryProps) {
+function HoursEntry({ entry, canRemove, onChange, onRemove }: HoursEntryProps) {
   const errors = entryErrors(entry);
   const toggleDay = (day: DayOfWeek, on: boolean) =>
     onChange({
@@ -136,7 +159,7 @@ function HoursEntry({ entry, onChange, onRemove }: HoursEntryProps) {
           {error}
         </p>
       ))}
-      <button type="button" className={shared.textButton} onClick={onRemove}>
+      <button type="button" className={shared.textButton} disabled={!canRemove} onClick={onRemove}>
         Remove these hours
       </button>
     </fieldset>

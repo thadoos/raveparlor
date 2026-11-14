@@ -103,7 +103,7 @@ export const siteContentSchema = z.object({
   version: z.literal(1),
   business: z.object({
     defaultWhatsApp: whatsAppSchema,
-    hours: z.array(openingHoursSchema),
+    hours: z.array(openingHoursSchema).min(1, "At least one opening hours entry is required"),
   }),
   barbers: z
     .array(barberSchema)
