@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, type KeyboardEvent, type MouseEvent } from "react";
+import { useSiteView } from "@/components/site/site-view-context";
 import { bookingHref } from "@/lib/booking/href";
 import { cx } from "@/lib/cx";
 import {
-  MENU,
   cardAriaLabel,
   isPickable,
   priceLabel,
@@ -28,7 +28,7 @@ interface ServiceCardProps {
  */
 export function ServiceCard({ categoryKey, index, item, animate }: ServiceCardProps) {
   const { state, open, registerCard } = useServiceDialog();
-  const category = MENU[categoryKey];
+  const category = useSiteView().menu[categoryKey];
   const ref = useMemo(() => registerCard(categoryKey, index), [registerCard, categoryKey, index]);
   const price = priceLabel(item);
   const pickable = isPickable(item, category);

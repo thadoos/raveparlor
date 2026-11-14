@@ -1,11 +1,15 @@
 import { cx } from "@/lib/cx";
 import { REVIEWS } from "@/lib/data/reviews";
-import { SITE } from "@/lib/data/site";
+import type { SiteInfo } from "@/lib/data/site";
 import { formatGoogleReviews } from "@/lib/format";
 import { ReviewsCarousel } from "./ReviewsCarousel";
 import styles from "./ReviewsSlide.module.css";
 
-export function ReviewsSlide() {
+interface ReviewsSlideProps {
+  site: SiteInfo;
+}
+
+export function ReviewsSlide({ site }: ReviewsSlideProps) {
   return (
     <section
       className={cx("slide", styles.reviews)}
@@ -19,12 +23,12 @@ export function ReviewsSlide() {
       <div className={styles.column}>
         <ReviewsCarousel reviews={REVIEWS} />
         <p className={styles.rating}>
-          <a className={styles.link} href={SITE.mapsUrl} target="_blank" rel="noopener noreferrer">
+          <a className={styles.link} href={site.mapsUrl} target="_blank" rel="noopener noreferrer">
             <span className={styles.stars} aria-hidden="true">
               ★★★★★
             </span>
             <span className={styles.score}>
-              {`${SITE.googleRating.score} out of 5 ${formatGoogleReviews()}`}
+              {`${site.googleRating.score} out of 5 ${formatGoogleReviews(site)}`}
             </span>
             <span className={styles.more}>Read them on Google</span>
           </a>

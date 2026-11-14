@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
-import { SITE } from "@/lib/data/site";
+import type { SiteInfo } from "@/lib/data/site";
 import {
   formatAddressLines,
   formatClosedDays,
@@ -12,7 +12,12 @@ import {
 } from "@/lib/format";
 import styles from "./BookVisit.module.css";
 
-export function BookVisit() {
+interface BookVisitProps {
+  site: SiteInfo;
+}
+
+export function BookVisit({ site }: BookVisitProps) {
+  const [street, townLine] = formatAddressLines(site);
   return (
     <section className={styles.visit} id="book" data-tone="dark" aria-labelledby="book-title">
       <div className={styles.grid}>
@@ -24,7 +29,7 @@ export function BookVisit() {
           <p>
             By appointment only
             <br />
-            {formatWhatsAppLine()}
+            {formatWhatsAppLine(site)}
           </p>
           <a
             className={styles.cta}
@@ -38,7 +43,7 @@ export function BookVisit() {
         <Reveal>
           <h3>Opening hours</h3>
           <p>
-            {SITE.hours.map((hours, i) => (
+            {site.hours.map((hours, i) => (
               <Fragment key={hours.days}>
                 {i > 0 && <br />}
                 {formatHours(hours)}
@@ -47,17 +52,17 @@ export function BookVisit() {
               </Fragment>
             ))}
           </p>
-          <p className={styles.note}>{formatClosedDays()}</p>
+          <p className={styles.note}>{formatClosedDays(site)}</p>
         </Reveal>
         <Reveal>
           <h3>Find us</h3>
           <p>
-            {formatAddressLines()[0]}
+            {street}
             <br />
-            {formatAddressLines()[1]}
+            {townLine}
           </p>
-          <p className={styles.note}>{formatRatingLine()}</p>
-          <a className={styles.cta} href={SITE.mapsUrl}>
+          <p className={styles.note}>{formatRatingLine(site)}</p>
+          <a className={styles.cta} href={site.mapsUrl}>
             Directions
           </a>
         </Reveal>

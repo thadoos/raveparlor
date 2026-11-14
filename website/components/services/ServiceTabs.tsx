@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, type KeyboardEvent } from "react";
-import { CATEGORY_ORDER, MENU, adjacentCategory, type CategoryKey } from "@/lib/data/services";
+import { useSiteView } from "@/components/site/site-view-context";
+import { CATEGORY_ORDER, adjacentCategory, type CategoryKey } from "@/lib/data/services";
 import styles from "./ServiceTabs.module.css";
 import { useServiceCategory } from "./services-context";
 
@@ -11,6 +12,7 @@ import { useServiceCategory } from "./services-context";
  */
 export function ServiceTabs() {
   const { category, setCategory } = useServiceCategory();
+  const { menu } = useSiteView();
   const tabs = useRef(new Map<CategoryKey, HTMLButtonElement>());
 
   function onKeyDown(e: KeyboardEvent<HTMLDivElement>) {
@@ -50,7 +52,7 @@ export function ServiceTabs() {
             tabIndex={selected ? 0 : -1}
             onClick={() => setCategory(key, { animate: true })}
           >
-            {MENU[key].name}
+            {menu[key].name}
           </button>
         );
       })}

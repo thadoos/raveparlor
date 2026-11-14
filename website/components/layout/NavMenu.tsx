@@ -1,14 +1,15 @@
 "use client";
 
+import { useSiteView } from "@/components/site/site-view-context";
 import { BOOK_MESSAGE, whatsappLink } from "@/lib/contact";
 import { cx } from "@/lib/cx";
 import { MENU_LINKS } from "@/lib/data/nav";
-import { SITE } from "@/lib/data/site";
 import { useNavMenu } from "./MenuProvider";
 import styles from "./NavMenu.module.css";
 
 export function NavMenu() {
   const { open, close, menuRef } = useNavMenu();
+  const { site } = useSiteView();
 
   return (
     <div
@@ -26,7 +27,7 @@ export function NavMenu() {
         ))}
       </nav>
       <div className={styles.foot}>
-        <a href={SITE.instagramUrl} onClick={close}>
+        <a href={site.instagramUrl} onClick={close}>
           Instagram
         </a>
         <a

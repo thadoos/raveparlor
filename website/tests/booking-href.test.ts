@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_CONTENT } from "@/lib/content/defaults";
+import { buildSiteView } from "@/lib/content/view";
 import { bookingHref, bookingMessage } from "@/lib/booking/href";
 import { whatsappLink } from "@/lib/contact";
-import { MENU, type CategoryKey, type MenuItem } from "@/lib/data/services";
+import type { CategoryKey, MenuItem } from "@/lib/data/services";
+
+const MENU = buildSiteView(DEFAULT_CONTENT, "").menu;
 
 function item(category: CategoryKey, name: string): MenuItem {
   const found = MENU[category].items.find((candidate) => candidate.name === name);

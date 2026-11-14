@@ -1,21 +1,26 @@
 import Image from "next/image";
 import { cx } from "@/lib/cx";
-import { PHOTOS, SLIDE_POSITIONS } from "@/lib/data/images";
+import type { ResolvedImage } from "@/lib/content/view";
 import styles from "./HeroPair.module.css";
 
-export function HeroPair() {
+interface HeroPairProps {
+  left: ResolvedImage;
+  right: ResolvedImage;
+}
+
+export function HeroPair({ left, right }: HeroPairProps) {
   return (
     <section className="slide pair is-current" id="top" data-tone="light">
       <div className={cx("layer", styles.pairGrid)}>
         <figure className="half is-current" id="gallery" data-tone="light">
           <div className="layer">
             <Image
-              src={PHOTOS.portraitColour.src}
-              alt={PHOTOS.portraitColour.alt}
+              src={left.src}
+              alt={left.alt}
               fill
               sizes="(max-width: 820px) 100vw, 50vw"
               className={styles.mLeft}
-              style={{ objectPosition: SLIDE_POSITIONS.heroLeft }}
+              style={{ objectPosition: left.position }}
               loading="eager"
               fetchPriority="high"
             />
@@ -31,11 +36,11 @@ export function HeroPair() {
         <figure className="half" data-tone="light">
           <div className="layer">
             <Image
-              src={PHOTOS.bobCopper.src}
-              alt={PHOTOS.bobCopper.alt}
+              src={right.src}
+              alt={right.alt}
               fill
               sizes="(max-width: 820px) 100vw, 50vw"
-              style={{ objectPosition: SLIDE_POSITIONS.heroRight }}
+              style={{ objectPosition: right.position }}
               loading="eager"
               fetchPriority="high"
             />

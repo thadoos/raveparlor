@@ -1,14 +1,15 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { Reveal } from "@/components/ui/Reveal";
+import type { ImageSlot } from "@/lib/content/schema";
+import type { ResolvedImage } from "@/lib/content/view";
 import { cx } from "@/lib/cx";
-import { OVERVIEW_IMAGES, PHOTOS, positionClass } from "@/lib/data/images";
+import { positionClass } from "@/lib/data/images";
 import {
   CATEGORY_ORDER,
-  MENU,
   categoryStats,
-  totalServices,
   type CategoryKey,
+  type MenuCategory,
 } from "@/lib/data/services";
 import { formatPrice, formatServiceCount } from "@/lib/format";
 import { CategoryLink } from "./CategoryLink";
@@ -39,7 +40,13 @@ const ICONS: Record<CategoryKey, ReactNode> = {
   ),
 };
 
-export function ServicesOverview() {
+interface ServicesOverviewProps {
+  menu: Record<CategoryKey, MenuCategory>;
+  images: Record<ImageSlot, ResolvedImage>;
+}
+
+export function ServicesOverview({ menu, images }: ServicesOverviewProps) {
+  const total = CATEGORY_ORDER.reduce((sum, key) => sum + menu[key].items.length, 0);
   return (
     <section
       className={cx("slide scroll", styles.services)}
@@ -53,15 +60,15 @@ export function ServicesOverview() {
             accessible name "Our Services" and are not rendered inside the flex container. */}
         <span>Our</span>{" "}
         <span className={styles.tag} aria-hidden="true">
-          <span className={styles.tagIn}>{formatServiceCount(totalServices)}</span>
+          <span className={styles.tagIn}>{formatServiceCount(total)}</span>
         </span>{" "}
         <span>Services</span>
       </Reveal>
       <div className={styles.grid}>
         {CATEGORY_ORDER.map((key) => {
-          const category = MENU[key];
+          const category = menu[key];
           const stats = categoryStats(category);
-          const image = OVERVIEW_IMAGES[key];
+          const image = images[`overview.${key}`];
           return (
             <CategoryLink key={key} category={key}>
               <span className={styles.media}>
@@ -69,11 +76,11 @@ export function ServicesOverview() {
                   View →
                 </span>
                 <Image
-                  src={PHOTOS[image.photo].src}
+                  src={image.src}
                   alt=""
                   fill
                   sizes="(max-width: 1024px) 50vw, 25vw"
-                  className={positionClass(image.objectPosition)}
+                  className={image.position && positionClass(image.position)}
                 />
               </span>
               <span className={styles.info}>

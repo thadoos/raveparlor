@@ -2,15 +2,13 @@
 
 import Image from "next/image";
 import { useRef, useState, type MouseEvent, type TouchEvent } from "react";
-import { PHOTOS } from "@/lib/data/images";
+import { useSiteView } from "@/components/site/site-view-context";
 import { useModalLock } from "@/lib/hooks/use-modal-lock";
-import poster from "@/public/images/price-list.webp";
 import styles from "./PricePoster.module.css";
 import { usePosterMotion } from "./use-poster-motion";
 
 const PARTS = ["Hair Cut / Blow-dry", "Colour, Perm & Treatments"] as const;
 const SWIPE_MIN_PX = 40;
-const ALT = PHOTOS.priceList.alt;
 
 function Icon({ path }: { path: string }) {
   return (
@@ -45,6 +43,7 @@ export function PricePoster() {
   const touchX = useRef<number | null>(null);
   const [part, setPart] = useState<0 | 1>(0);
   const [viewing, setViewing] = useState(false);
+  const poster = useSiteView().images.priceList;
 
   // The deck stands down (no slide wheel/touch/key handling) while the viewer is open.
   useModalLock(viewing);
@@ -80,12 +79,18 @@ export function PricePoster() {
       <a
         ref={thumb}
         className={viewing ? `${styles.poster} ${styles.lifted}` : styles.poster}
-        href="/images/price-list.webp"
+        href={poster.src}
         target="_blank"
         rel="noopener"
         onClick={open}
       >
-        <Image src={poster} alt={ALT} sizes="(max-width: 1328px) 100vw, 1280px" />
+        <Image
+          src={poster.src}
+          alt={poster.alt}
+          width={poster.width}
+          height={poster.height}
+          sizes="(max-width: 1328px) 100vw, 1280px"
+        />
       </a>
       <p className={styles.hint}>Tap the price list to enlarge</p>
 
@@ -123,7 +128,13 @@ export function PricePoster() {
             onTouchEnd={onTouchEnd}
           >
             <div className={styles.track} ref={track}>
-              <Image src={poster} alt={ALT} sizes="(max-width: 820px) 180vw, 1500px" />
+              <Image
+                src={poster.src}
+                alt={poster.alt}
+                width={poster.width}
+                height={poster.height}
+                sizes="(max-width: 820px) 180vw, 1500px"
+              />
             </div>
           </div>
         </div>

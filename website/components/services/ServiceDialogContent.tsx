@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducer, useRef, type MouseEvent } from "react";
+import { useSiteView } from "@/components/site/site-view-context";
 import { bookingHref } from "@/lib/booking/href";
 import { cx } from "@/lib/cx";
 import {
@@ -9,7 +10,7 @@ import {
   pickerReducer,
   type Selection,
 } from "@/lib/booking/picker";
-import { MENU, isPickable } from "@/lib/data/services";
+import { isPickable } from "@/lib/data/services";
 import { useReducedMotion } from "@/lib/hooks/use-media";
 import { DialogActions } from "./DialogActions";
 import { DialogDetails } from "./DialogDetails";
@@ -32,7 +33,8 @@ interface ServiceDialogContentProps {
  * the selection starts empty.
  */
 export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
-  const category = MENU[target.category];
+  const { site, menu } = useSiteView();
+  const category = menu[target.category];
   const item = category.items[target.index];
   const [picker, dispatch] = useReducer(pickerReducer, target.picking, initialPickerState);
   const [nudging, nudge] = useNudge();
@@ -73,7 +75,7 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
     <div className={dialogStyles.body}>
       <DialogMedia images={category.images} />
       <div className={styles.text}>
-        <DialogRating />
+        <DialogRating site={site} />
         <p className={styles.cat} id="md-cat">
           {category.name}
         </p>

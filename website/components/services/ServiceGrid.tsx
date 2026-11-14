@@ -1,6 +1,6 @@
 "use client";
 
-import { MENU } from "@/lib/data/services";
+import { useSiteView } from "@/components/site/site-view-context";
 import { useReducedMotion } from "@/lib/hooks/use-media";
 import { ServiceCard } from "./ServiceCard";
 import { ServiceMedia } from "./ServiceMedia";
@@ -15,7 +15,7 @@ import { useServiceCategory } from "./services-context";
 export function ServiceGrid() {
   const { category: key, animate: wantsAnimation, token } = useServiceCategory();
   const reducedMotion = useReducedMotion();
-  const category = MENU[key];
+  const category = useSiteView().menu[key];
   const animate = wantsAnimation && !reducedMotion;
 
   return (
@@ -28,8 +28,7 @@ export function ServiceGrid() {
     >
       <ServiceMedia
         key={`${token}:media`}
-        src={category.media}
-        position={category.mediaPos}
+        image={category.media}
         tall={category.items.length >= 2}
         animate={animate}
       />

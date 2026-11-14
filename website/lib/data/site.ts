@@ -1,9 +1,6 @@
 import type { OpeningHours } from "@/lib/content/schema";
 /** Business details shared by every component. Server-safe: no side effects, no browser APIs. */
 
-/** Business WhatsApp number, in international format without the plus. */
-export const WHATSAPP_NUMBER = "447789096148";
-
 export interface Address {
   street: string;
   town: string;
@@ -33,33 +30,16 @@ export interface SiteInfo {
   copyrightStartYear: string;
 }
 
-export const SITE: SiteInfo = {
+/** The site details that are not editable content (hours and the WhatsApp number come from the content document). */
+export type StaticSiteInfo = Omit<SiteInfo, "hours" | "whatsappNumber" | "phoneDisplay">;
+
+export const SITE_STATIC: StaticSiteInfo = {
   brandName: "Rave’s Parlor London",
   address: {
     street: "15 Coombe Road",
     town: "New Malden",
     postcode: "KT3 4QG",
   },
-  phoneDisplay: "07789 096148",
-  whatsappNumber: WHATSAPP_NUMBER,
-  hours: [
-    {
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-      days: "Mon – Sat",
-      shortDays: "Mon – Sat",
-      open: "10:00",
-      close: "19:00",
-      lastAppointment: "18:00",
-    },
-    {
-      dayOfWeek: ["Sunday"],
-      days: "Sunday",
-      shortDays: "Sun",
-      open: "10:00",
-      close: "18:00",
-      lastAppointment: "17:00",
-    },
-  ],
   closedDays: ["Christmas Day", "Boxing Day", "New Year’s Day"],
   googleRating: { score: "4.9", reviews: 202 },
   instagramUrl: "https://www.instagram.com/ravesparlor_london",

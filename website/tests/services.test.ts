@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_CONTENT } from "@/lib/content/defaults";
+import { buildSiteView } from "@/lib/content/view";
 import {
   CATEGORY_ORDER,
   adjacentCategory,
-  MENU,
   cardAriaLabel,
   categoryStats,
   cutLabel,
@@ -11,10 +12,11 @@ import {
   isPrice,
   minPriceForColumn,
   priceLabel,
-  totalServices,
   type CategoryKey,
   type MenuItem,
 } from "@/lib/data/services";
+
+const MENU = buildSiteView(DEFAULT_CONTENT, "").menu;
 
 function item(category: CategoryKey, name: string): MenuItem {
   const found = MENU[category].items.find((candidate) => candidate.name === name);
@@ -26,7 +28,7 @@ describe("menu data", () => {
   it("has the expected number of services per category", () => {
     expect(CATEGORY_ORDER).toEqual(["cut", "colour", "perm", "treat"]);
     expect(CATEGORY_ORDER.map((key) => MENU[key].items.length)).toEqual([3, 6, 3, 2]);
-    expect(totalServices).toBe(14);
+    expect(CATEGORY_ORDER.reduce((sum, key) => sum + MENU[key].items.length, 0)).toBe(14);
   });
 
   it("derives the lowest 'from' price per category", () => {

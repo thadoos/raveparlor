@@ -1,13 +1,13 @@
 "use client";
 
-import { MENU } from "@/lib/data/services";
+import { useSiteView } from "@/components/site/site-view-context";
 import styles from "./MenuHead.module.css";
 import { useServiceCategory } from "./services-context";
 
 /** Title and intro of the active category. */
 export function MenuHead() {
   const { category } = useServiceCategory();
-  const { name, intro } = MENU[category];
+  const { name, intro } = useSiteView().menu[category];
   return (
     <div className={styles.head}>
       <h2 className={styles.title} id="mn-title">

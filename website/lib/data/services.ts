@@ -1,9 +1,7 @@
-import { DEFAULT_CONTENT } from "@/lib/content/defaults";
 import type { Barber, CategoryKey } from "@/lib/content/schema";
-import { buildSiteView } from "@/lib/content/view";
 import type { ResolvedImage } from "@/lib/content/view";
 
-/** Service menu data (prices from the shop price list) and helpers derived from it. */
+/** Service menu types and helpers (the menu itself is built from the content document). */
 
 export type { CategoryKey } from "@/lib/content/schema";
 
@@ -48,9 +46,6 @@ export interface MenuCategory {
 }
 
 export const CATEGORY_ORDER: readonly CategoryKey[] = ["cut", "colour", "perm", "treat"];
-
-/** Legacy constant built from the default content; removed once every consumer reads the site view. */
-export const MENU: Record<CategoryKey, MenuCategory> = buildSiteView(DEFAULT_CONTENT, "").menu;
 
 /** True for a real price, false for an empty cell ("–" or "-"). */
 export function isPrice(value: string | undefined | null): value is string {
@@ -108,11 +103,6 @@ export function categoryStats(category: MenuCategory): CategoryStats {
     from: Math.min(...category.items.map(fromAmount)),
   };
 }
-
-export const totalServices: number = CATEGORY_ORDER.reduce(
-  (sum, key) => sum + MENU[key].items.length,
-  0,
-);
 
 export interface PriceLabel {
   prefix?: string;

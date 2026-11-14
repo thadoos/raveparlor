@@ -1,7 +1,7 @@
-import { PHOTOS } from "@/lib/data/images";
-import { SITE, SITE_URL, type DayOfWeek } from "@/lib/data/site";
+import type { ResolvedImage } from "@/lib/content/view";
+import { SITE_URL, type DayOfWeek, type SiteInfo } from "@/lib/data/site";
 
-/** schema.org `HairSalon` structured data (https://schema.org/HairSalon), built from `SITE`. */
+/** schema.org `HairSalon` structured data (https://schema.org/HairSalon), built from the site details. */
 
 export interface PostalAddressLd {
   "@type": "PostalAddress";
@@ -36,30 +36,42 @@ export function e164(whatsappNumber: string): string {
   return `+${whatsappNumber}`;
 }
 
-/** The salon as JSON-LD. `siteUrl` is the canonical origin (defaults to `SITE_URL`). */
-export function buildHairSalonLd(siteUrl: string = SITE_URL): HairSalonLd {
+/** An absolute URL for `src`: a relative path is resolved against `siteUrl`, an absolute URL is kept. */
+function absoluteUrl(src: string, siteUrl: string): string {
+  return /^https?:\/\//i.test(src) ? src : `${siteUrl}${src}`;
+}
+
+/**
+ * The salon as JSON-LD. `image` is the parlor photo; `siteUrl` is the canonical origin (defaults
+ * to `SITE_URL`).
+ */
+export function buildHairSalonLd(
+  site: SiteInfo,
+  image: ResolvedImage,
+  siteUrl: string = SITE_URL,
+): HairSalonLd {
   return {
     "@context": "https://schema.org",
     "@type": "HairSalon",
-    name: SITE.brandName,
+    name: site.brandName,
     url: siteUrl,
-    image: `${siteUrl}${PHOTOS.parlorReception.src}`,
-    telephone: e164(SITE.whatsappNumber),
+    image: absoluteUrl(image.src, siteUrl),
+    telephone: e164(site.whatsappNumber),
     address: {
       "@type": "PostalAddress",
-      streetAddress: SITE.address.street,
-      addressLocality: SITE.address.town,
-      postalCode: SITE.address.postcode,
+      streetAddress: site.address.street,
+      addressLocality: site.address.town,
+      postalCode: site.address.postcode,
       addressCountry: "GB",
     },
-    openingHoursSpecification: SITE.hours.map((hours) => ({
+    openingHoursSpecification: site.hours.map((hours) => ({
       "@type": "OpeningHoursSpecification",
       dayOfWeek: hours.dayOfWeek,
       opens: hours.open,
       closes: hours.close,
     })),
-    sameAs: [SITE.instagramUrl],
-    hasMap: SITE.mapsUrl,
+    sameAs: [site.instagramUrl],
+    hasMap: site.mapsUrl,
   };
 }
 

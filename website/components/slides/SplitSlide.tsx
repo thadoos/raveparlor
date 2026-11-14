@@ -1,19 +1,23 @@
 import Image from "next/image";
 import { cx } from "@/lib/cx";
-import { PHOTOS, SLIDE_POSITIONS } from "@/lib/data/images";
+import type { ResolvedImage } from "@/lib/content/view";
 import styles from "./SplitSlide.module.css";
 
-export function SplitSlide() {
+interface SplitSlideProps {
+  image: ResolvedImage;
+}
+
+export function SplitSlide({ image }: SplitSlideProps) {
   return (
     <section className={cx("slide", styles.split)} data-tone="light" data-tone-m="dark">
       <div className={cx("layer", styles.grid)}>
         <figure>
           <Image
-            src={PHOTOS.portraitMono.src}
-            alt={PHOTOS.portraitMono.alt}
+            src={image.src}
+            alt={image.alt}
             fill
             sizes="(max-width: 820px) 100vw, 50vw"
-            style={{ objectPosition: SLIDE_POSITIONS.split }}
+            style={{ objectPosition: image.position }}
             loading="eager"
           />
           <div className="scrim"></div>

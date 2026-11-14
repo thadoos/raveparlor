@@ -2,7 +2,7 @@ import { formatUkPhone } from "@/lib/content/normalize";
 import { CATEGORY_KEYS, IMAGE_SLOTS } from "@/lib/content/schema";
 import type { CategoryKey, ImageRef, ImageSlot, SiteContent } from "@/lib/content/schema";
 import { IMAGE_POSITIONS, MENU_STRUCTURE } from "@/lib/content/structure";
-import { SITE } from "@/lib/data/site";
+import { SITE_STATIC } from "@/lib/data/site";
 import type { SiteInfo } from "@/lib/data/site";
 import type { MenuCategory, MenuItem } from "@/lib/data/services";
 
@@ -93,7 +93,7 @@ export function buildMenu(
 
 export function buildSiteInfo(content: SiteContent): SiteInfo {
   return {
-    ...SITE,
+    ...SITE_STATIC,
     hours: content.business.hours,
     whatsappNumber: content.business.defaultWhatsApp,
     phoneDisplay: formatUkPhone(content.business.defaultWhatsApp),

@@ -1,6 +1,5 @@
-import { WHATSAPP_NUMBER } from "@/lib/data/site";
-
-export { WHATSAPP_NUMBER };
+/** Business WhatsApp number, in international format without the plus. */
+export const WHATSAPP_NUMBER = "447789096148";
 
 /** Opens a chat with the salon; `message` pre-fills the text box (the customer still presses send). */
 export function whatsappLink(message?: string) {

@@ -1,12 +1,12 @@
 import type { MetadataRoute } from "next";
-import { SITE } from "@/lib/data/site";
+import { SITE_STATIC } from "@/lib/data/site";
 
 /** Colours match the `--color-paper` / `--color-ink` tokens in app/styles/tokens.css. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: SITE.brandName,
+    name: SITE_STATIC.brandName,
     short_name: "Rave’s Parlor",
-    description: `Hair salon in ${SITE.address.town}, London.`,
+    description: `Hair salon in ${SITE_STATIC.address.town}, London.`,
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

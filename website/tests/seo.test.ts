@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { SITE, resolveSiteUrl } from "@/lib/data/site";
+import { DEFAULT_CONTENT } from "@/lib/content/defaults";
+import { buildSiteView } from "@/lib/content/view";
+import { resolveSiteUrl } from "@/lib/data/site";
 import { buildHairSalonLd, e164, serializeJsonLd } from "@/lib/seo";
 
 describe("resolveSiteUrl", () => {
@@ -39,25 +41,27 @@ describe("e164", () => {
 });
 
 describe("buildHairSalonLd", () => {
-  const ld = buildHairSalonLd("https://example.com");
+  const view = buildSiteView(DEFAULT_CONTENT, "");
+  const site = view.site;
+  const ld = buildHairSalonLd(site, view.images.parlor, "https://example.com");
 
   it("describes the salon", () => {
     expect(ld["@context"]).toBe("https://schema.org");
     expect(ld["@type"]).toBe("HairSalon");
-    expect(ld.name).toBe(SITE.brandName);
+    expect(ld.name).toBe(site.brandName);
     expect(ld.url).toBe("https://example.com");
     expect(ld.image).toBe("https://example.com/images/parlor-reception.jpg");
     expect(ld.telephone).toBe("+447789096148");
-    expect(ld.sameAs).toEqual([SITE.instagramUrl]);
-    expect(ld.hasMap).toBe(SITE.mapsUrl);
+    expect(ld.sameAs).toEqual([site.instagramUrl]);
+    expect(ld.hasMap).toBe(site.mapsUrl);
   });
 
   it("builds a postal address", () => {
     expect(ld.address).toEqual({
       "@type": "PostalAddress",
-      streetAddress: SITE.address.street,
-      addressLocality: SITE.address.town,
-      postalCode: SITE.address.postcode,
+      streetAddress: site.address.street,
+      addressLocality: site.address.town,
+      postalCode: site.address.postcode,
       addressCountry: "GB",
     });
   });
@@ -77,6 +81,22 @@ describe("buildHairSalonLd", () => {
         closes: "18:00",
       },
     ]);
+  });
+
+  it("keeps an absolute (Storage-backed) parlor image URL as it is", () => {
+    const stored = buildSiteView(
+      {
+        ...DEFAULT_CONTENT,
+        images: {
+          ...DEFAULT_CONTENT.images,
+          parlor: { path: "parlor/reception.jpg", alt: "Reception", width: 1253, height: 832 },
+        },
+      },
+      "https://project.supabase.co",
+    );
+    expect(buildHairSalonLd(site, stored.images.parlor, "https://example.com").image).toBe(
+      "https://project.supabase.co/storage/v1/object/public/site-images/parlor/reception.jpg",
+    );
   });
 
   it("makes no rating, review or price claims", () => {
