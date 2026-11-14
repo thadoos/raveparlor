@@ -59,7 +59,7 @@ function useEditorMode(): [EditorMode, (mode: EditorMode) => void] {
 export function AdminApp({ initial }: AdminAppProps) {
   const editor = useDraftEditor(initial);
   const [mode, setMode] = useEditorMode();
-  const [selection, select] = useFormSelection();
+  const { selection, select, backToList } = useFormSelection();
 
   // Publish warnings link here: they open their editor in form mode.
   const openTarget = useCallback(
@@ -81,6 +81,7 @@ export function AdminApp({ initial }: AdminAppProps) {
             apply={editor.apply}
             selection={selection}
             onSelect={select}
+            onBackToList={backToList}
           />
         ) : (
           <VisualMode draft={editor.draft} apply={editor.apply} />

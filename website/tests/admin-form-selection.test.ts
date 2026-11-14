@@ -3,6 +3,7 @@ import { setChemicalNote, setPrice, updateBarber } from "@/lib/admin/draft-ops";
 import {
   dirtySections,
   formSelectionQuery,
+  historyUpdate,
   parseFormSelection,
   selectionTarget,
   targetSelection,
@@ -123,5 +124,43 @@ describe("dirtySections", () => {
     draft.business.hours = draft.business.hours.slice(0, 1);
     draft.images.priceList = { ...draft.images.priceList, alt: "New" };
     expect([...dirtySections(saved, draft)].sort()).toEqual(["business", "hours", "photos"]);
+  });
+});
+
+describe("historyUpdate", () => {
+  const list = { section: "services" } as const;
+  const cutting = { section: "services", item: "cut.cutting" } as const;
+  const updo = { section: "services", item: "cut.updo" } as const;
+
+  it("does nothing when the selection is unchanged", () => {
+    expect(historyUpdate(cutting, cutting, true)).toEqual({ mode: "none", fromList: true });
+  });
+
+  it("pushes a section change", () => {
+    expect(historyUpdate(list, { section: "hours" }, false)).toEqual({
+      mode: "push",
+      fromList: false,
+    });
+    expect(historyUpdate(cutting, { section: "barbers" }, true)).toEqual({
+      mode: "push",
+      fromList: false,
+    });
+    expect(historyUpdate({ section: "photos" }, cutting, false)).toEqual({
+      mode: "push",
+      fromList: false,
+    });
+  });
+
+  it("pushes opening an entry from the list, marking the list behind it", () => {
+    expect(historyUpdate(list, cutting, false)).toEqual({ mode: "push", fromList: true });
+  });
+
+  it("replaces moving between entries, keeping the list mark", () => {
+    expect(historyUpdate(cutting, updo, true)).toEqual({ mode: "replace", fromList: true });
+    expect(historyUpdate(cutting, updo, false)).toEqual({ mode: "replace", fromList: false });
+  });
+
+  it("replaces going back to the list", () => {
+    expect(historyUpdate(cutting, list, true)).toEqual({ mode: "replace", fromList: false });
   });
 });

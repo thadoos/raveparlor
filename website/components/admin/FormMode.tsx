@@ -21,10 +21,18 @@ interface FormModeProps extends EditorProps {
   saved: SiteContent;
   selection: FormSelection;
   onSelect: (next: FormSelection) => void;
+  onBackToList: () => void;
 }
 
 /** Form editing: one section (or one service) at a time inside the sidebar shell. */
-export function FormMode({ draft, saved, apply, selection, onSelect }: FormModeProps) {
+export function FormMode({
+  draft,
+  saved,
+  apply,
+  selection,
+  onSelect,
+  onBackToList,
+}: FormModeProps) {
   const dirty = useMemo(() => dirtySections(saved, draft), [saved, draft]);
   const openTarget = useCallback(
     (target: EditTarget) => onSelect(targetSelection(target)),
@@ -70,6 +78,7 @@ export function FormMode({ draft, saved, apply, selection, onSelect }: FormModeP
       selection={selection}
       dirty={dirty}
       onSelect={onSelect}
+      onBackToList={onBackToList}
       title={target ? targetLabel(target, draft) : sectionLabel}
     >
       {body}

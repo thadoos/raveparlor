@@ -162,3 +162,23 @@ export function dirtySections(saved: SiteContent, draft: SiteContent): Set<FormS
   if (chemicalChanged || [...dirty].some((key) => key.includes("."))) dirty.add("services");
   return dirty;
 }
+
+/**
+ * How a selection change is written to browser history. Moving to another section or opening an
+ * entry from the Services list pushes, so the back button returns; changes within one level (one
+ * service to another) replace. `fromList` marks an entry whose previous entry is the Services list,
+ * so the phone back link can go back instead of stacking another entry.
+ */
+export function historyUpdate(
+  prev: FormSelection,
+  next: FormSelection,
+  prevFromList: boolean,
+): { mode: "push" | "replace" | "none"; fromList: boolean } {
+  if (formSelectionQuery(prev) === formSelectionQuery(next)) {
+    return { mode: "none", fromList: prevFromList };
+  }
+  const nextHasItem = next.section === "services" && next.item !== undefined;
+  if (prev.section !== next.section) return { mode: "push", fromList: false };
+  if (prev.item === undefined && nextHasItem) return { mode: "push", fromList: true };
+  return { mode: "replace", fromList: prevFromList && nextHasItem };
+}

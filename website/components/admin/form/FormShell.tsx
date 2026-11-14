@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { FORM_SECTIONS, formSelectionQuery } from "@/lib/admin/form-selection";
 import type { FormItem, FormSection, FormSelection } from "@/lib/admin/form-selection";
@@ -13,6 +13,8 @@ interface FormShellProps {
   selection: FormSelection;
   dirty: ReadonlySet<FormSection | FormItem>;
   onSelect: (next: FormSelection) => void;
+  /** The phone back link from an editor to the Services list. */
+  onBackToList: () => void;
   /** The editor pane's heading. */
   title: string;
   /** The editor pane's body; null in Services while nothing is selected. */
@@ -24,32 +26,41 @@ interface FormShellProps {
  * editor pane. Phones: a section tab strip, then either the Services list or one editor with a back
  * link to the list.
  */
-export function FormShell({ selection, dirty, onSelect, title, children }: FormShellProps) {
+export function FormShell({
+  selection,
+  dirty,
+  onSelect,
+  onBackToList,
+  title,
+  children,
+}: FormShellProps) {
   const shell = useRef<HTMLDivElement>(null);
-  // The entry the phone back link returns to, focused (and so scrolled into view) in the list.
-  const [returnTo, setReturnTo] = useState<FormItem | undefined>();
+  const heading = useRef<HTMLHeadingElement>(null);
   const services = selection.section === "services";
-  const query = formSelectionQuery(selection);
-  const firstRender = useRef(true);
+  // The selection last shown. Null until mounted, so the first render moves neither focus nor scroll.
+  const shown = useRef<FormSelection | null>(null);
 
-  // A new selection starts at the top of the shell, unless the back link is restoring the list.
+  // Every later selection change is the admin's doing (a click, a warning link, back/forward).
   useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
+    const prev = shown.current;
+    if (prev && formSelectionQuery(prev) === formSelectionQuery(selection)) return;
+    shown.current = selection;
+    const node = shell.current;
+    if (!prev || !node) return;
+
+    // Back to the Services list (link or back gesture): focus the entry that was open, which also
+    // scrolls it into view.
+    if (prev.section === "services" && prev.item && services && !selection.item) {
+      node.querySelector<HTMLElement>(`[data-item="${CSS.escape(prev.item)}"]`)?.focus();
       return;
     }
-    if (returnTo) return;
-    const node = shell.current;
-    if (!node) return;
+
     // scroll-margin-top clears the draft bar pinned above the shell from 820px.
     const margin = parseFloat(getComputedStyle(node).scrollMarginTop) || 0;
     if (node.getBoundingClientRect().top < margin) node.scrollIntoView({ block: "start" });
-  }, [query, returnTo]);
-
-  const select = (next: FormSelection) => {
-    setReturnTo(undefined);
-    onSelect(next);
-  };
+    // The control that was used may now be hidden (phones): move focus to the new pane.
+    heading.current?.focus({ preventScroll: true });
+  }, [selection, services]);
 
   return (
     <div
@@ -67,7 +78,7 @@ export function FormShell({ selection, dirty, onSelect, title, children }: FormS
             type="button"
             className={styles.section}
             aria-current={selection.section === id ? "page" : undefined}
-            onClick={() => select({ section: id })}
+            onClick={() => onSelect({ section: id })}
           >
             <span>{label}</span>
             {dirty.has(id) ? <DirtyDot /> : null}
@@ -79,21 +90,13 @@ export function FormShell({ selection, dirty, onSelect, title, children }: FormS
         <ServiceList
           selected={selection.item}
           dirty={dirty}
-          focusItem={returnTo}
-          onSelect={(item) => select({ section: "services", item })}
+          onSelect={(item) => onSelect({ section: "services", item })}
         />
       ) : null}
 
       <div className={styles.pane}>
         {services && selection.item ? (
-          <button
-            type="button"
-            className={styles.back}
-            onClick={() => {
-              setReturnTo(selection.item);
-              onSelect({ section: "services" });
-            }}
-          >
+          <button type="button" className={styles.back} onClick={onBackToList}>
             <span aria-hidden="true">‹</span> Services
           </button>
         ) : null}
@@ -101,7 +104,9 @@ export function FormShell({ selection, dirty, onSelect, title, children }: FormS
           <p className={styles.empty}>Choose a service or a category intro from the list.</p>
         ) : (
           <section className={styles.panel} aria-label={title}>
-            <h2 className={styles.title}>{title}</h2>
+            <h2 ref={heading} className={styles.title} tabIndex={-1}>
+              {title}
+            </h2>
             {children}
           </section>
         )}

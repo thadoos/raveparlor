@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { SERVICE_LIST } from "@/lib/admin/form-selection";
 import type { FormItem } from "@/lib/admin/form-selection";
 import { DirtyDot } from "./DirtyDot";
@@ -9,24 +8,13 @@ import styles from "./FormShell.module.css";
 interface ServiceListProps {
   selected?: FormItem;
   dirty: ReadonlySet<string>;
-  /** Focused when the list appears (the entry the phone back link came from). */
-  focusItem?: FormItem;
   onSelect: (item: FormItem) => void;
 }
 
 /** Services grouped by category, each category's intro first. */
-export function ServiceList({ selected, dirty, focusItem, onSelect }: ServiceListProps) {
-  const list = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (!focusItem) return;
-    list.current
-      ?.querySelector<HTMLButtonElement>(`[data-item="${CSS.escape(focusItem)}"]`)
-      ?.focus();
-  }, [focusItem]);
-
+export function ServiceList({ selected, dirty, onSelect }: ServiceListProps) {
   return (
-    <nav ref={list} className={styles.list} aria-label="Services">
+    <nav className={styles.list} aria-label="Services">
       {SERVICE_LIST.map((group) => (
         <div key={group.category} className={styles.group}>
           <h3 className={styles.groupTitle}>{group.name}</h3>
