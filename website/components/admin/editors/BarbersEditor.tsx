@@ -6,9 +6,8 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { dragOffsets, dragTargetIndex } from "@/lib/admin/drag-reorder";
 import { addBarber, moveBarber, removeBarber } from "@/lib/admin/draft-ops";
 import { newId } from "@/lib/admin/uuid";
-import { normalizePrice, normalizeWhatsApp } from "@/lib/content/normalize";
+import { normalizeWhatsApp } from "@/lib/content/normalize";
 import type { Barber } from "@/lib/content/schema";
-import { CUT_COLUMNS } from "@/lib/content/structure";
 import { BarberEditor } from "./BarberEditor";
 import type { EditorProps } from "./types";
 import shared from "./Editor.module.css";
@@ -197,7 +196,7 @@ interface AddBarberFormProps {
   onCancel: () => void;
 }
 
-type AddField = "name" | "days" | "whatsApp" | "price0" | "price1" | "price2";
+type AddField = "name" | "days" | "whatsApp";
 type AddErrors = Partial<Record<AddField, string>>;
 
 /** Inline form for a new barber. Nothing reaches the draft until every field is valid. */
@@ -206,9 +205,6 @@ function AddBarberForm({ existingNames, onAdd, onCancel }: AddBarberFormProps) {
     name: "",
     days: "",
     whatsApp: "",
-    price0: "",
-    price1: "",
-    price2: "",
   });
   const [errors, setErrors] = useState<AddErrors>({});
 
@@ -220,7 +216,6 @@ function AddBarberForm({ existingNames, onAdd, onCancel }: AddBarberFormProps) {
     const name = values.name.trim();
     const days = values.days.trim();
     const whatsApp = normalizeWhatsApp(values.whatsApp);
-    const prices = [values.price0, values.price1, values.price2].map(normalizePrice);
 
     if (!name) next.name = "Required";
     else if (existingNames.some((n) => n.trim().toLowerCase() === name.toLowerCase())) {
@@ -228,14 +223,10 @@ function AddBarberForm({ existingNames, onAdd, onCancel }: AddBarberFormProps) {
     }
     if (!days) next.days = "Required";
     if (!whatsApp) next.whatsApp = "Enter a phone number like 07789 096148.";
-    prices.forEach((price, i) => {
-      if (!price) next[`price${i}` as AddField] = "Use a price like £80 or £30 – £40.";
-    });
 
     setErrors(next);
-    const [p0, p1, p2] = prices;
-    if (Object.keys(next).length > 0 || !whatsApp || !p0 || !p1 || !p2) return;
-    onAdd({ name, days, whatsApp, cutPrices: [p0, p1, p2] });
+    if (Object.keys(next).length > 0 || !whatsApp) return;
+    onAdd({ name, days, whatsApp });
   }
 
   return (
@@ -256,21 +247,12 @@ function AddBarberForm({ existingNames, onAdd, onCancel }: AddBarberFormProps) {
         error={errors.whatsApp}
         type="tel"
       />
-      <div className={shared.row}>
-        {CUT_COLUMNS.map((col, i) => {
-          const field = `price${i}` as AddField;
-          return (
-            <AddInput
-              key={col}
-              label={col}
-              value={values[field]}
-              onChange={set(field)}
-              error={errors[field]}
-              placeholder="£40"
-            />
-          );
-        })}
-      </div>
+      {existingNames.length > 0 ? (
+        <p className={shared.note}>
+          They start with {existingNames[0]}&apos;s prices on every service priced by barber. Change
+          them in Services.
+        </p>
+      ) : null}
       <div className={styles.formActions}>
         <button type="button" className={`admin-button ${shared.secondary}`} onClick={onCancel}>
           Cancel

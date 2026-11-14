@@ -23,6 +23,11 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
 }
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 .replace {
   width: 100%;
 }
@@ -45,6 +50,11 @@
 }
 
 @media (min-width: 820px) {
+  .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
   .replace {
     width: auto;
   }

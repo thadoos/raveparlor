@@ -1,0 +1,74 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Each option is a chip, top to bottom in column order: its label, editable in place, then
+   move and remove. */
+.chip {
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 0 4px 0 16px;
+  background: var(--color-offwhite);
+}
+.label {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 6px;
+}
+.input {
+  margin-top: 0;
+}
+.iconButton {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+.iconButton:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.add {
+  display: flex;
+  flex-direction: column;
+}
+.addRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 16px;
+}
+.addRow .input {
+  flex: 1 1 160px;
+  width: auto;
+}
+.addRow button {
+  flex: 1 1 auto;
+}
+
+@media (min-width: 820px) {
+  .list,
+  .add {
+    max-width: 480px;
+  }
+  .addRow button {
+    flex: 0 0 auto;
+  }
+}

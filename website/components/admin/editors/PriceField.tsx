@@ -9,12 +9,14 @@ interface PriceFieldProps {
   label: string;
   value: string;
   onChange: (price: string) => void;
+  /** Keeps the label for screen readers only, e.g. in a grid whose headers already show it. */
+  hideLabel?: boolean;
 }
 
 const INVALID = "Use a price like £80, £30 – £40 or £100+, or – for none.";
 
 /** A price, normalized to "£80" / "£30 – £40" on blur. Invalid text never reaches the draft. */
-export function PriceField({ label, value, onChange }: PriceFieldProps) {
+export function PriceField({ label, value, onChange, hideLabel }: PriceFieldProps) {
   const id = useId();
   const field = useNormalizedField({
     value,
@@ -24,7 +26,7 @@ export function PriceField({ label, value, onChange }: PriceFieldProps) {
   });
   return (
     <div className={styles.field}>
-      <label className="admin-label" htmlFor={id}>
+      <label className={hideLabel ? styles.visuallyHidden : "admin-label"} htmlFor={id}>
         {label}
       </label>
       <input

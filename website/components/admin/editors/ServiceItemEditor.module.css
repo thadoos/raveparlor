@@ -1,8 +1,6 @@
-.perBarber {
+.prices,
+.photos {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px 16px;
-  padding: 14px 16px;
-  background: var(--color-offwhite);
+  flex-direction: column;
+  gap: 16px;
 }

@@ -8,12 +8,13 @@ import { CategoryIntroEditor } from "./CategoryIntroEditor";
 import { ChemicalNoteEditor } from "./ChemicalNoteEditor";
 import { HoursEditor } from "./HoursEditor";
 import { ImageSlotEditor } from "./ImageSlotEditor";
+import { ItemPhotosEditor } from "./ItemPhotosEditor";
 import { ServiceItemEditor } from "./ServiceItemEditor";
 import type { EditorProps } from "./types";
 
 interface EditorForProps extends EditorProps {
   target: EditTarget;
-  /** Lets an editor open another one (e.g. a cut price's "Edit barbers"). */
+  /** Lets an editor open another one (e.g. a service's link to Barbers). */
   onOpenTarget?: (target: EditTarget) => void;
 }
 
@@ -32,6 +33,16 @@ export function EditorFor({ target, draft, apply, onOpenTarget }: EditorForProps
           category={target.category}
           item={target.item}
           onOpenTarget={onOpenTarget}
+        />
+      );
+    case "itemPhoto":
+      return (
+        <ItemPhotosEditor
+          draft={draft}
+          apply={apply}
+          category={target.category}
+          item={target.item}
+          index={target.index}
         />
       );
     case "intro":

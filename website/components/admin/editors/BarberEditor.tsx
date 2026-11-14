@@ -1,9 +1,7 @@
 "use client";
 
 import { updateBarber } from "@/lib/admin/draft-ops";
-import { CUT_COLUMNS } from "@/lib/content/structure";
 import { PhoneField } from "./PhoneField";
-import { PriceField } from "./PriceField";
 import { TextField } from "./TextField";
 import type { EditorProps } from "./types";
 import styles from "./Editor.module.css";
@@ -12,7 +10,7 @@ interface BarberEditorProps extends EditorProps {
   id: string;
 }
 
-/** One barber's name, working days, WhatsApp number and cut prices. */
+/** One barber's name, working days and WhatsApp number. Their prices live on each service. */
 export function BarberEditor({ draft, apply, id }: BarberEditorProps) {
   const barber = draft.barbers.find((b) => b.id === id);
   if (!barber) return <p className={styles.note}>This barber has been removed.</p>;
@@ -44,24 +42,6 @@ export function BarberEditor({ draft, apply, id }: BarberEditorProps) {
         onChange={(whatsApp) => patch({ whatsApp })}
         hint="Booking messages for this barber go here."
       />
-      <div className={styles.row}>
-        {CUT_COLUMNS.map((col, index) => (
-          <PriceField
-            key={col}
-            label={col}
-            value={barber.cutPrices[index]}
-            onChange={(price) =>
-              apply((c) => {
-                const current = c.barbers.find((b) => b.id === id);
-                if (!current) return c;
-                const cutPrices: [string, string, string] = [...current.cutPrices];
-                cutPrices[index] = price;
-                return updateBarber(c, id, { cutPrices });
-              })
-            }
-          />
-        ))}
-      </div>
     </div>
   );
 }
