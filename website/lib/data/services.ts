@@ -71,13 +71,17 @@ export function cutLabel(cols: readonly string[], index: number): string {
   return cols.join("|") === "Short|Medium|Long" ? `${cols[index]} length` : cols[index];
 }
 
-/** The amount in pounds of a price string such as "£80" or "£100 – £220+" (its first number). */
-function priceAmount(value: string): number {
-  return parseInt(value.replace(/[^\d]/g, ""), 10);
+/**
+ * The amount in pounds of a price string such as "£80" or "£100 – £220+" (its first £ amount);
+ * null when it has none.
+ */
+function priceAmount(value: string): number | null {
+  const match = /£(\d+)/.exec(value);
+  return match ? parseInt(match[1], 10) : null;
 }
 
-function fromAmount(item: MenuItem): number {
-  return priceAmount(item.from);
+function isAmount(amount: number | null): amount is number {
+  return amount !== null;
 }
 
 /** Lowest price in a column across the rows, in pounds; null when no row has a price there. */
@@ -85,7 +89,8 @@ export function minPriceForColumn(item: MenuItem, col: number): number | null {
   const amounts = item.rows
     .map((row) => row.prices[col])
     .filter(isPrice)
-    .map(priceAmount);
+    .map(priceAmount)
+    .filter(isAmount);
   return amounts.length > 0 ? Math.min(...amounts) : null;
 }
 
@@ -104,7 +109,7 @@ export interface CategoryStats {
 export function categoryStats(category: MenuCategory): CategoryStats {
   return {
     count: category.items.length,
-    from: Math.min(...category.items.map(fromAmount)),
+    from: Math.min(...category.items.map((item) => priceAmount(item.from)).filter(isAmount)),
   };
 }
 

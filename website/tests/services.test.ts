@@ -132,6 +132,27 @@ describe("minPriceForColumn", () => {
     expect(minPriceForColumn(item("colour", "Root Retouching"), 1)).toBeNull();
     expect(minPriceForColumn(item("cut", "Cutting & Finishing"), 5)).toBeNull();
   });
+
+  function rangeItem(cells: string[]): MenuItem {
+    return {
+      ...item("cut", "Cutting & Finishing"),
+      rows: cells.map((price, i) => ({
+        label: `B${i}`,
+        sub: "",
+        prices: [price],
+        barberId: `b${i}`,
+      })),
+    };
+  }
+
+  it("uses the first amount of range prices", () =>
+    expect(minPriceForColumn(rangeItem(["£50 – £80", "£45 – £90", "£60 – £70"]), 0)).toBe(45));
+
+  it("compares range and plain prices by their first amount", () =>
+    expect(minPriceForColumn(rangeItem(["£100 – £220+", "£55", "£60 – £65"]), 0)).toBe(55));
+
+  it("ignores cells that are not offered", () =>
+    expect(minPriceForColumn(rangeItem(["–", "£70 – £90", "-"]), 0)).toBe(70));
 });
 
 describe("adjacentCategory", () => {
