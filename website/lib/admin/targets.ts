@@ -14,7 +14,12 @@ function isSlot(value: string): value is ImageSlot {
   return (IMAGE_SLOTS as readonly string[]).includes(value);
 }
 
-/** The inverse of targetKey. Unknown kinds, categories, items and slots give null. */
+/** Whether `item` is one of the category's services (as MENU_STRUCTURE lists them). */
+function isItem(category: string, item: string): category is CategoryKey {
+  return isCategory(category) && MENU_STRUCTURE[category].items.some((i) => i.key === item);
+}
+
+/** The inverse of targetKey. Unknown kinds, categories, items, slots and photo indices give null. */
 export function parseTargetKey(key: string): EditTarget | null {
   const colon = key.indexOf(":");
   const kind = colon === -1 ? key : key.slice(0, colon);
@@ -33,14 +38,16 @@ export function parseTargetKey(key: string): EditTarget | null {
     case "image":
       return rest !== null && isSlot(rest) ? { kind, slot: rest } : null;
     case "item": {
-      if (rest === null) return null;
-      const dot = rest.indexOf(".");
-      if (dot === -1) return null;
-      const category = rest.slice(0, dot);
-      const item = rest.slice(dot + 1);
-      if (!isCategory(category)) return null;
-      if (!MENU_STRUCTURE[category].items.some((i) => i.key === item)) return null;
-      return { kind, category, item };
+      const parts = rest?.split(".");
+      if (parts?.length !== 2 || !isItem(parts[0], parts[1])) return null;
+      return { kind, category: parts[0], item: parts[1] };
+    }
+    case "itemPhoto": {
+      const parts = rest?.split(".");
+      if (parts?.length !== 3 || !isItem(parts[0], parts[1])) return null;
+      const index = parts[2] === "0" ? 0 : parts[2] === "1" ? 1 : null;
+      if (index === null) return null;
+      return { kind, category: parts[0], item: parts[1], index };
     }
     default:
       return null;
@@ -55,19 +62,6 @@ export const IMAGE_GROUPS: readonly { title: string; slots: readonly ImageSlot[]
     slots: ["overview.cut", "overview.colour", "overview.perm", "overview.treat"],
   },
   { title: "Service photos", slots: ["media.cut", "media.colour", "media.perm", "media.treat"] },
-  {
-    title: "Service dialog photos",
-    slots: [
-      "dialog.cut.0",
-      "dialog.cut.1",
-      "dialog.colour.0",
-      "dialog.colour.1",
-      "dialog.perm.0",
-      "dialog.perm.1",
-      "dialog.treat.0",
-      "dialog.treat.1",
-    ],
-  },
   { title: "Price poster", slots: ["priceList"] },
 ];
 
@@ -82,11 +76,13 @@ const FIXED_SLOT_LABELS: Partial<Record<ImageSlot, string>> = {
 export function imageSlotLabel(slot: ImageSlot): string {
   const fixed = FIXED_SLOT_LABELS[slot];
   if (fixed) return fixed;
-  const [group, category, index] = slot.split(".");
+  const [group, category] = slot.split(".");
   const name = isCategory(category) ? MENU_STRUCTURE[category].name : category;
-  if (group === "overview") return `${name} overview`;
-  if (group === "media") return `${name} photo`;
-  return `${name} dialog photo ${Number(index) + 1}`;
+  return group === "overview" ? `${name} overview` : `${name} photo`;
+}
+
+function itemName(category: CategoryKey, item: string): string {
+  return MENU_STRUCTURE[category].items.find((i) => i.key === item)?.name ?? "Service";
 }
 
 /** A human title for the editor header. */
@@ -97,7 +93,9 @@ export function targetLabel(t: EditTarget, content: SiteContent): string {
     case "barber":
       return content.barbers.find((b) => b.id === t.id)?.name ?? "Barber";
     case "item":
-      return MENU_STRUCTURE[t.category].items.find((i) => i.key === t.item)?.name ?? "Service";
+      return itemName(t.category, t.item);
+    case "itemPhoto":
+      return `${itemName(t.category, t.item)} photo ${t.index + 1}`;
     case "intro":
       return `${MENU_STRUCTURE[t.category].name} intro`;
     case "hours":

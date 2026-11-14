@@ -1,3 +1,4 @@
+import { contentImagePaths } from "@/lib/content/schema";
 import type { SiteContent } from "@/lib/content/schema";
 
 /** A storage object as the cleanup sees it. `createdAt` is the ISO timestamp Storage reports. */
@@ -27,8 +28,9 @@ export function findOrphans(
 ): string[] {
   const used = new Set<string>();
   for (const content of referenced) {
-    for (const ref of Object.values(content.images)) {
-      if (!ref.path.startsWith("/")) used.add(ref.path);
+    // Site slots and every service's photos: a path missed here would be deleted while in use.
+    for (const path of contentImagePaths(content)) {
+      if (!path.startsWith("/")) used.add(path);
     }
   }
   const cutoff = now.getTime() - minAgeMs;

@@ -10,13 +10,15 @@ export type EditTarget =
   | { kind: "barbers" }
   | { kind: "barber"; id: string }
   | { kind: "item"; category: CategoryKey; item: string }
+  | { kind: "itemPhoto"; category: CategoryKey; item: string; index: 0 | 1 }
   | { kind: "intro"; category: CategoryKey }
   | { kind: "hours" }
   | { kind: "business" }
   | { kind: "chemicalNote" }
   | { kind: "image"; slot: ImageSlot };
 
-/** A stable string for a target, e.g. "item:colour.roots", "image:heroLeft" or "barber:<id>". */
+/** A stable string for a target, e.g. "item:colour.roots", "itemPhoto:cut.cutting.1",
+ *  "image:heroLeft" or "barber:<id>". */
 export function targetKey(t: EditTarget): string {
   switch (t.kind) {
     case "barbers":
@@ -28,6 +30,8 @@ export function targetKey(t: EditTarget): string {
       return `barber:${t.id}`;
     case "item":
       return `item:${t.category}.${t.item}`;
+    case "itemPhoto":
+      return `itemPhoto:${t.category}.${t.item}.${t.index}`;
     case "intro":
       return `intro:${t.category}`;
     case "image":

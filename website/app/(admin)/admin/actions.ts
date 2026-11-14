@@ -117,7 +117,8 @@ async function readContent(
   return result.content;
 }
 
-/** Validates, then writes the draft row. Invalid content never reaches the database. */
+/** Validates, then writes the draft row. Invalid content never reaches the database. Always writes
+ *  version 2: parseSiteContent migrates version 1 input, and the migrated result is what's stored. */
 async function writeDraft(supabase: SupabaseClient, content: unknown): Promise<ActionResult> {
   const result = parseSiteContent(content);
   if (!result.ok) return { ok: false, error: result.issues.join("; ") };
@@ -174,6 +175,8 @@ async function readRecentVersions(supabase: SupabaseClient): Promise<SiteContent
     .limit(KEPT_VERSIONS);
   if (error) throw new Error(`Failed to load content versions: ${error.message}`);
   return data.map((row, index) => {
+    // Versions published before v2 are still version 1; parseSiteContent migrates them, so their
+    // service photos (the old dialog slots) stay referenced.
     const result = parseSiteContent(row.content);
     // Unknown references would make every photo look unused: stop rather than guess.
     if (!result.ok) throw new Error(`Version ${index} is invalid:\n${result.issues.join("\n")}`);

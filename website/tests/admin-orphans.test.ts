@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MIN_ORPHAN_AGE_MS, findOrphans } from "@/lib/admin/orphans";
-import { setImage } from "@/lib/admin/draft-ops";
+import { setImage, setItemPhoto } from "@/lib/admin/draft-ops";
 import { DEFAULT_CONTENT } from "@/lib/content/defaults";
 
 const ref = (path: string) => ({ path, alt: "", width: 10, height: 10 });
@@ -21,6 +21,14 @@ describe("findOrphans", () => {
         { now: NOW },
       ),
     ).toEqual(["heroLeft/b.webp"]);
+  });
+
+  it("never returns a photo referenced only by a service item", () => {
+    const path = "item.cut.cutting/0e4c3f85-6d71-4f40-8d9e-4a5b6c7d8e94.webp";
+    const draft = setItemPhoto(DEFAULT_CONTENT, "cut", "cutting", 1, ref(path));
+    expect(
+      findOrphans([obj(path), obj("item.cut.cutting/old.webp")], [draft], { now: NOW }),
+    ).toEqual(["item.cut.cutting/old.webp"]);
   });
 
   it("keeps unreferenced objects younger than the minimum age", () => {
@@ -50,9 +58,9 @@ describe("findOrphans", () => {
   });
 
   it("does not let bundled /images paths protect anything", () => {
-    expect(findOrphans([obj("images/parlor-reception.jpg")], [DEFAULT_CONTENT], { now: NOW })).toEqual(
-      ["images/parlor-reception.jpg"],
-    );
+    expect(
+      findOrphans([obj("images/parlor-reception.jpg")], [DEFAULT_CONTENT], { now: NOW }),
+    ).toEqual(["images/parlor-reception.jpg"]);
   });
 
   it("handles an empty bucket", () => {

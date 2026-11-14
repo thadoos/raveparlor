@@ -1,6 +1,6 @@
 import { CATEGORY_KEYS, IMAGE_SLOTS } from "@/lib/content/schema";
-import type { Barber, SiteContent } from "@/lib/content/schema";
-import { CUT_COLUMNS, MENU_STRUCTURE } from "@/lib/content/structure";
+import type { Barber, CategoryKey, ImageRef, ItemContent, SiteContent } from "@/lib/content/schema";
+import { MENU_STRUCTURE } from "@/lib/content/structure";
 
 /** Structural equality for JSON-like values. Ignores object key order (jsonb reorders keys). */
 export function deepEqual(a: unknown, b: unknown): boolean {
@@ -15,6 +15,11 @@ export function deepEqual(a: unknown, b: unknown): boolean {
   const keys = Object.keys(aRecord);
   if (keys.length !== Object.keys(bRecord).length) return false;
   return keys.every((key) => Object.hasOwn(bRecord, key) && deepEqual(aRecord[key], bRecord[key]));
+}
+
+function itemOf(c: SiteContent, category: CategoryKey, key: string): ItemContent | undefined {
+  const items = c.services[category].items;
+  return Object.hasOwn(items, key) ? items[key] : undefined;
 }
 
 function byId(barbers: readonly Barber[]): Map<string, Barber> {
@@ -42,25 +47,49 @@ function barberLines(published: SiteContent, draft: SiteContent): string[] {
   return lines;
 }
 
+/** Cell keys of an item: its folded option labels, or one unnamed cell when it has none. */
+function cellKeys(item: ItemContent): string[] {
+  return item.options.length === 0 ? [""] : item.options.map((o) => o.trim().toLowerCase());
+}
+
+/** The price a barber pays for cell `index`: their own row when priced by barber, else the base. */
+function effectiveCell(item: ItemContent, barberId: string | null, index: number) {
+  if (!item.byBarber || barberId === null) return item.prices.base?.[index];
+  const rows = item.prices.barbers;
+  return rows && Object.hasOwn(rows, barberId) ? rows[barberId][index] : undefined;
+}
+
+/**
+ * Whether any price someone could book changed: per barber kept on both sides (or the one base row
+ * when neither side is priced by barber) and per option on both sides, matched by label. Prices
+ * that only moved with their option, or came and went with a barber or option, don't count: the
+ * option and barber lines already report those.
+ */
+function itemPricesChanged(old: ItemContent, now: ItemContent, keptIds: readonly string[]) {
+  const ids: (string | null)[] = old.byBarber || now.byBarber ? [...keptIds] : [null];
+  const oldKeys = cellKeys(old);
+  return cellKeys(now).some((key, index) => {
+    const oldIndex = oldKeys.indexOf(key);
+    if (oldIndex === -1) return false;
+    return ids.some((id) => effectiveCell(old, id, oldIndex) !== effectiveCell(now, id, index));
+  });
+}
+
+/** Per service: options, the barber axis and prices. */
 function priceLines(published: SiteContent, draft: SiteContent): string[] {
   const lines: string[] = [];
-  const before = byId(published.barbers);
-  for (const b of draft.barbers) {
-    const old = before.get(b.id);
-    if (!old) continue;
-    CUT_COLUMNS.forEach((column, i) => {
-      if (old.cutPrices[i] !== b.cutPrices[i]) {
-        lines.push(`${b.name}: ${column} ${old.cutPrices[i]} → ${b.cutPrices[i]}`);
-      }
-    });
-  }
+  const after = byId(draft.barbers);
+  const keptIds = published.barbers.filter((b) => after.has(b.id)).map((b) => b.id);
   for (const category of CATEGORY_KEYS) {
     for (const item of MENU_STRUCTURE[category].items) {
-      const old = published.services[category].items[item.key];
-      const now = draft.services[category].items[item.key];
-      if (!deepEqual(old?.prices, now?.prices) || old?.range !== now?.range) {
-        lines.push(`${item.name}: prices changed`);
+      const old = itemOf(published, category, item.key);
+      const now = itemOf(draft, category, item.key);
+      if (!old || !now) continue;
+      if (!deepEqual(old.options, now.options)) lines.push(`${item.name}: options changed`);
+      if (old.byBarber !== now.byBarber) {
+        lines.push(`${item.name}: barber option turned ${now.byBarber ? "on" : "off"}`);
       }
+      if (itemPricesChanged(old, now, keptIds)) lines.push(`${item.name}: prices changed`);
     }
   }
   return lines;
@@ -74,8 +103,8 @@ function copyLines(published: SiteContent, draft: SiteContent): string[] {
     const now = draft.services[category];
     if (!deepEqual(old.intro, now.intro)) lines.push(`${structure.name}: intro text changed`);
     for (const item of structure.items) {
-      const a = old.items[item.key];
-      const b = now.items[item.key];
+      const a = itemOf(published, category, item.key);
+      const b = itemOf(draft, category, item.key);
       if (a?.desc !== b?.desc || a?.ideal !== b?.ideal || a?.note !== b?.note) {
         lines.push(`${item.name}: text changed`);
       }
@@ -86,20 +115,51 @@ function copyLines(published: SiteContent, draft: SiteContent): string[] {
   return lines;
 }
 
+/** Identifies an image file: same key means the same picture, whatever its alt text. */
+function fileKey(ref: ImageRef): string {
+  return `${ref.path}|${ref.width}|${ref.height}`;
+}
+
+/**
+ * A service's photo changes. Count changes are adds and removes; a new file beyond what an add
+ * explains is a replacement. Alt text is compared for files on both sides.
+ */
+function itemPhotoLines(name: string, old: ItemContent, now: ItemContent): string[] {
+  const lines: string[] = [];
+  const oldByFile = new Map(old.photos.map((photo) => [fileKey(photo), photo]));
+  const newFiles = now.photos.filter((photo) => !oldByFile.has(fileKey(photo))).length;
+  const added = Math.max(0, now.photos.length - old.photos.length);
+  if (newFiles > added) lines.push(`${name}: photo replaced`);
+  if (now.photos.length > old.photos.length) lines.push(`${name}: photo added`);
+  if (now.photos.length < old.photos.length) lines.push(`${name}: photo removed`);
+  const altChanged = now.photos.some((photo) => {
+    const before = oldByFile.get(fileKey(photo));
+    return before !== undefined && before.alt !== photo.alt;
+  });
+  if (altChanged) lines.push(`${name}: photo alt text changed`);
+  return lines;
+}
+
 function imageLines(published: SiteContent, draft: SiteContent): string[] {
   const lines: string[] = [];
   for (const slot of IMAGE_SLOTS) {
     const old = published.images[slot];
     const now = draft.images[slot];
-    if (old.path !== now.path || old.width !== now.width || old.height !== now.height) {
-      lines.push(`Photo replaced: ${slot}`);
-    }
+    if (fileKey(old) !== fileKey(now)) lines.push(`Photo replaced: ${slot}`);
     if (old.alt !== now.alt) lines.push(`Alt text changed: ${slot}`);
+  }
+  for (const category of CATEGORY_KEYS) {
+    for (const item of MENU_STRUCTURE[category].items) {
+      const old = itemOf(published, category, item.key);
+      const now = itemOf(draft, category, item.key);
+      if (old && now) lines.push(...itemPhotoLines(item.name, old, now));
+    }
   }
   return lines;
 }
 
-/** Human-readable changes from `published` to `draft`: barbers, prices, copy, hours, number, images. */
+/** Human-readable changes from `published` to `draft`: barbers, options and prices, copy, hours,
+ *  number, images (site slots, then service photos). */
 export function summarizeChanges(published: SiteContent, draft: SiteContent): string[] {
   return [
     ...barberLines(published, draft),

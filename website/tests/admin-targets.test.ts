@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseTargetKey, targetKey, targetLabel } from "@/lib/admin/targets";
+import { IMAGE_GROUPS, parseTargetKey, targetKey, targetLabel } from "@/lib/admin/targets";
 import type { EditTarget } from "@/lib/admin/targets";
 import { DEFAULT_CONTENT } from "@/lib/content/defaults";
 import { CATEGORY_KEYS, IMAGE_SLOTS } from "@/lib/content/schema";
@@ -15,6 +15,14 @@ const ALL_TARGETS: EditTarget[] = [
       category,
       item: item.key,
     })),
+    ...MENU_STRUCTURE[category].items.flatMap((item) =>
+      ([0, 1] as const).map((index): EditTarget => ({
+        kind: "itemPhoto",
+        category,
+        item: item.key,
+        index,
+      })),
+    ),
   ]),
   { kind: "hours" },
   { kind: "business" },
@@ -35,6 +43,9 @@ describe("edit targets", () => {
     );
     expect(targetKey({ kind: "image", slot: "heroLeft" })).toBe("image:heroLeft");
     expect(targetKey({ kind: "barber", id: "abc" })).toBe("barber:abc");
+    expect(targetKey({ kind: "itemPhoto", category: "cut", item: "cutting", index: 1 })).toBe(
+      "itemPhoto:cut.cutting.1",
+    );
   });
 
   it("rejects unknown kinds, categories, items and slots", () => {
@@ -45,6 +56,12 @@ describe("edit targets", () => {
     expect(parseTargetKey("bogus")).toBeNull();
     expect(parseTargetKey("barber:")).toBeNull();
     expect(parseTargetKey("hours:extra")).toBeNull();
+    expect(parseTargetKey("itemPhoto:cut.cutting.2")).toBeNull();
+    expect(parseTargetKey("itemPhoto:cut.cutting.01")).toBeNull();
+    expect(parseTargetKey("itemPhoto:cut.cutting")).toBeNull();
+    expect(parseTargetKey("itemPhoto:cut.nope.0")).toBeNull();
+    expect(parseTargetKey("itemPhoto:nope.cutting.0")).toBeNull();
+    expect(parseTargetKey("itemPhoto:cut.cutting.0.0")).toBeNull();
   });
 
   it("labels targets for the editor header", () => {
@@ -54,5 +71,14 @@ describe("edit targets", () => {
     const [first] = DEFAULT_CONTENT.barbers;
     expect(targetLabel({ kind: "barber", id: first.id }, DEFAULT_CONTENT)).toBe(first.name);
     expect(targetLabel({ kind: "hours" }, DEFAULT_CONTENT)).toBe("Opening hours");
+    expect(
+      targetLabel({ kind: "itemPhoto", category: "cut", item: "updo", index: 1 }, DEFAULT_CONTENT),
+    ).toBe("Up-do Hairdressing photo 2");
+  });
+
+  it("groups every image slot exactly once", () => {
+    const slots = IMAGE_GROUPS.flatMap((group) => group.slots);
+    expect([...slots].sort()).toEqual([...IMAGE_SLOTS].sort());
+    expect(IMAGE_GROUPS.map((group) => group.title)).not.toContain("Service dialog photos");
   });
 });

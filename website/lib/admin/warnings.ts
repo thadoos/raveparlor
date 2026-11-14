@@ -17,21 +17,18 @@ const ITEM_FIELDS = [
   ["note", "note"],
 ] as const;
 
-/** The prices the poster shows: every barber's cut prices (adding or removing one counts) and every item price. */
+/** What the poster shows: every service's options and price rows. A barber added or removed counts,
+ *  since it adds or removes rows. */
 function pricesChanged(published: SiteContent, draft: SiteContent): boolean {
-  const barberPrices = (c: SiteContent) =>
-    Object.fromEntries(c.barbers.map((b) => [b.id, b.cutPrices] as const));
-  const itemPrices = (c: SiteContent) =>
+  const pricing = (c: SiteContent) =>
     CATEGORY_KEYS.map((category) =>
       MENU_STRUCTURE[category].items.map(({ key }) => {
-        const item = c.services[category].items[key];
-        return { prices: item?.prices, range: item?.range };
+        const items = c.services[category].items;
+        const item = Object.hasOwn(items, key) ? items[key] : undefined;
+        return { options: item?.options, prices: item?.prices };
       }),
     );
-  return (
-    !deepEqual(barberPrices(published), barberPrices(draft)) ||
-    !deepEqual(itemPrices(published), itemPrices(draft))
-  );
+  return !deepEqual(pricing(published), pricing(draft));
 }
 
 function escapeRegExp(text: string): string {
