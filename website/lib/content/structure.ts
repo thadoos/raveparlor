@@ -1,74 +1,133 @@
 // Type-only imports: schema.ts imports checkStructure from here at runtime.
-import type { CategoryKey, ImageSlot, SiteContent } from "@/lib/content/schema";
+import type { CategoryKey, ImageSlot, ItemContent, SiteContent } from "@/lib/content/schema";
 
-/** Fixed shape of the menu: which items exist, in what order, and how their prices are laid out. */
+/** Fixed shape of the menu: which items exist, in what order, and their fixed flags. Options, the
+ *  barber axis and prices are content (see ItemContent). */
 
 export interface ItemStructure {
   key: string;
   name: string;
-  kind: "barberTable" | "table" | "range";
-  cols?: readonly string[];
   single?: boolean;
   chemicalNote?: boolean;
 }
 
 export interface CategoryStructure {
   name: string;
-  barbers: boolean;
   items: readonly ItemStructure[];
 }
 
-export const CUT_COLUMNS = ["Gentleman", "Ladies", "Under 12s"] as const;
-
-const LENGTHS = ["Short", "Medium", "Long"] as const;
+/** Hair length options used by the colour and perm price tables. */
+export const LENGTHS = ["Short", "Medium", "Long"] as const;
 
 export const MENU_STRUCTURE: Record<CategoryKey, CategoryStructure> = {
   cut: {
     name: "Cut & Style",
-    barbers: true,
     items: [
-      { key: "cutting", name: "Cutting & Finishing", kind: "barberTable", cols: CUT_COLUMNS },
-      { key: "cleansing", name: "Cleansing & Styling", kind: "range" },
-      { key: "updo", name: "Up-do Hairdressing", kind: "range" },
+      { key: "cutting", name: "Cutting & Finishing" },
+      { key: "cleansing", name: "Cleansing & Styling" },
+      { key: "updo", name: "Up-do Hairdressing" },
     ],
   },
   colour: {
     name: "Colour & Highlights",
-    barbers: false,
     items: [
-      { key: "roots", name: "Root Retouching", kind: "table", cols: LENGTHS, chemicalNote: true },
-      { key: "fullColour", name: "Full Head Colour", kind: "table", cols: LENGTHS, chemicalNote: true },
-      { key: "halfHighlights", name: "Half Head Highlights", kind: "table", cols: LENGTHS, chemicalNote: true },
-      { key: "fullHighlights", name: "Full Head Highlights", kind: "table", cols: LENGTHS, chemicalNote: true },
-      { key: "technicalHighlight", name: "Technical Highlight", kind: "range", chemicalNote: true },
-      { key: "bleach", name: "Full Head Bleach", kind: "range", chemicalNote: true },
+      { key: "roots", name: "Root Retouching", chemicalNote: true },
+      { key: "fullColour", name: "Full Head Colour", chemicalNote: true },
+      { key: "halfHighlights", name: "Half Head Highlights", chemicalNote: true },
+      { key: "fullHighlights", name: "Full Head Highlights", chemicalNote: true },
+      { key: "technicalHighlight", name: "Technical Highlight", chemicalNote: true },
+      { key: "bleach", name: "Full Head Bleach", chemicalNote: true },
     ],
   },
   perm: {
     name: "Perm & Straightening",
-    barbers: false,
     items: [
-      { key: "coolPerm", name: "Technical Perm (Cool Perm)", kind: "table", cols: LENGTHS, chemicalNote: true },
-      { key: "halfPerm", name: "Half-Head Perm on Top", kind: "table", cols: ["Short"], chemicalNote: true },
-      { key: "ionStraightening", name: "Ion Straightening", kind: "table", cols: LENGTHS, chemicalNote: true },
+      { key: "coolPerm", name: "Technical Perm (Cool Perm)", chemicalNote: true },
+      { key: "halfPerm", name: "Half-Head Perm on Top", chemicalNote: true },
+      { key: "ionStraightening", name: "Ion Straightening", chemicalNote: true },
     ],
   },
   treat: {
     name: "Treatments",
-    barbers: false,
     items: [
-      { key: "olaplex", name: "Olaplex No.1 & No.2", kind: "range", single: true },
-      { key: "scalpSpa", name: "Kérastase Scalp Relax Spa & Serum", kind: "range", single: true },
+      { key: "olaplex", name: "Olaplex No.1 & No.2", single: true },
+      { key: "scalpSpa", name: "Kérastase Scalp Relax Spa & Serum", single: true },
     ],
   },
 };
 
+const NOT_OFFERED = "–";
+
+function plural(n: number): string {
+  return `${n} price${n === 1 ? "" : "s"}`;
+}
+
+/** Issues with one item's options, price shape and photos. `path` is the item's path. */
+function checkItem(item: ItemContent, barberIds: readonly string[], path: string): string[] {
+  const issues: string[] = [];
+
+  const labels = item.options.map((o) => o.trim().toLowerCase());
+  item.options.forEach((option, i) => {
+    if (labels[i] === "") issues.push(`${path}.options.${i}: Option label is required`);
+    else if (labels.indexOf(labels[i]) !== i)
+      issues.push(`${path}.options.${i}: Duplicate option "${option}"`);
+  });
+
+  const width = Math.max(1, item.options.length);
+  const checkRow = (row: readonly string[], rowPath: string) => {
+    if (row.length !== width)
+      issues.push(`${rowPath}: Expected ${plural(width)}, got ${row.length}`);
+  };
+  const { base, barbers } = item.prices;
+  const cells: string[] = [];
+  if (item.byBarber) {
+    if (base !== undefined)
+      issues.push(`${path}.prices.base: Not allowed when prices depend on the barber`);
+    if (barbers === undefined) {
+      issues.push(`${path}.prices.barbers: Required when prices depend on the barber`);
+    } else {
+      for (const id of barberIds) {
+        const row = Object.hasOwn(barbers, id) ? barbers[id] : undefined;
+        if (row === undefined)
+          issues.push(`${path}.prices.barbers.${id}: Missing prices for this barber`);
+        else {
+          checkRow(row, `${path}.prices.barbers.${id}`);
+          cells.push(...row);
+        }
+      }
+      for (const id of Object.keys(barbers)) {
+        if (!barberIds.includes(id)) issues.push(`${path}.prices.barbers.${id}: Unknown barber`);
+      }
+    }
+  } else {
+    if (barbers !== undefined) {
+      issues.push(`${path}.prices.barbers: Not allowed when prices don't depend on the barber`);
+    }
+    if (base === undefined) issues.push(`${path}.prices.base: Required`);
+    else {
+      checkRow(base, `${path}.prices.base`);
+      cells.push(...base);
+    }
+  }
+  if (cells.length > 0 && cells.every((cell) => cell === NOT_OFFERED)) {
+    issues.push(`${path}.prices: At least one price is required`);
+  }
+
+  const photos: readonly unknown[] = item.photos;
+  if (photos.length < 1 || photos.length > 2) {
+    issues.push(`${path}.photos: Expected 1 or 2 photos, got ${photos.length}`);
+  }
+  return issues;
+}
+
 /**
- * Checks what the zod schema can't: every category has exactly the items MENU_STRUCTURE lists,
- * table items have one price per column, and range items have a range. Returns readable issues.
+ * Checks what the zod schema can't: every category has exactly the items MENU_STRUCTURE lists, and
+ * each item has unique non-empty options, prices shaped to its options and barber axis (one row per
+ * current barber when byBarber), at least one real price, and 1-2 photos. Returns readable issues.
  */
 export function checkStructure(content: SiteContent): string[] {
   const issues: string[] = [];
+  const barberIds = content.barbers.map((b) => b.id);
   for (const [category, structure] of Object.entries(MENU_STRUCTURE) as [
     CategoryKey,
     CategoryStructure,
@@ -85,17 +144,7 @@ export function checkStructure(content: SiteContent): string[] {
         issues.push(`${path}.${item.key}: Missing item`);
         continue;
       }
-      if (item.kind === "table") {
-        const expected = item.cols?.length ?? 0;
-        const actual = data.prices?.length ?? 0;
-        if (actual !== expected) {
-          issues.push(
-            `${path}.${item.key}.prices: Expected ${expected} price${expected === 1 ? "" : "s"}, got ${actual}`,
-          );
-        }
-      } else if (item.kind === "range" && data.range === undefined) {
-        issues.push(`${path}.${item.key}.range: Required`);
-      }
+      issues.push(...checkItem(data, barberIds, `${path}.${item.key}`));
     }
   }
   return issues;

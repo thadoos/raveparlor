@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CONTENT } from "@/lib/content/defaults";
-import { parseSiteContent } from "@/lib/content/schema";
+import { itemPhotoFolder, parseSiteContent } from "@/lib/content/schema";
 import type { ImageRef, ImageSlot, SiteContent } from "@/lib/content/schema";
 
 type Draft = Omit<SiteContent, "version" | "images"> & {
@@ -33,15 +33,19 @@ describe("parseSiteContent", () => {
   it("rejects duplicate barber names case-insensitively", () =>
     expect(
       mutated((c) => {
-        c.barbers.push({ ...c.barbers[0], id: "22222222-2222-4222-8222-222222222222", name: "RAVE" });
+        c.barbers.push({
+          ...c.barbers[0],
+          id: "22222222-2222-4222-8222-222222222222",
+          name: "RAVE",
+        });
       }).ok,
     ).toBe(false));
 
   it("rejects non-normalized whatsApp", () =>
     expect(mutated((c) => (c.barbers[0].whatsApp = "07789 096148")).ok).toBe(false));
 
-  it("rejects non-canonical cut prices", () =>
-    expect(mutated((c) => (c.barbers[0].cutPrices[0] = "80")).ok).toBe(false));
+  it("rejects non-canonical item prices", () =>
+    expect(mutated((c) => (c.services.colour.items.roots.prices.base![0] = "80")).ok).toBe(false));
 
   it("rejects open after close", () =>
     expect(
@@ -64,9 +68,9 @@ describe("parseSiteContent", () => {
     expect(
       mutated(
         (c) =>
-          (c.images["dialog.cut.0"] = {
-            ...c.images["dialog.cut.0"]!,
-            path: "dialog.cut.0/0f8fad5b-d9cb-469f-a165-70867728950e.webp",
+          (c.images.heroLeft = {
+            ...c.images.heroLeft!,
+            path: "heroLeft/0f8fad5b-d9cb-469f-a165-70867728950e.webp",
           }),
       ).ok,
     ).toBe(true));
@@ -90,7 +94,28 @@ describe("parseSiteContent", () => {
   it("rejects missing image slot", () =>
     expect(mutated((c) => delete c.images.priceList).ok).toBe(false));
 
-  it("rejects version 2", () => expect(mutated((c) => (c.version = 2)).ok).toBe(false));
+  it("accepts an uploaded item photo storage key", () =>
+    expect(
+      mutated((c) => {
+        const photos = c.services.cut.items.cutting.photos;
+        photos[0] = {
+          ...photos[0],
+          path: `${itemPhotoFolder("cut", "cutting")}/0f8fad5b-d9cb-469f-a165-70867728950e.webp`,
+        };
+      }).ok,
+    ).toBe(true));
+
+  it("names item photo folders item.<category>.<item>", () =>
+    expect(itemPhotoFolder("cut", "cutting")).toBe("item.cut.cutting"));
+
+  it("rejects a removed dialog image slot", () =>
+    expect(
+      mutated((c) => {
+        (c.images as Record<string, ImageRef>)["dialog.cut.0"] = c.images.heroLeft!;
+      }).ok,
+    ).toBe(false));
+
+  it("rejects version 3", () => expect(mutated((c) => (c.version = 3)).ok).toBe(false));
 });
 
 describe("parseSiteContent structure checks", () => {
@@ -107,24 +132,85 @@ describe("parseSiteContent structure checks", () => {
 
   it("rejects an extra item key", () => {
     const issues = issuesOf(
-      (c) => (c.services.treat.items.extra = { range: "£10", desc: "x", ideal: "y" }),
+      (c) => (c.services.treat.items.extra = structuredClone(c.services.treat.items.olaplex)),
     );
     expect(issues).toContain("services.treat.items.extra: Unknown item");
   });
 
-  it("rejects a table item with the wrong number of prices", () => {
-    const issues = issuesOf((c) => (c.services.colour.items.roots.prices = ["£80", "–"]));
-    expect(issues).toContain("services.colour.items.roots.prices: Expected 3 prices, got 2");
+  const RAVE = "7b1f0c52-3a4e-4c1d-9a6b-1d2e3f4a5b61";
+  const cutting = (c: Draft) => c.services.cut.items.cutting;
+
+  it("rejects a byBarber item missing a barber's row", () => {
+    const issues = issuesOf((c) => delete cutting(c).prices.barbers![RAVE]);
+    expect(issues.some((i) => i.startsWith("services.cut.items.cutting.prices.barbers"))).toBe(
+      true,
+    );
   });
 
-  it("rejects a table item without prices", () => {
-    const issues = issuesOf((c) => delete c.services.perm.items.halfPerm.prices);
-    expect(issues).toContain("services.perm.items.halfPerm.prices: Expected 1 price, got 0");
+  it("rejects a row with an unknown barber id", () =>
+    expect(
+      issuesOf(
+        (c) =>
+          (cutting(c).prices.barbers!["33333333-3333-4333-8333-333333333333"] = ["£1", "£2", "£3"]),
+      ),
+    ).toContain(
+      "services.cut.items.cutting.prices.barbers.33333333-3333-4333-8333-333333333333: Unknown barber",
+    ));
+
+  it("rejects base on a byBarber item", () =>
+    issuesOf((c) => (cutting(c).prices.base = ["£1", "£2", "£3"])));
+
+  it("rejects barbers on a non-byBarber item", () =>
+    issuesOf(
+      (c) => (c.services.colour.items.roots.prices.barbers = { [RAVE]: ["£1", "£2", "£3"] }),
+    ));
+
+  it("rejects a non-byBarber item without base", () =>
+    issuesOf((c) => delete c.services.treat.items.olaplex.prices.base));
+
+  it("rejects the wrong row length after adding an option", () => {
+    const issues = issuesOf((c) => cutting(c).options.push("Kids"));
+    expect(issues.some((i) => i.includes("Expected 4 prices, got 3"))).toBe(true);
   });
 
-  it("rejects a range item missing range", () => {
-    const issues = issuesOf((c) => delete c.services.treat.items.olaplex.range);
-    expect(issues).toContain("services.treat.items.olaplex.range: Required");
+  it("rejects a base of the wrong length", () => {
+    const issues = issuesOf((c) => (c.services.colour.items.roots.prices.base = ["£80", "–"]));
+    expect(issues).toContain("services.colour.items.roots.prices.base: Expected 3 prices, got 2");
+  });
+
+  it("rejects duplicate option labels", () =>
+    expect(issuesOf((c) => (c.services.colour.items.roots.options[1] = "short"))).toContain(
+      'services.colour.items.roots.options.1: Duplicate option "short"',
+    ));
+
+  it("rejects an empty option label", () =>
+    expect(issuesOf((c) => (c.services.colour.items.roots.options[1] = "  "))).toContain(
+      "services.colour.items.roots.options.1: Option label is required",
+    ));
+
+  it("rejects an item whose cells are all –", () => {
+    const issues = issuesOf((c) => (c.services.colour.items.roots.prices.base = ["–", "–", "–"]));
+    expect(issues.some((i) => i.startsWith("services.colour.items.roots.prices"))).toBe(true);
+  });
+
+  it("rejects a byBarber item whose cells are all –", () =>
+    issuesOf((c) => {
+      for (const id of Object.keys(cutting(c).prices.barbers!))
+        cutting(c).prices.barbers![id] = ["–", "–", "–"];
+    }));
+
+  it("rejects 0 photos", () =>
+    issuesOf((c) => ((cutting(c) as { photos: ImageRef[] }).photos = [])));
+
+  it("rejects 3 photos", () =>
+    issuesOf((c) => {
+      const photos = cutting(c).photos as ImageRef[];
+      photos.push(photos[0], photos[0]);
+    }));
+
+  it("accepts a single photo", () => {
+    const r = mutated((c) => (cutting(c).photos = [cutting(c).photos[0]]));
+    expect(r.ok).toBe(true);
   });
 
   it("accepts DEFAULT_CONTENT", () => expect(parseSiteContent(DEFAULT_CONTENT).ok).toBe(true));

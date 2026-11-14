@@ -1,99 +1,57 @@
 import { z } from "zod";
-import { PRICE_PATTERN, WHATSAPP_PATTERN } from "@/lib/content/normalize";
+import { migrateV1toV2, siteContentV1Schema } from "@/lib/content/legacy-v1";
+import {
+  CATEGORY_KEYS,
+  IMAGE_SLOTS,
+  barberListSchema,
+  businessSchema,
+  formatIssues,
+  imageRefSchema,
+  priceSchema,
+  sharedNotesSchema,
+  textSchema,
+  whatsAppSchema,
+} from "@/lib/content/primitives";
+import type { CategoryKey } from "@/lib/content/primitives";
 import { checkStructure } from "@/lib/content/structure";
 
-/** Editable site content: schema, derived types and validation. Canonical values only. */
+/** Editable site content (version 2): schema, derived types and validation. Canonical values only. */
 
-export const CATEGORY_KEYS = ["cut", "colour", "perm", "treat"] as const;
-export type CategoryKey = (typeof CATEGORY_KEYS)[number];
-
-export const IMAGE_SLOTS = [
-  "heroLeft",
-  "heroRight",
-  "split",
-  "parlor",
-  "priceList",
-  "overview.cut",
-  "overview.colour",
-  "overview.perm",
-  "overview.treat",
-  "media.cut",
-  "media.colour",
-  "media.perm",
-  "media.treat",
-  "dialog.cut.0",
-  "dialog.cut.1",
-  "dialog.colour.0",
-  "dialog.colour.1",
-  "dialog.perm.0",
-  "dialog.perm.1",
-  "dialog.treat.0",
-  "dialog.treat.1",
-] as const;
-export type ImageSlot = (typeof IMAGE_SLOTS)[number];
-
-const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
-
-const priceSchema = z.string().regex(PRICE_PATTERN, "Price must look like £80 or £30 – £40");
-const timeSchema = z.string().regex(TIME_PATTERN, "Time must be HH:MM");
-const textSchema = z.string().trim().min(1, "Required");
-
-const dayOfWeekSchema = z.enum([
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-]);
-export type DayOfWeek = z.infer<typeof dayOfWeekSchema>;
-
-const openingHoursSchema = z
-  .object({
-    dayOfWeek: z.array(dayOfWeekSchema).min(1),
-    days: textSchema,
-    shortDays: textSchema,
-    open: timeSchema,
-    close: timeSchema,
-    lastAppointment: timeSchema,
-  })
-  .refine((h) => h.open < h.close, { message: "Opening time must be before closing time", path: ["close"] })
-  .refine((h) => h.lastAppointment >= h.open && h.lastAppointment <= h.close, {
-    message: "Last appointment must be between opening and closing time",
-    path: ["lastAppointment"],
-  });
-export type OpeningHours = z.infer<typeof openingHoursSchema>;
-
-/** A bundled file under /images, or an uploaded storage key: `<slot>/<uuid>.<webp|jpg>`
- *  (see ImageSlotEditor). Anything else (URLs, protocol-relative "//host", bare "/") is rejected. */
-const IMAGE_PATH_PATTERN = /^(\/images\/[\w./-]+|[\w.]+\/[0-9a-f-]{36}\.(webp|jpg))$/;
-
-const imageRefSchema = z.object({
-  path: z.string().regex(IMAGE_PATH_PATTERN, "Image path must be /images/... or an uploaded photo"),
-  alt: z.string(),
-  width: z.number().int().positive(),
-  height: z.number().int().positive(),
-});
-export type ImageRef = z.infer<typeof imageRefSchema>;
-
-const whatsAppSchema = z.string().regex(WHATSAPP_PATTERN, "WhatsApp number must be digits only, e.g. 447789096148");
+export { CATEGORY_KEYS, IMAGE_PATH_PATTERN, IMAGE_SLOTS } from "@/lib/content/primitives";
+export type {
+  CategoryKey,
+  DayOfWeek,
+  ImageRef,
+  ImageSlot,
+  OpeningHours,
+} from "@/lib/content/primitives";
 
 const barberSchema = z.object({
   id: z.uuid(),
   name: textSchema,
   days: textSchema,
   whatsApp: whatsAppSchema,
-  cutPrices: z.tuple([priceSchema, priceSchema, priceSchema]),
 });
 export type Barber = z.infer<typeof barberSchema>;
 
+/** Exactly one shape is present: `base` when the item's byBarber is false, else `barbers` (one row
+ *  per barber id). Each row has `max(1, options.length)` cells. Enforced by checkStructure. */
+const itemPricesSchema = z.object({
+  base: z.array(priceSchema).optional(),
+  barbers: z.record(z.string(), z.array(priceSchema)).optional(),
+});
+export type ItemPrices = z.infer<typeof itemPricesSchema>;
+
 const itemContentSchema = z.object({
-  prices: z.array(priceSchema).optional(),
-  range: z.string().optional(),
+  options: z.array(z.string()),
+  byBarber: z.boolean(),
+  prices: itemPricesSchema,
   desc: z.string(),
   ideal: z.string(),
   note: z.string().optional(),
+  photos: z.union([z.tuple([imageRefSchema]), z.tuple([imageRefSchema, imageRefSchema])], {
+    error: "Expected 1 or 2 photos",
+  }),
 });
 export type ItemContent = z.infer<typeof itemContentSchema>;
 
@@ -104,36 +62,48 @@ const categoryContentSchema = z.object({
 export type CategoryContent = z.infer<typeof categoryContentSchema>;
 
 export const siteContentSchema = z.object({
-  version: z.literal(1),
-  business: z.object({
-    defaultWhatsApp: whatsAppSchema,
-    hours: z.array(openingHoursSchema).min(1, "At least one opening hours entry is required"),
-  }),
-  barbers: z
-    .array(barberSchema)
-    .min(1, "At least one barber is required")
-    .refine((barbers) => new Set(barbers.map((b) => b.name.trim().toLowerCase())).size === barbers.length, {
-      message: "Barber names must be unique",
-    }),
+  version: z.literal(2),
+  business: businessSchema,
+  barbers: barberListSchema(barberSchema),
   services: z.record(z.enum(CATEGORY_KEYS), categoryContentSchema),
-  sharedNotes: z.object({ chemical: z.string() }),
+  sharedNotes: sharedNotesSchema,
   images: z.record(z.enum(IMAGE_SLOTS), imageRefSchema),
 });
 export type SiteContent = z.infer<typeof siteContentSchema>;
 
-export type ParseSiteContentResult = { ok: true; content: SiteContent } | { ok: false; issues: string[] };
+/** Storage folder for an item's uploaded modal photos, e.g. `item.cut.cutting`. */
+export function itemPhotoFolder(category: CategoryKey, item: string): string {
+  return `item.${category}.${item}`;
+}
 
-export function parseSiteContent(input: unknown): ParseSiteContentResult {
-  const result = siteContentSchema.safeParse(input);
-  if (result.success) {
-    const issues = checkStructure(result.data);
-    return issues.length === 0 ? { ok: true, content: result.data } : { ok: false, issues };
+/** Every image path the content references: site slots and every item's photos (deduplicated). */
+export function contentImagePaths(c: SiteContent): string[] {
+  const paths = new Set(Object.values(c.images).map((image) => image.path));
+  for (const category of Object.values(c.services)) {
+    for (const item of Object.values(category.items)) {
+      for (const photo of item.photos) paths.add(photo.path);
+    }
   }
-  return {
-    ok: false,
-    issues: result.error.issues.map((issue) => {
-      const path = issue.path.join(".");
-      return path ? `${path}: ${issue.message}` : issue.message;
-    }),
-  };
+  return [...paths];
+}
+
+export type ParseSiteContentResult =
+  { ok: true; content: SiteContent } | { ok: false; issues: string[] };
+
+function isV1(input: unknown): boolean {
+  return typeof input === "object" && input !== null && "version" in input && input.version === 1;
+}
+
+/** Validates content. Version 1 input (old stored rows) is migrated to version 2 first. */
+export function parseSiteContent(input: unknown): ParseSiteContentResult {
+  let candidate = input;
+  if (isV1(input)) {
+    const v1 = siteContentV1Schema.safeParse(input);
+    if (!v1.success) return { ok: false, issues: formatIssues(v1.error) };
+    candidate = migrateV1toV2(v1.data);
+  }
+  const result = siteContentSchema.safeParse(candidate);
+  if (!result.success) return { ok: false, issues: formatIssues(result.error) };
+  const issues = checkStructure(result.data);
+  return issues.length === 0 ? { ok: true, content: result.data } : { ok: false, issues };
 }
