@@ -1,0 +1,33 @@
+/* Shared editor body: a column of fields. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 16px;
+}
+.note {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+.textButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.secondary {
+  background: transparent;
+  color: var(--color-ink);
+}
+.secondary:hover,
+.secondary:focus-visible {
+  background: var(--color-offwhite);
+}

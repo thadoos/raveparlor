@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   addBarber,
+  clearItemNote,
   moveBarber,
   removeBarber,
   setChemicalNote,
@@ -114,5 +115,14 @@ describe("draft operations", () => {
       op(input);
       expect(input).toEqual(snapshot);
     }
+  });
+
+  it("clearItemNote removes the note key and leaves other items alone", () => {
+    const before = content();
+    const next = clearItemNote(before, "cut", "cleansing");
+    expect(Object.hasOwn(next.services.cut.items.cleansing, "note")).toBe(false);
+    expect(next.services.cut.items.cleansing.desc).toBe(before.services.cut.items.cleansing.desc);
+    expect(next.services.cut.items.updo).toBe(before.services.cut.items.updo);
+    expect(Object.hasOwn(before.services.cut.items.cleansing, "note")).toBe(true);
   });
 });

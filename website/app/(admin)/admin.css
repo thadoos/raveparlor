@@ -28,7 +28,8 @@ img {
   max-width: 100%;
 }
 button,
-input {
+input,
+textarea {
   font: inherit;
   color: inherit;
 }

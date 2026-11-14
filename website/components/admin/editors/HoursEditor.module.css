@@ -1,0 +1,42 @@
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  margin: 0;
+  padding: 20px 16px;
+  border: 1px solid var(--color-offwhite-muted);
+}
+.legend {
+  padding: 0 6px;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+.days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.day {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--color-offwhite-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+.day:has(input:checked) {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+.day input {
+  accent-color: var(--color-paper);
+  margin: 0;
+}
+.entry > button {
+  align-self: flex-start;
+}

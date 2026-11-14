@@ -3,9 +3,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { ADMIN_PATH, LOGIN_PATH, getAdmin, requireAdmin } from "@/lib/admin/auth";
 import { runDraftAction } from "@/lib/admin/draft-action";
 import type { ActionResult } from "@/lib/admin/draft-action";
+import { findOrphans } from "@/lib/admin/orphans";
 import { CONTENT_TAG } from "@/lib/content/published";
 import { parseSiteContent } from "@/lib/content/schema";
 import type { SiteContent } from "@/lib/content/schema";
@@ -134,6 +136,65 @@ async function writeDraft(supabase: SupabaseClient, content: unknown): Promise<A
   return { ok: true };
 }
 
+// Image cleanup ------------------------------------------------------------------------------
+// Uploads land in storage before they are saved anywhere, so replaced or abandoned photos pile up.
+// After a publish or discard, anything not used by the draft, the live site or the last few
+// versions (kept so a rollback still has its photos) is removed.
+
+const IMAGE_BUCKET = "site-images";
+const KEPT_VERSIONS = 10;
+const LIST_PAGE = 1000;
+
+/** Every object path in the bucket. Folders (entries without an id) are listed recursively. */
+async function listImagePaths(supabase: SupabaseClient, prefix = ""): Promise<string[]> {
+  const paths: string[] = [];
+  for (let offset = 0; ; offset += LIST_PAGE) {
+    const { data, error } = await supabase.storage
+      .from(IMAGE_BUCKET)
+      .list(prefix, { limit: LIST_PAGE, offset });
+    if (error) throw new Error(`Listing "${prefix}" failed: ${error.message}`);
+    for (const entry of data) {
+      const path = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.id === null) paths.push(...(await listImagePaths(supabase, path)));
+      else paths.push(path);
+    }
+    if (data.length < LIST_PAGE) return paths;
+  }
+}
+
+async function readRecentVersions(supabase: SupabaseClient): Promise<SiteContent[]> {
+  const { data, error } = await supabase
+    .from("content_versions")
+    .select("content")
+    .order("published_at", { ascending: false })
+    .limit(KEPT_VERSIONS);
+  if (error) throw new Error(`Failed to load content versions: ${error.message}`);
+  return data.map((row, index) => {
+    const result = parseSiteContent(row.content);
+    // Unknown references would make every photo look unused: stop rather than guess.
+    if (!result.ok) throw new Error(`Version ${index} is invalid:\n${result.issues.join("\n")}`);
+    return result.content;
+  });
+}
+
+/** Removes unreferenced images. Never throws: a failed cleanup only leaves files behind. */
+async function cleanupOrphans(supabase: SupabaseClient): Promise<void> {
+  try {
+    const [paths, draft, published, versions] = await Promise.all([
+      listImagePaths(supabase),
+      readContent(supabase, "draft"),
+      readContent(supabase, "published"),
+      readRecentVersions(supabase),
+    ]);
+    const orphans = findOrphans(paths, [draft, published, ...versions]);
+    if (orphans.length === 0) return;
+    const { error } = await supabase.storage.from(IMAGE_BUCKET).remove(orphans);
+    if (error) throw new Error(`Removing ${orphans.length} images failed: ${error.message}`);
+  } catch (error) {
+    console.error("cleanupOrphans failed:", error);
+  }
+}
+
 export async function loadDraft(): Promise<{ draft: SiteContent; published: SiteContent }> {
   await requireAdmin();
   const supabase = await createServerSupabase();
@@ -165,6 +226,7 @@ export async function publishDraft(
       return { ok: false, error: "The draft was saved, but publishing failed. Try again." };
     }
     updateTag(CONTENT_TAG);
+    after(() => cleanupOrphans(supabase));
     return { ok: true, publishedAt: typeof data === "string" ? data : undefined };
   });
 }
@@ -178,6 +240,7 @@ export async function discardDraft(): Promise<ActionResult & { content?: SiteCon
       console.error("discardDraft failed:", error.message);
       return { ok: false, error: "Couldn't discard the draft. Try again." };
     }
+    after(() => cleanupOrphans(supabase));
     try {
       return { ok: true, content: await readContent(supabase, "draft") };
     } catch (e) {

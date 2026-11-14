@@ -1,0 +1,23 @@
+/* Shared look for the editor fields: label above, underlined input, hint and error below. */
+.field {
+  display: block;
+  min-width: 0;
+}
+.textarea {
+  min-height: 96px;
+  resize: vertical;
+  line-height: 1.5;
+}
+.hint {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+.error {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #a12a2a;
+}
+.invalid {
+  border-bottom-color: #a12a2a;
+}

@@ -3,6 +3,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { DraftBar } from "@/components/admin/DraftBar";
 import type { EditorMode } from "@/components/admin/DraftBar";
+import { FormMode } from "@/components/admin/FormMode";
 import { useDraftEditor } from "@/components/admin/use-draft-editor";
 import type { SiteContent } from "@/lib/content/schema";
 import styles from "./AdminApp.module.css";
@@ -59,7 +60,7 @@ export function AdminApp({ initial }: AdminAppProps) {
       <DraftBar editor={editor} mode={mode} onModeChange={setMode} />
       <main className={styles.main}>
         {mode === "form" ? (
-          <p className="admin-label">Form editor coming soon.</p>
+          <FormMode draft={editor.draft} apply={editor.apply} />
         ) : (
           <p className="admin-label">Visual editor coming soon.</p>
         )}

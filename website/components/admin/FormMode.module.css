@@ -1,0 +1,104 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+.nav {
+  display: flex;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.navLink {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--color-offwhite-muted);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.navLink:hover,
+.navLink:focus-visible {
+  border-color: var(--color-ink);
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  scroll-margin-top: 16px;
+}
+.sectionTitle {
+  margin: 0;
+  font-weight: 300;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+}
+/* Groups (categories, image groups) span the whole section grid. */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  grid-column: 1 / -1;
+}
+.group + .group {
+  margin-top: 16px;
+}
+.groupTitle {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.card {
+  min-width: 0;
+  padding: 24px 16px;
+  border: 1px solid var(--color-offwhite-muted);
+  background: var(--color-paper);
+  scroll-margin-top: 16px;
+}
+.cardTitle {
+  margin: 0 0 20px;
+  font-weight: 300;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+
+@media (min-width: 820px) {
+  .form {
+    gap: 64px;
+  }
+  .nav {
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+  }
+  .section,
+  .card {
+    /* Clears the draft bar pinned to the top. */
+    scroll-margin-top: 96px;
+  }
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .card {
+    padding: 28px 28px 32px;
+  }
+}

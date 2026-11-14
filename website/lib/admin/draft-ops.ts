@@ -56,6 +56,17 @@ export function setItemContent(
   };
 }
 
+/** Removes the item's own note, so a chemical item falls back to the shared note again. */
+export function clearItemNote(c: SiteContent, category: CategoryKey, itemKey: string): SiteContent {
+  const cat = c.services[category];
+  const item = { ...cat.items[itemKey] };
+  delete item.note;
+  return {
+    ...c,
+    services: { ...c.services, [category]: { ...cat, items: { ...cat.items, [itemKey]: item } } },
+  };
+}
+
 export function setIntro(
   c: SiteContent,
   category: CategoryKey,
