@@ -43,7 +43,7 @@ function RowLabel({ row }: RowLabelProps): ReactNode {
  * The price table of a service with options. With a barber choice it has a row per barber (plus a
  * "No preference" row showing the lowest price per option while picking); when every barber charges
  * the same, the details show one unlabelled row and the full table appears while picking. Prices
- * become buttons while picking.
+ * become buttons while picking; cells that are not offered ("–") stay plain text.
  */
 export function PriceTable({ item, picking, selection, onPick }: PriceTableProps) {
   const cols = item.options;
@@ -88,7 +88,7 @@ export function PriceTable({ item, picking, selection, onPick }: PriceTableProps
             )}
             {row.prices.map((price, c) => (
               <td key={cols[c] ?? c}>
-                {hasRows || (optionCells && isPrice(price)) ? (
+                {(hasRows || optionCells) && isPrice(price) ? (
                   <PriceCell
                     label={price}
                     picking={picking}
@@ -109,14 +109,18 @@ export function PriceTable({ item, picking, selection, onPick }: PriceTableProps
               const min = minPriceForColumn(item, c);
               return (
                 <td key={col}>
-                  <PriceCell
-                    label={min === null ? "–" : `from £${min}`}
-                    picking={picking}
-                    selected={isSelected(anyRow, c)}
-                    onPick={() =>
-                      onPick({ barberId: null, cut: cutLabel(cols, c), row: anyRow, col: c })
-                    }
-                  />
+                  {min === null ? (
+                    "–"
+                  ) : (
+                    <PriceCell
+                      label={`from £${min}`}
+                      picking={picking}
+                      selected={isSelected(anyRow, c)}
+                      onPick={() =>
+                        onPick({ barberId: null, cut: cutLabel(cols, c), row: anyRow, col: c })
+                      }
+                    />
+                  )}
                 </td>
               );
             })}

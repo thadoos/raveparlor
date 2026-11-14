@@ -166,6 +166,14 @@
   border-bottom: 1px dotted #b5b5b0;
   pointer-events: none;
 }
+/* a barber who doesn't offer the service: shown, but not pickable */
+.price .who.isPicking .cell:disabled {
+  color: #b5b5b0;
+  cursor: default;
+}
+.price .who.isPicking .cell:disabled::after {
+  display: none;
+}
 .price table.isPicking .cell {
   width: min-content;
   margin-left: -12px;

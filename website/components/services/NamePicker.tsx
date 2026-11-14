@@ -1,7 +1,7 @@
 import { Editable } from "@/components/edit/Editable";
 import type { Selection } from "@/lib/booking/picker";
 import { cx } from "@/lib/cx";
-import type { PriceRow } from "@/lib/data/services";
+import { isPrice, type PriceRow } from "@/lib/data/services";
 import styles from "./DialogPrice.module.css";
 import { PriceCell } from "./PriceCell";
 
@@ -33,7 +33,7 @@ function Name({ row }: NameProps) {
 
 /**
  * For a service without options and a barber choice: each barber, with their price when the
- * barbers' prices differ.
+ * barbers' prices differ. A barber who doesn't offer the service ("–") can't be picked.
  */
 export function NamePicker({ rows, picking, listed, selection, onPick }: NamePickerProps) {
   return (
@@ -51,6 +51,7 @@ export function NamePicker({ rows, picking, listed, selection, onPick }: NamePic
             )
           }
           picking={picking}
+          offered={isPrice(row.prices[0])}
           selected={selection?.row === r}
           onPick={() => onPick({ barberId: row.barberId, cut: null, row: r, col: 0 })}
         />
