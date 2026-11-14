@@ -52,9 +52,14 @@ function sameBox(a: Box | null, b: Box | null): boolean {
   return a.top === b.top && a.left === b.left && a.width === b.width && a.height === b.height;
 }
 
+/** Frames with an unchanged box before the re-measure loop idles. */
+const IDLE_FRAMES = 10;
+
 /**
  * Outlines the editable region under the pointer. While one is hovered it is re-measured every
- * frame, so the outline follows deck slides and scrolling.
+ * frame, so the outline follows deck slides and scrolling. Once the box has held still for a few
+ * frames the loop idles; pointer movement, scrolling, resizing and anything that can start a deck
+ * slide (wheel, keys, CSS transitions) wake it again.
  */
 export function EditOverlay() {
   const [box, setBox] = useState<Box | null>(null);
@@ -62,31 +67,46 @@ export function EditOverlay() {
   useEffect(() => {
     let hovered: Element | null = null;
     let frame = 0;
+    let last: Box | null = null;
+    let still = 0;
 
     function tick() {
       frame = 0;
       const next = hovered?.isConnected ? measure(hovered) : null;
+      still = sameBox(last, next) ? still + 1 : 0;
+      last = next;
       setBox((prev) => (sameBox(prev, next) ? prev : next));
-      if (hovered) frame = requestAnimationFrame(tick);
+      if (hovered && still < IDLE_FRAMES) frame = requestAnimationFrame(tick);
+    }
+
+    function wake() {
+      still = 0;
+      if (!frame) frame = requestAnimationFrame(tick);
     }
 
     function onPointerMove(e: PointerEvent) {
-      const next = e.target instanceof Element ? e.target.closest("[data-edit-target]") : null;
-      if (next === hovered) return;
-      hovered = next;
-      if (!frame) frame = requestAnimationFrame(tick);
+      hovered = e.target instanceof Element ? e.target.closest("[data-edit-target]") : null;
+      wake();
     }
 
     function onLeave() {
       hovered = null;
-      if (!frame) frame = requestAnimationFrame(tick);
+      wake();
     }
 
     document.addEventListener("pointermove", onPointerMove, { passive: true });
     document.documentElement.addEventListener("pointerleave", onLeave);
+    // Capture so scrolls and transitions inside any element count.
+    const wakeEvents = ["scroll", "wheel", "keydown", "transitionrun"] as const;
+    for (const type of wakeEvents) {
+      document.addEventListener(type, wake, { capture: true, passive: true });
+    }
+    window.addEventListener("resize", wake);
     return () => {
       document.removeEventListener("pointermove", onPointerMove);
       document.documentElement.removeEventListener("pointerleave", onLeave);
+      for (const type of wakeEvents) document.removeEventListener(type, wake, { capture: true });
+      window.removeEventListener("resize", wake);
       if (frame) cancelAnimationFrame(frame);
     };
   }, []);
