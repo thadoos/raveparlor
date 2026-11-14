@@ -34,7 +34,7 @@ export async function resizeImage(
   maxEdge = 2400,
   quality = 0.85,
 ): Promise<{ blob: Blob; width: number; height: number }> {
-  const bitmap = await createImageBitmap(file);
+  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   try {
     const { width, height } = fitWithin(bitmap.width, bitmap.height, maxEdge);
     let canvas: OffscreenCanvas | HTMLCanvasElement;
