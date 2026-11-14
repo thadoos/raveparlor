@@ -1,7 +1,6 @@
 import { SitePage } from "@/components/site/SitePage";
-import { DEFAULT_CONTENT } from "@/lib/content/defaults";
-import { buildSiteView } from "@/lib/content/view";
+import { getSiteView } from "@/lib/content/published";
 
-export default function Home() {
-  return <SitePage view={buildSiteView(DEFAULT_CONTENT, "")} />;
+export default async function Home() {
+  return <SitePage view={await getSiteView()} />;
 }

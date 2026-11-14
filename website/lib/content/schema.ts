@@ -1,12 +1,11 @@
 import { z } from "zod";
 import { PRICE_PATTERN, WHATSAPP_PATTERN } from "@/lib/content/normalize";
+import { checkStructure } from "@/lib/content/structure";
 
 /** Editable site content: schema, derived types and validation. Canonical values only. */
 
 export const CATEGORY_KEYS = ["cut", "colour", "perm", "treat"] as const;
 export type CategoryKey = (typeof CATEGORY_KEYS)[number];
-
-export const CUT_COLUMNS = ["Gentleman", "Ladies", "Under 12s"] as const;
 
 export const IMAGE_SLOTS = [
   "heroLeft",
@@ -122,7 +121,10 @@ export type ParseSiteContentResult = { ok: true; content: SiteContent } | { ok: 
 
 export function parseSiteContent(input: unknown): ParseSiteContentResult {
   const result = siteContentSchema.safeParse(input);
-  if (result.success) return { ok: true, content: result.data };
+  if (result.success) {
+    const issues = checkStructure(result.data);
+    return issues.length === 0 ? { ok: true, content: result.data } : { ok: false, issues };
+  }
   return {
     ok: false,
     issues: result.error.issues.map((issue) => {

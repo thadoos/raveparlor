@@ -59,3 +59,40 @@ describe("parseSiteContent", () => {
 
   it("rejects version 2", () => expect(mutated((c) => (c.version = 2)).ok).toBe(false));
 });
+
+describe("parseSiteContent structure checks", () => {
+  function issuesOf(fn: (c: Draft) => void): string[] {
+    const r = mutated(fn);
+    expect(r.ok).toBe(false);
+    return r.ok ? [] : r.issues;
+  }
+
+  it("rejects a missing item key", () => {
+    const issues = issuesOf((c) => delete c.services.colour.items.roots);
+    expect(issues).toContain("services.colour.items.roots: Missing item");
+  });
+
+  it("rejects an extra item key", () => {
+    const issues = issuesOf(
+      (c) => (c.services.treat.items.extra = { range: "£10", desc: "x", ideal: "y" }),
+    );
+    expect(issues).toContain("services.treat.items.extra: Unknown item");
+  });
+
+  it("rejects a table item with the wrong number of prices", () => {
+    const issues = issuesOf((c) => (c.services.colour.items.roots.prices = ["£80", "–"]));
+    expect(issues).toContain("services.colour.items.roots.prices: Expected 3 prices, got 2");
+  });
+
+  it("rejects a table item without prices", () => {
+    const issues = issuesOf((c) => delete c.services.perm.items.halfPerm.prices);
+    expect(issues).toContain("services.perm.items.halfPerm.prices: Expected 1 price, got 0");
+  });
+
+  it("rejects a range item missing range", () => {
+    const issues = issuesOf((c) => delete c.services.treat.items.olaplex.range);
+    expect(issues).toContain("services.treat.items.olaplex.range: Required");
+  });
+
+  it("accepts DEFAULT_CONTENT", () => expect(parseSiteContent(DEFAULT_CONTENT).ok).toBe(true));
+});
