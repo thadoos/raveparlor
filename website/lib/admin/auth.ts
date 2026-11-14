@@ -17,7 +17,9 @@ export async function requireAdmin(): Promise<{ userId: string; email: string }>
   if (!user) redirect(LOGIN_PATH);
 
   const { data: isAdmin, error } = await supabase.rpc("is_admin");
-  if (error || isAdmin !== true) {
+  // A failed check is an outage, not a verdict: let the error boundary show it.
+  if (error) throw new Error(`Admin check failed: ${error.message}`);
+  if (isAdmin !== true) {
     await supabase.auth.signOut();
     redirect(`${LOGIN_PATH}?error=not-admin`);
   }

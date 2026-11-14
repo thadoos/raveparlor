@@ -12,6 +12,13 @@ export interface AuthState {
 }
 
 const MIN_PASSWORD_LENGTH = 10;
+const SOMETHING_WRONG = "Something went wrong, try again.";
+
+/** Fixed messages for the auth errors a password change can hit; raw Supabase text never reaches the page. */
+const UPDATE_ERRORS: Record<string, string> = {
+  weak_password: "That password is too weak. Try a longer one.",
+  same_password: "The new password must be different from the current one.",
+};
 
 function field(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -29,9 +36,15 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   if (error) return wrong;
 
   const { data: isAdmin, error: rpcError } = await supabase.rpc("is_admin");
-  if (rpcError || isAdmin !== true) {
+  if (rpcError) {
+    // Unverified: don't leave a session behind.
     await supabase.auth.signOut();
-    return { error: "This account doesn't have admin access." };
+    return { error: SOMETHING_WRONG };
+  }
+  if (isAdmin !== true) {
+    // Same message as bad credentials, so the form doesn't reveal which accounts exist.
+    await supabase.auth.signOut();
+    return wrong;
   }
   redirect(ADMIN_PATH);
 }
@@ -60,6 +73,9 @@ export async function changePassword(_prev: AuthState, formData: FormData): Prom
   if (verifyError) return { error: "The current password is wrong." };
 
   const { error } = await supabase.auth.updateUser({ password: next });
-  if (error) return { error: `Couldn't change the password: ${error.message}` };
+  if (error) return { error: UPDATE_ERRORS[error.code ?? ""] ?? SOMETHING_WRONG };
+
+  // Anyone signed in elsewhere with the old password loses access.
+  await supabase.auth.signOut({ scope: "others" });
   return { ok: true };
 }
