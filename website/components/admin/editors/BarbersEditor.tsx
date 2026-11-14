@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { FormEvent, PointerEvent as ReactPointerEvent } from "react";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { dragOffsets, dragTargetIndex } from "@/lib/admin/drag-reorder";
 import { addBarber, moveBarber, removeBarber } from "@/lib/admin/draft-ops";
 import { newId } from "@/lib/admin/uuid";
 import { normalizePrice, normalizeWhatsApp } from "@/lib/content/normalize";
@@ -17,9 +18,11 @@ import styles from "./BarbersEditor.module.css";
 interface Drag {
   id: string;
   pointerId: number;
-  /** Vertical midpoints of the other rows, captured when the drag starts. */
-  midpoints: number[];
-  to: number;
+  startIndex: number;
+  startY: number;
+  /** Row heights in list order, measured when the drag starts. */
+  heights: number[];
+  deltaY: number;
 }
 
 /** The barbers list: reorder (drag handle or up/down), edit, add and remove. */
@@ -27,47 +30,57 @@ export function BarbersEditor({ draft, apply }: EditorProps) {
   const [open, setOpen] = useState<string | null>(null);
   const [removing, setRemoving] = useState<Barber | null>(null);
   const [adding, setAdding] = useState(false);
-  const [drag, setDrag] = useState<Drag | null>(null);
+  // The DOM order never changes mid-drag (moving the capturing node would drop pointer capture):
+  // the preview is drawn with translateY and the move is applied on release. Handlers read the
+  // ref, so a pointerup followed by lostpointercapture can't act on a stale drag.
+  const [drag, setDragState] = useState<Drag | null>(null);
+  const dragRef = useRef<Drag | null>(null);
   const rows = useRef(new Map<string, HTMLLIElement>());
 
   const barbers = draft.barbers;
-  const order = drag ? previewOrder(barbers, drag) : barbers;
+  const toIndex = drag ? dragTargetIndex(drag.startIndex, drag.deltaY, drag.heights) : -1;
+  const offsets = drag ? dragOffsets(drag.startIndex, toIndex, drag.deltaY, drag.heights) : null;
+
+  function setDrag(next: Drag | null) {
+    dragRef.current = next;
+    setDragState(next);
+  }
 
   function startDrag(event: ReactPointerEvent<HTMLButtonElement>, id: string) {
-    if (event.button !== 0) return;
+    if (event.button !== 0 || dragRef.current) return;
+    const startIndex = barbers.findIndex((b) => b.id === id);
+    if (startIndex === -1) return;
     event.currentTarget.setPointerCapture(event.pointerId);
-    const midpoints = barbers
-      .filter((b) => b.id !== id)
-      .map((b) => {
-        const rect = rows.current.get(b.id)?.getBoundingClientRect();
-        return rect ? rect.top + rect.height / 2 : 0;
-      });
-    setOpen(null);
+    const heights = barbers.map((b) => rows.current.get(b.id)?.getBoundingClientRect().height ?? 0);
     setDrag({
       id,
       pointerId: event.pointerId,
-      midpoints,
-      to: barbers.findIndex((b) => b.id === id),
+      startIndex,
+      startY: event.clientY,
+      heights,
+      deltaY: 0,
     });
   }
 
   function moveDrag(event: ReactPointerEvent<HTMLButtonElement>) {
-    if (!drag || event.pointerId !== drag.pointerId) return;
-    const to = drag.midpoints.filter((mid) => mid < event.clientY).length;
-    if (to !== drag.to) setDrag({ ...drag, to });
+    const current = dragRef.current;
+    if (!current || event.pointerId !== current.pointerId) return;
+    setDrag({ ...current, deltaY: event.clientY - current.startY });
   }
 
   function endDrag(event: ReactPointerEvent<HTMLButtonElement>, commit: boolean) {
-    if (!drag || event.pointerId !== drag.pointerId) return;
-    if (commit) apply((c) => moveBarber(c, drag.id, drag.to));
+    const current = dragRef.current;
+    if (!current || event.pointerId !== current.pointerId) return;
     setDrag(null);
+    if (!commit) return;
+    const to = dragTargetIndex(current.startIndex, current.deltaY, current.heights);
+    if (to !== current.startIndex) apply((c) => moveBarber(c, current.id, to));
   }
 
   return (
     <div className={shared.stack}>
       <ol className={styles.list}>
-        {order.map((barber) => {
-          const index = barbers.findIndex((b) => b.id === barber.id);
+        {barbers.map((barber, index) => {
           const isOpen = open === barber.id;
           return (
             <li
@@ -76,7 +89,10 @@ export function BarbersEditor({ draft, apply }: EditorProps) {
                 if (node) rows.current.set(barber.id, node);
                 else rows.current.delete(barber.id);
               }}
-              className={`${styles.item} ${drag?.id === barber.id ? styles.dragging : ""}`}
+              className={`${styles.item} ${drag ? styles.sorting : ""} ${
+                drag?.id === barber.id ? styles.dragging : ""
+              }`}
+              style={offsets ? { transform: `translateY(${offsets[index]}px)` } : undefined}
             >
               <div className={styles.row}>
                 <button
@@ -87,6 +103,7 @@ export function BarbersEditor({ draft, apply }: EditorProps) {
                   onPointerMove={moveDrag}
                   onPointerUp={(event) => endDrag(event, true)}
                   onPointerCancel={(event) => endDrag(event, false)}
+                  onLostPointerCapture={(event) => endDrag(event, false)}
                 >
                   <span aria-hidden="true">⠿</span>
                 </button>
@@ -172,14 +189,6 @@ export function BarbersEditor({ draft, apply }: EditorProps) {
       </ConfirmDialog>
     </div>
   );
-}
-
-function previewOrder(barbers: Barber[], drag: Drag): Barber[] {
-  const moving = barbers.find((b) => b.id === drag.id);
-  if (!moving) return barbers;
-  const rest = barbers.filter((b) => b.id !== drag.id);
-  rest.splice(drag.to, 0, moving);
-  return rest;
 }
 
 interface AddBarberFormProps {

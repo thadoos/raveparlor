@@ -8,10 +8,15 @@
   border-bottom: 1px solid var(--color-offwhite-muted);
   background: var(--color-paper);
 }
-.dragging {
+/* While sorting, the other rows glide aside; the dragged row tracks the pointer exactly. */
+.sorting {
   position: relative;
+  transition: transform var(--dur-fast) var(--ease);
+}
+.dragging {
   z-index: var(--z-raised);
   box-shadow: 0 6px 18px rgb(17 17 17 / 0.12);
+  transition: none;
 }
 .row {
   display: flex;
