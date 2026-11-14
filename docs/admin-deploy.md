@@ -8,6 +8,7 @@ Going from local to a remote Supabase project plus Netlify. Run commands in `web
 3. In the dashboard (Authentication), match `supabase/config.toml`: sign-ups off, email confirmations off, secure password change off.
 4. Seed: put the remote values in `.env.local` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, and the real `ADMIN_EMAIL` / `ADMIN_PASSWORD`; use an admin password of at least 10 characters, the app's minimum), then `npm run seed:content`. It is idempotent: it creates the admin user and `admins` row, and inserts draft/published from the defaults only if missing.
    `SUPABASE_SECRET_KEY`, `ADMIN_EMAIL` and `ADMIN_PASSWORD` are for the seed script only. Never set them on Netlify.
+   Projects seeded after the v2 content change start at v2 and need no migration. Only older local rows need `npm run migrate:content`.
 5. Netlify: set the site's base directory to `website` (so `netlify/functions` is found), and set env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (plus `NEXT_PUBLIC_SITE_URL`). Set the Netlify build Node version to 22 (`@netlify/functions` requires node >=22.12), e.g. env var `NODE_VERSION=22`.
 6. Deploy.
 7. Spike check: edit a price in `/admin`, Publish, and confirm the live page shows it within seconds. Publish calls `updateTag("site-content")` in `app/(admin)/admin/actions.ts`. If the page does not refresh, switch that call to `revalidateTag(CONTENT_TAG, { expire: 0 })` (`CONTENT_TAG` is in `lib/content/published.ts`).

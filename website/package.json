@@ -14,7 +14,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "check": "npm run lint && npm run typecheck && npm run test",
-    "seed:content": "tsx --env-file=.env.local scripts/seed-content.ts"
+    "seed:content": "tsx --env-file=.env.local scripts/seed-content.ts",
+    "migrate:content": "tsx --env-file=.env.local scripts/migrate-content.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

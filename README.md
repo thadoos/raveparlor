@@ -15,7 +15,7 @@ Website for Rave's Parlor London, a hair salon in New Malden.
     ├── components/       # layout/, deck/, slides/, services/, sections/, seo/, ui/
     ├── netlify/functions/ # keep-alive.mts (daily Supabase ping)
     ├── supabase/         # config.toml, migrations/
-    ├── scripts/          # seed-content.ts
+    ├── scripts/          # seed-content.ts, migrate-content.ts
     ├── lib/              # data/ (site, nav, images, services), deck/ (paging), booking/ (picker),
     │                     #   hooks/, contact, seo (JSON-LD)
     ├── tests/            # Vitest unit tests for the pure logic in lib/
@@ -61,6 +61,7 @@ Site content is stored in Supabase and edited at `/admin` (preview at `/preview`
 supabase start                 # local stack; `supabase status` prints the keys
 cp .env.example .env.local     # fill in the Supabase keys and ADMIN_EMAIL / ADMIN_PASSWORD
 npm run seed:content           # creates the admin user and initial content (idempotent)
+npm run migrate:content        # one-off: upgrades older (v1) content rows to the current format (idempotent)
 npm run dev                    # then open http://localhost:3000/admin
 ```
 
