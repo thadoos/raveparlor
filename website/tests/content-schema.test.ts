@@ -1,40 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { IMAGE_SLOTS, parseSiteContent } from "@/lib/content/schema";
+import { DEFAULT_CONTENT } from "@/lib/content/defaults";
+import { parseSiteContent } from "@/lib/content/schema";
+import type { ImageRef, ImageSlot, SiteContent } from "@/lib/content/schema";
 
-const CATS = ["cut", "colour", "perm", "treat"] as const;
+type Draft = Omit<SiteContent, "version" | "images"> & {
+  version: number;
+  images: Partial<Record<ImageSlot, ImageRef>>;
+};
 
-function makeContent() {
-  const images: Record<string, unknown> = {};
-  for (const slot of IMAGE_SLOTS) {
-    images[slot] = { path: "/images/x.jpg", alt: "x", width: 100, height: 100 };
-  }
-  return {
-    version: 1,
-    business: {
-      defaultWhatsApp: "447789096148",
-      hours: [
-        {
-          dayOfWeek: ["Monday", "Tuesday"],
-          days: "Mon – Tue",
-          shortDays: "Mon – Tue",
-          open: "10:00",
-          close: "19:00",
-          lastAppointment: "18:00",
-        },
-      ],
-    },
-    barbers: [
-      { id: "11111111-1111-4111-8111-111111111111", name: "Rave", days: "Mon – Sat", whatsApp: "447789096148", cutPrices: ["£30", "£35", "£20"] },
-    ],
-    services: Object.fromEntries(
-      CATS.map((c) => [
-        c,
-        { intro: ["a", "b"], items: { Item: { prices: ["£10"], desc: "d", ideal: "i" } } },
-      ]),
-    ),
-    sharedNotes: { chemical: "note" },
-    images,
-  };
+function makeContent(): Draft {
+  return structuredClone(DEFAULT_CONTENT);
 }
 
 function mutated(fn: (c: ReturnType<typeof makeContent>) => void) {
