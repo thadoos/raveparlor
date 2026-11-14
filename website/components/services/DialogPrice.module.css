@@ -111,7 +111,20 @@
   display: flex;
   animation: rowIn 0.5s var(--ease);
 }
-.who .cell:first-child {
+/* barbers with different prices: the list shows in the details too */
+.who.isListed {
+  display: flex;
+  margin-top: 0;
+}
+.who.isListed:not(.isPicking) {
+  flex-direction: column;
+  font-size: 18px;
+  font-weight: 600;
+}
+.who.isListed:not(.isPicking) .cell:last-child {
+  display: none;
+}
+.who.isPicking .cell:first-child {
   margin-left: -12px;
 }
 @keyframes rowIn {

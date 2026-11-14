@@ -29,13 +29,12 @@ interface ServiceCardProps {
  */
 export function ServiceCard({ categoryKey, index, item, animate }: ServiceCardProps) {
   const { state, open, registerCard } = useServiceDialog();
-  const { site, menu } = useSiteView();
-  const category = menu[categoryKey];
+  const { site, barbers } = useSiteView();
   const ref = useMemo(() => registerCard(categoryKey, index), [registerCard, categoryKey, index]);
   // An attribute rather than an Editable wrapper: the grid styles cards with :last-child.
   const editProps = useEditTargetProps({ kind: "item", category: categoryKey, item: item.key });
   const price = priceLabel(item);
-  const pickable = isPickable(item, category);
+  const pickable = isPickable(item);
   // the card stays hidden behind the dialog that expands out of it
   const target = state.target;
   const hidden =
@@ -86,8 +85,8 @@ export function ServiceCard({ categoryKey, index, item, animate }: ServiceCardPr
           className={styles.booknow}
           href={bookingHref({
             item,
-            category,
             selection: null,
+            barbers,
             defaultWhatsApp: site.whatsappNumber,
           })}
           target="_blank"

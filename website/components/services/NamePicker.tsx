@@ -1,34 +1,37 @@
 import type { Selection } from "@/lib/booking/picker";
 import { cx } from "@/lib/cx";
-import type { Barber } from "@/lib/data/services";
+import type { PriceRow } from "@/lib/data/services";
 import styles from "./DialogPrice.module.css";
 import { PriceCell } from "./PriceCell";
 
 interface NamePickerProps {
-  barbers: readonly Barber[];
+  /** The barbers' rows of a service without options (one price each). */
+  rows: readonly PriceRow[];
   picking: boolean;
+  /** Show the list outside the booking step too (when the barbers' prices differ). */
+  listed: boolean;
   selection: Selection | null;
   onPick: (selection: Selection) => void;
 }
 
-/** For a single-price service with a barber choice: just the names, shown while picking. */
-export function NamePicker({ barbers, picking, selection, onPick }: NamePickerProps) {
+/** For a service without options and a barber choice: each barber with their price. */
+export function NamePicker({ rows, picking, listed, selection, onPick }: NamePickerProps) {
   return (
-    <div className={cx(styles.who, picking && styles.isPicking)}>
-      {barbers.map((barber, row) => (
+    <div className={cx(styles.who, picking && styles.isPicking, listed && styles.isListed)}>
+      {rows.map((row, r) => (
         <PriceCell
-          key={barber.id}
-          label={barber.name}
+          key={row.barberId ?? r}
+          label={`${row.label} · ${row.prices[0] ?? "–"}`}
           picking={picking}
-          selected={selection?.row === row}
-          onPick={() => onPick({ barberId: barber.id, cut: null, row, col: 0 })}
+          selected={selection?.row === r}
+          onPick={() => onPick({ barberId: row.barberId, cut: null, row: r, col: 0 })}
         />
       ))}
       <PriceCell
         label="No preference"
         picking={picking}
-        selected={selection?.row === barbers.length}
-        onPick={() => onPick({ barberId: null, cut: null, row: barbers.length, col: 0 })}
+        selected={selection?.row === rows.length}
+        onPick={() => onPick({ barberId: null, cut: null, row: rows.length, col: 0 })}
       />
     </div>
   );

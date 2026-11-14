@@ -33,7 +33,7 @@ interface ServiceDialogContentProps {
  * the selection starts empty.
  */
 export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
-  const { site, menu } = useSiteView();
+  const { site, menu, barbers } = useSiteView();
   const category = menu[target.category];
   const item = category.items[target.index];
   const [picker, dispatch] = useReducer(pickerReducer, target.picking, initialPickerState);
@@ -41,7 +41,7 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
   const reducedMotion = useReducedMotion();
   const priceRef = useRef<HTMLDivElement>(null);
   const bookRef = useRef<HTMLAnchorElement>(null);
-  const pickable = isPickable(item, category);
+  const pickable = isPickable(item);
 
   function onBook(e: MouseEvent<HTMLAnchorElement>) {
     const intent = bookIntent(picker, pickable);
@@ -65,7 +65,6 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
 
   const priceProps = {
     item,
-    category,
     picking: picker.flipped,
     selection: picker.selection,
     onPick: (selection: Selection) => dispatch({ type: "pick", selection }),
@@ -73,7 +72,7 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
 
   return (
     <div className={dialogStyles.body}>
-      <DialogMedia category={target.category} images={category.images} />
+      <DialogMedia photos={item.photos} />
       <div className={styles.text}>
         <DialogRating site={site} />
         <p className={styles.cat} id="md-cat">
@@ -87,14 +86,18 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
           id="md-price"
           ref={priceRef}
         >
-          {item.cols ? <PriceTable {...priceProps} /> : <SinglePrice {...priceProps} />}
+          {item.options.length > 0 ? (
+            <PriceTable {...priceProps} />
+          ) : (
+            <SinglePrice {...priceProps} />
+          )}
         </div>
         <DialogDetails item={item} flipped={picker.flipped} />
         <DialogActions
           href={bookingHref({
             item,
-            category,
             selection: picker.selection,
+            barbers,
             defaultWhatsApp: site.whatsappNumber,
           })}
           flipped={picker.flipped}

@@ -1,25 +1,29 @@
 import type { Selection } from "@/lib/booking/picker";
-import type { MenuCategory, MenuItem } from "@/lib/data/services";
+import type { MenuItem } from "@/lib/data/services";
 import styles from "./DialogPrice.module.css";
 import { NamePicker } from "./NamePicker";
 
 interface SinglePriceProps {
   item: MenuItem;
-  category: MenuCategory;
   picking: boolean;
   selection: Selection | null;
   onPick: (selection: Selection) => void;
 }
 
-/** A service with one price or range; a barber choice (names only) when the category has barbers. */
-export function SinglePrice({ item, category, picking, selection, onPick }: SinglePriceProps) {
+/**
+ * A service without options: one price, or with a barber choice the barbers and their prices. When
+ * every barber charges the same, the details show the one price and the barbers appear while picking.
+ */
+export function SinglePrice({ item, picking, selection, onPick }: SinglePriceProps) {
+  const listed = item.byBarber && !item.collapsed;
   return (
     <>
-      <div className={styles.one}>{item.range}</div>
-      {category.barbers && (
+      {!listed && <div className={styles.one}>{item.rows.at(0)?.prices[0]}</div>}
+      {item.byBarber && (
         <NamePicker
-          barbers={category.barbers}
+          rows={item.rows}
           picking={picking}
+          listed={listed}
           selection={selection}
           onPick={onPick}
         />

@@ -5,6 +5,8 @@
 import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { DEFAULT_CONTENT } from "@/lib/content/defaults";
+import { parseSiteContent } from "@/lib/content/schema";
+import type { SiteContent } from "@/lib/content/schema";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -55,8 +57,15 @@ async function ensureAdminRow(supabase: SupabaseClient, userId: string): Promise
   console.log(data.length > 0 ? "Added user to admins" : "User is already an admin");
 }
 
-async function ensureContentRows(supabase: SupabaseClient): Promise<void> {
-  const rows = (["draft", "published"] as const).map((id) => ({ id, content: DEFAULT_CONTENT }));
+/** DEFAULT_CONTENT, validated: invalid content is never seeded. */
+function validDefaultContent(): SiteContent {
+  const result = parseSiteContent(DEFAULT_CONTENT);
+  if (!result.ok) throw new Error(`DEFAULT_CONTENT is invalid:\n${result.issues.join("\n")}`);
+  return result.content;
+}
+
+async function ensureContentRows(supabase: SupabaseClient, content: SiteContent): Promise<void> {
+  const rows = (["draft", "published"] as const).map((id) => ({ id, content }));
   const { data, error } = await supabase
     .from("site_content")
     .upsert(rows, { onConflict: "id", ignoreDuplicates: true })
@@ -71,6 +80,7 @@ async function ensureContentRows(supabase: SupabaseClient): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  const content = validDefaultContent();
   const supabase = createClient(
     requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
     requireEnv("SUPABASE_SECRET_KEY"),
@@ -84,7 +94,7 @@ async function main(): Promise<void> {
     requireEnv("ADMIN_PASSWORD"),
   );
   await ensureAdminRow(supabase, userId);
-  await ensureContentRows(supabase);
+  await ensureContentRows(supabase, content);
 }
 
 main().catch((error: unknown) => {

@@ -1,28 +1,29 @@
 import { serviceMessage, whatsappLink } from "@/lib/contact";
-import type { MenuCategory, MenuItem } from "@/lib/data/services";
+import type { Barber, MenuItem } from "@/lib/data/services";
 import type { Selection } from "./picker";
 
 export interface BookingOptions {
   item: MenuItem;
-  category: MenuCategory;
   /** What the visitor picked, or null when nothing is picked (or the service has no choices). */
   selection: Selection | null;
+  /** All barbers, to look up the chosen one. */
+  barbers: readonly Barber[];
   /** The number to message when no barber is chosen. */
   defaultWhatsApp: string;
 }
 
-function selectedBarber({ category, selection }: BookingOptions) {
+function selectedBarber({ barbers, selection }: BookingOptions) {
   const id = selection?.barberId;
-  return id ? category.barbers?.find((barber) => barber.id === id) : undefined;
+  return id ? barbers.find((barber) => barber.id === id) : undefined;
 }
 
 /** The WhatsApp message for a service and the current selection. */
 export function bookingMessage(options: BookingOptions): string {
-  const { item, category, selection } = options;
+  const { item, selection } = options;
   return serviceMessage({
     service: item.name,
     barber: selectedBarber(options)?.name ?? null,
-    chooseBarber: !!category.barbers,
+    chooseBarber: item.byBarber,
     cut: selection?.cut ?? null,
   });
 }

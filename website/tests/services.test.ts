@@ -7,7 +7,6 @@ import {
   cardAriaLabel,
   categoryStats,
   cutLabel,
-  hasChoices,
   isPickable,
   isPrice,
   minPriceForColumn,
@@ -51,27 +50,19 @@ describe("isPrice", () => {
   });
 });
 
-describe("hasChoices and isPickable", () => {
-  it("needs at least two real prices to have choices", () => {
-    expect(hasChoices(item("colour", "Root Retouching"))).toBe(false);
-    expect(hasChoices(item("colour", "Full Head Colour"))).toBe(true);
-    expect(hasChoices(item("perm", "Half-Head Perm on Top"))).toBe(false);
+describe("isPickable", () => {
+  it("is pickable when prices depend on the barber", () => {
+    expect(isPickable(item("cut", "Cutting & Finishing"))).toBe(true);
+    expect(isPickable(item("cut", "Cleansing & Styling"))).toBe(true);
+    expect(isPickable(item("cut", "Up-do Hairdressing"))).toBe(true);
   });
 
-  it("has no choices for per-barber rows or single prices", () => {
-    expect(hasChoices(item("cut", "Cutting & Finishing"))).toBe(false);
-    expect(hasChoices(item("cut", "Cleansing & Styling"))).toBe(false);
-  });
-
-  it("is pickable when the category has barbers or the item has choices", () => {
-    expect(isPickable(item("colour", "Root Retouching"), MENU.colour)).toBe(false);
-    expect(isPickable(item("colour", "Full Head Colour"), MENU.colour)).toBe(true);
-    expect(isPickable(item("perm", "Half-Head Perm on Top"), MENU.perm)).toBe(false);
-    expect(isPickable(item("cut", "Cutting & Finishing"), MENU.cut)).toBe(true);
-    expect(isPickable(item("cut", "Cleansing & Styling"), MENU.cut)).toBe(true);
-    for (const treatment of MENU.treat.items) {
-      expect(isPickable(treatment, MENU.treat)).toBe(false);
-    }
+  it("needs at least two options with real prices otherwise", () => {
+    expect(isPickable(item("colour", "Full Head Colour"))).toBe(true);
+    expect(isPickable(item("colour", "Root Retouching"))).toBe(false);
+    expect(isPickable(item("perm", "Half-Head Perm on Top"))).toBe(false);
+    expect(isPickable(item("treat", "Olaplex No.1 & No.2"))).toBe(false);
+    for (const treatment of MENU.treat.items) expect(isPickable(treatment)).toBe(false);
   });
 });
 
@@ -94,7 +85,11 @@ describe("priceLabel", () => {
     expect(priceLabel(item("treat", "Olaplex No.1 & No.2"))).toEqual({ text: "£30" });
   });
 
-  it("prefixes 'From' when there are several columns", () => {
+  it("shows a collapsed per-barber price as written", () => {
+    expect(priceLabel(item("cut", "Cleansing & Styling"))).toEqual({ text: "£30 – £40" });
+  });
+
+  it("prefixes 'From' when there are several distinct prices", () => {
     expect(priceLabel(item("colour", "Full Head Colour"))).toEqual({
       prefix: "From",
       text: "£80",
@@ -130,8 +125,11 @@ describe("minPriceForColumn", () => {
     expect([0, 1, 2].map((col) => minPriceForColumn(cutting, col))).toEqual([40, 60, 30]);
   });
 
-  it("is null without per-barber rows", () => {
-    expect(minPriceForColumn(item("colour", "Full Head Colour"), 0)).toBeNull();
+  it("uses the single row of items without a barber axis", () =>
+    expect(minPriceForColumn(item("colour", "Full Head Colour"), 0)).toBe(80));
+
+  it("is null when no row has a price in the column", () => {
+    expect(minPriceForColumn(item("colour", "Root Retouching"), 1)).toBeNull();
     expect(minPriceForColumn(item("cut", "Cutting & Finishing"), 5)).toBeNull();
   });
 });

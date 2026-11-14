@@ -1,10 +1,11 @@
 import { formatUkPhone } from "@/lib/content/normalize";
 import { CATEGORY_KEYS, IMAGE_SLOTS } from "@/lib/content/schema";
-import type { CategoryKey, ImageRef, ImageSlot, SiteContent } from "@/lib/content/schema";
+import { allCells, priceRows, rowsIdentical } from "@/lib/content/prices";
+import type { Barber, CategoryKey, ImageRef, ImageSlot, SiteContent } from "@/lib/content/schema";
 import { IMAGE_POSITIONS, MENU_STRUCTURE } from "@/lib/content/structure";
 import { SITE_STATIC } from "@/lib/data/site";
 import type { SiteInfo } from "@/lib/data/site";
-import type { MenuCategory, MenuItem } from "@/lib/data/services";
+import type { MenuCategory, MenuItem, PriceRow } from "@/lib/data/services";
 
 /** Turns the content document into the shapes the components render. Pure: no I/O. */
 
@@ -19,6 +20,8 @@ export interface ResolvedImage {
 export interface SiteView {
   site: SiteInfo;
   menu: Record<CategoryKey, MenuCategory>;
+  /** The barbers, in display order (booking looks up the chosen barber's name and number here). */
+  barbers: readonly Barber[];
   images: Record<ImageSlot, ResolvedImage>;
 }
 
@@ -34,58 +37,59 @@ export function resolveImage(ref: ImageRef, supabaseUrl: string, position?: stri
 
 /** The lowest £ amount in any of the price strings, e.g. ["£100 – £220+"] gives "£100". */
 export function deriveFrom(prices: readonly string[]): string {
-  const amounts = prices.flatMap((price) => Array.from(price.matchAll(/£(\d+)/g), (m) => Number(m[1])));
+  const amounts = prices.flatMap((price) =>
+    Array.from(price.matchAll(/£(\d+)/g), (m) => Number(m[1])),
+  );
   return amounts.length > 0 ? `£${Math.min(...amounts)}` : "–";
 }
 
-function buildItem(content: SiteContent, category: CategoryKey, itemIndex: number): MenuItem {
+function buildItem(
+  content: SiteContent,
+  category: CategoryKey,
+  itemIndex: number,
+  supabaseUrl: string,
+): MenuItem {
   const structure = MENU_STRUCTURE[category].items[itemIndex];
-  const data = content.services[category].items[structure.key];
+  const items = content.services[category].items;
+  const data = Object.hasOwn(items, structure.key) ? items[structure.key] : undefined;
   if (!data) throw new Error(`Missing content for ${category}.${structure.key}`);
 
   const note = data.note ?? (structure.chemicalNote ? content.sharedNotes.chemical : undefined);
-  const base = { key: structure.key, name: structure.name, desc: data.desc, ideal: data.ideal };
-  const extras = {
+  const barbers = new Map(content.barbers.map((barber) => [barber.id, barber]));
+  const stored = priceRows(data, content.barbers);
+  const rows: PriceRow[] = stored.map(({ barberId, prices }) => {
+    const barber = barberId === null ? undefined : barbers.get(barberId);
+    return { label: barber?.name ?? "", sub: barber?.days ?? "", prices, barberId };
+  });
+  return {
+    key: structure.key,
+    name: structure.name,
+    options: [...data.options],
+    byBarber: data.byBarber,
+    rows,
+    collapsed: data.byBarber && rowsIdentical(stored),
+    from: deriveFrom(allCells(data, content.barbers)),
     ...(structure.single ? { single: true } : {}),
+    desc: data.desc,
+    ideal: data.ideal,
     ...(note !== undefined ? { note } : {}),
+    photos: data.photos.map((photo) => resolveImage(photo, supabaseUrl)),
   };
-
-  if (structure.kind === "barberTable") {
-    return {
-      ...base,
-      ...extras,
-      cols: structure.cols,
-      rows: content.barbers.map((barber) => ({
-        label: barber.name,
-        sub: barber.days,
-        prices: barber.cutPrices,
-        barberId: barber.id,
-      })),
-      from: deriveFrom(content.barbers.flatMap((barber) => barber.cutPrices)),
-    };
-  }
-  if (structure.kind === "table") {
-    const prices = data.prices ?? [];
-    return { ...base, ...extras, cols: structure.cols, prices, from: deriveFrom(prices) };
-  }
-  const range = data.range ?? "";
-  return { ...base, ...extras, range, from: deriveFrom([range]) };
 }
 
 export function buildMenu(
   content: SiteContent,
   images: Record<ImageSlot, ResolvedImage>,
+  supabaseUrl: string,
 ): Record<CategoryKey, MenuCategory> {
   const entries = CATEGORY_KEYS.map((key) => {
     const structure = MENU_STRUCTURE[key];
     const category: MenuCategory = {
       name: structure.name,
-      images: [images[`dialog.${key}.0`], images[`dialog.${key}.1`]],
       media: images[`media.${key}`],
       intro: content.services[key].intro,
-      items: structure.items.map((_, index) => buildItem(content, key, index)),
+      items: structure.items.map((_, index) => buildItem(content, key, index, supabaseUrl)),
     };
-    if (structure.barbers) category.barbers = content.barbers;
     return [key, category] as const;
   });
   return Object.fromEntries(entries) as Record<CategoryKey, MenuCategory>;
@@ -102,7 +106,15 @@ export function buildSiteInfo(content: SiteContent): SiteInfo {
 
 export function buildSiteView(content: SiteContent, supabaseUrl: string): SiteView {
   const images = Object.fromEntries(
-    IMAGE_SLOTS.map((slot) => [slot, resolveImage(content.images[slot], supabaseUrl, IMAGE_POSITIONS[slot])]),
+    IMAGE_SLOTS.map((slot) => [
+      slot,
+      resolveImage(content.images[slot], supabaseUrl, IMAGE_POSITIONS[slot]),
+    ]),
   ) as Record<ImageSlot, ResolvedImage>;
-  return { site: buildSiteInfo(content), menu: buildMenu(content, images), images };
+  return {
+    site: buildSiteInfo(content),
+    menu: buildMenu(content, images, supabaseUrl),
+    barbers: content.barbers,
+    images,
+  };
 }

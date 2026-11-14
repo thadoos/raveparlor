@@ -13,7 +13,8 @@ const CONTENT = {
     b.name === "Julian" ? { ...b, whatsApp: JULIAN_NUMBER } : b,
   ),
 };
-const MENU = buildSiteView(CONTENT, "").menu;
+const VIEW = buildSiteView(CONTENT, "");
+const MENU = VIEW.menu;
 
 function barberId(name: string): string {
   const found = CONTENT.barbers.find((b) => b.name === name);
@@ -34,7 +35,7 @@ describe("bookingMessage", () => {
     expect(
       bookingMessage({
         item: cutting,
-        category: MENU.cut,
+        barbers: VIEW.barbers,
         selection: { barberId: barberId("Julian"), cut: "Ladies", row: 2, col: 1 },
         defaultWhatsApp: DEFAULT_NUMBER,
       }),
@@ -45,18 +46,29 @@ describe("bookingMessage", () => {
     expect(
       bookingMessage({
         item: cutting,
-        category: MENU.cut,
+        barbers: VIEW.barbers,
         selection: { barberId: null, cut: "Gentleman", row: 3, col: 0 },
         defaultWhatsApp: DEFAULT_NUMBER,
       }),
     ).toBe("Hi, I'd like to book Cutting and Finishing (Gentleman). Any barber is fine.");
   });
 
-  it("asks for a barber on every service in a category with barbers, before any pick", () => {
+  it("names the barber picked on a single-price service", () => {
+    const options = {
+      item: item("cut", "Cleansing & Styling"),
+      barbers: VIEW.barbers,
+      selection: { barberId: barberId("Julian"), cut: null, row: 2, col: 0 },
+      defaultWhatsApp: DEFAULT_NUMBER,
+    };
+    expect(bookingMessage(options)).toBe("Hi, I'd like to book Cleansing and Styling with Julian.");
+    expect(bookingHref(options).startsWith(`https://wa.me/${JULIAN_NUMBER}?text=`)).toBe(true);
+  });
+
+  it("asks for a barber on every service with per-barber prices, before any pick", () => {
     expect(
       bookingMessage({
         item: item("cut", "Up-do Hairdressing"),
-        category: MENU.cut,
+        barbers: VIEW.barbers,
         selection: null,
         defaultWhatsApp: DEFAULT_NUMBER,
       }),
@@ -64,7 +76,7 @@ describe("bookingMessage", () => {
     expect(
       bookingMessage({
         item: item("cut", "Up-do Hairdressing"),
-        category: MENU.cut,
+        barbers: VIEW.barbers,
         selection: { barberId: barberId("Rave"), cut: null, row: 0, col: 0 },
         defaultWhatsApp: DEFAULT_NUMBER,
       }),
@@ -75,7 +87,7 @@ describe("bookingMessage", () => {
     expect(
       bookingMessage({
         item: item("colour", "Full Head Colour"),
-        category: MENU.colour,
+        barbers: VIEW.barbers,
         selection: { barberId: null, cut: "Medium length", row: 0, col: 1 },
         defaultWhatsApp: DEFAULT_NUMBER,
       }),
@@ -86,7 +98,7 @@ describe("bookingMessage", () => {
     expect(
       bookingMessage({
         item: item("colour", "Root Retouching"),
-        category: MENU.colour,
+        barbers: VIEW.barbers,
         selection: null,
         defaultWhatsApp: DEFAULT_NUMBER,
       }),
@@ -94,7 +106,7 @@ describe("bookingMessage", () => {
     expect(
       bookingMessage({
         item: item("treat", "Olaplex No.1 & No.2"),
-        category: MENU.treat,
+        barbers: VIEW.barbers,
         selection: null,
         defaultWhatsApp: DEFAULT_NUMBER,
       }),
@@ -106,7 +118,7 @@ describe("bookingHref", () => {
   it("is a WhatsApp link with the message", () => {
     const options = {
       item: item("perm", "Ion Straightening"),
-      category: MENU.perm,
+      barbers: VIEW.barbers,
       selection: null,
       defaultWhatsApp: DEFAULT_NUMBER,
     };
@@ -114,7 +126,7 @@ describe("bookingHref", () => {
   });
 
   const cutting = () => item("cut", "Cutting & Finishing");
-  const base = () => ({ item: cutting(), category: MENU.cut, defaultWhatsApp: DEFAULT_NUMBER });
+  const base = () => ({ item: cutting(), barbers: VIEW.barbers, defaultWhatsApp: DEFAULT_NUMBER });
 
   it("uses the chosen barber's number", () => {
     const href = bookingHref({
