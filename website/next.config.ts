@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  // Two root layouts ((site) and (admin)), so unmatched URLs need app/global-not-found.tsx.
+  experimental: { globalNotFound: true },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: supabaseUrl

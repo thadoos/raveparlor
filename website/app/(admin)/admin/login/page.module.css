@@ -1,0 +1,51 @@
+/* Mobile first: the image sits on top at reduced height, the form below. */
+.page {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+.media {
+  position: relative;
+  height: 32vh;
+  min-height: 200px;
+  background: var(--color-offwhite);
+}
+.media img {
+  object-fit: cover;
+}
+.panel {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px 56px;
+}
+.inner {
+  width: 100%;
+  max-width: 360px;
+}
+.title {
+  margin: 10px 0 32px;
+  font-weight: 200;
+  font-size: 30px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 821px) {
+  .page {
+    flex-direction: row;
+  }
+  .media {
+    flex: 1 1 50%;
+    height: auto;
+  }
+  .panel {
+    flex: 1 1 50%;
+    align-items: center;
+    padding: 48px;
+  }
+  .title {
+    font-size: 44px;
+  }
+}

@@ -1,0 +1,106 @@
+/* Admin globals: a small reset and the shared form primitives. Page and component styles live in
+   CSS Modules. Colours, type and timings come from ../styles/tokens.css. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--logo);
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a {
+  color: inherit;
+}
+img {
+  display: block;
+  max-width: 100%;
+}
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
+}
+
+/* Thin, letter-spaced uppercase label, as on the site */
+.admin-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.admin-input {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 8px;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-offwhite-muted);
+  border-radius: 0;
+  background: transparent;
+  font-size: 16px; /* 16px stops iOS zooming into the field */
+  transition: border-color var(--dur-fast);
+}
+.admin-input:focus {
+  outline: none;
+  border-bottom-color: var(--color-ink);
+}
+.admin-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 28px;
+  border: 1px solid var(--color-ink);
+  border-radius: 0;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast),
+    color var(--dur-fast),
+    opacity var(--dur-fast);
+}
+.admin-button:hover,
+.admin-button:focus-visible {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.admin-button:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+.admin-error {
+  margin: 0;
+  min-height: 1.6em;
+  font-size: 13px;
+  color: #a12a2a;
+}
+.admin-success {
+  margin: 0;
+  min-height: 1.6em;
+  font-size: 13px;
+  color: #2a6b3c;
+}

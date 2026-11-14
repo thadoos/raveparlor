@@ -1,0 +1,36 @@
+.page {
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px 56px;
+}
+.inner {
+  width: 100%;
+  max-width: 400px;
+}
+.back {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-muted);
+}
+.back:hover,
+.back:focus-visible {
+  color: var(--color-ink);
+}
+.title {
+  margin: 24px 0 32px;
+  font-weight: 200;
+  font-size: 26px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 821px) {
+  .page {
+    padding-top: 96px;
+  }
+  .title {
+    font-size: 34px;
+  }
+}

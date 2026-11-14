@@ -1,18 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Jost } from "next/font/google";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { getSiteView } from "@/lib/content/published";
 import { SITE_URL } from "@/lib/data/site";
+import { jost } from "@/lib/fonts";
 import { formatHoursSummary } from "@/lib/format";
 import { buildHairSalonLd } from "@/lib/seo";
 import "../globals.css";
-
-const jost = Jost({
-  variable: "--font-jost",
-  subsets: ["latin"],
-  weight: ["200", "300", "400"],
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const { site } = await getSiteView();
