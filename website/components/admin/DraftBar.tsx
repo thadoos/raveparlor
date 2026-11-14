@@ -162,8 +162,8 @@ export function DraftBar({ editor, mode, onModeChange }: DraftBarProps) {
       >
         {publishLines.length > 0 ? (
           <ul className={styles.list}>
-            {publishLines.map((line) => (
-              <li key={line}>{line}</li>
+            {publishLines.map((line, index) => (
+              <li key={index}>{line}</li>
             ))}
           </ul>
         ) : (
@@ -171,8 +171,8 @@ export function DraftBar({ editor, mode, onModeChange }: DraftBarProps) {
         )}
         {warnings.length > 0 ? (
           <ul className={styles.warnings}>
-            {warnings.map((warning) => (
-              <li key={warning.message}>{warning.message}</li>
+            {warnings.map((warning, index) => (
+              <li key={index}>{warning.message}</li>
             ))}
           </ul>
         ) : null}
