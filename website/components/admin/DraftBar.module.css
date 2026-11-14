@@ -1,0 +1,172 @@
+/* Phones: pinned to the bottom, within thumb reach. It sits after the main area (order) so sticky
+   bottom keeps it on screen. From 820px it moves to the top. The parent is a flex column. */
+.bar {
+  position: sticky;
+  bottom: 0;
+  order: 1;
+  z-index: var(--z-header);
+  border-top: 1px solid var(--color-offwhite-muted);
+  background: var(--color-paper);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+}
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: var(--layout-max);
+  margin: 0 auto;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modes {
+  display: flex;
+  flex-shrink: 0;
+  border: 1px solid var(--color-ink);
+}
+.mode {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.mode[aria-pressed="true"] {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.status {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 13px;
+  color: var(--color-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu {
+  position: relative;
+  flex-shrink: 0;
+}
+.menuButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  list-style: none;
+  cursor: pointer;
+}
+.menuButton::-webkit-details-marker {
+  display: none;
+}
+.menuPanel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  z-index: var(--z-menu);
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  padding: 6px 0;
+  border: 1px solid var(--color-ink);
+  background: var(--color-paper);
+}
+.menuItem {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.menuItem:hover,
+.menuItem:focus-visible {
+  background: var(--color-offwhite);
+}
+
+.action {
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 0 12px;
+}
+.secondary {
+  background: transparent;
+  color: var(--color-ink);
+}
+.secondary:hover,
+.secondary:focus-visible {
+  background: var(--color-offwhite);
+}
+.action:disabled {
+  cursor: not-allowed;
+}
+
+.list,
+.warnings {
+  margin: 0;
+  padding-left: 18px;
+}
+.warnings {
+  margin-top: 16px;
+  color: #8a5a00;
+}
+.list li + li,
+.warnings li + li {
+  margin-top: 4px;
+}
+
+@media (min-width: 820px) {
+  .bar {
+    top: 0;
+    bottom: auto;
+    order: 0;
+    border-top: 0;
+    border-bottom: 1px solid var(--color-offwhite-muted);
+    padding: 12px 32px;
+  }
+  .inner {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+  }
+  /* One line: modes, status, actions, menu */
+  .row {
+    display: contents;
+  }
+  .status {
+    order: 1;
+  }
+  .action {
+    order: 2;
+    flex: 0 0 auto;
+    padding: 0 24px;
+  }
+  .menu {
+    order: 3;
+  }
+  .menuPanel {
+    top: calc(100% + 8px);
+    bottom: auto;
+  }
+  .inner > :global(.admin-error) {
+    order: 4;
+    flex-basis: 100%;
+  }
+}

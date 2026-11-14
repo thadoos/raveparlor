@@ -1,7 +1,12 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { ADMIN_PATH, LOGIN_PATH, requireAdmin } from "@/lib/admin/auth";
+import { CONTENT_TAG } from "@/lib/content/published";
+import { parseSiteContent } from "@/lib/content/schema";
+import type { SiteContent } from "@/lib/content/schema";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 /** Every action re-checks auth itself: server actions are public endpoints. */
@@ -65,11 +70,15 @@ export async function changePassword(_prev: AuthState, formData: FormData): Prom
   if (next.length < MIN_PASSWORD_LENGTH) {
     return { error: `The new password needs at least ${MIN_PASSWORD_LENGTH} characters.` };
   }
-  if (next === current) return { error: "The new password must be different from the current one." };
+  if (next === current)
+    return { error: "The new password must be different from the current one." };
   if (next !== confirm) return { error: "The new passwords don't match." };
 
   const supabase = await createServerSupabase();
-  const { error: verifyError } = await supabase.auth.signInWithPassword({ email, password: current });
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email,
+    password: current,
+  });
   if (verifyError) return { error: "The current password is wrong." };
 
   const { error } = await supabase.auth.updateUser({ password: next });
@@ -78,4 +87,97 @@ export async function changePassword(_prev: AuthState, formData: FormData): Prom
   // Anyone signed in elsewhere with the old password loses access.
   await supabase.auth.signOut({ scope: "others" });
   return { ok: true };
+}
+
+// Draft content ------------------------------------------------------------------------------
+
+export type ActionResult = { ok: true } | { ok: false; error: string };
+
+async function readContent(
+  supabase: SupabaseClient,
+  id: "draft" | "published",
+): Promise<SiteContent> {
+  const { data, error } = await supabase
+    .from("site_content")
+    .select("content")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load ${id} content: ${error.message}`);
+  if (!data) throw new Error(`No ${id} content`);
+  const result = parseSiteContent(data.content);
+  if (!result.ok) throw new Error(`Invalid ${id} content:\n${result.issues.join("\n")}`);
+  return result.content;
+}
+
+/** Validates, then writes the draft row. Invalid content never reaches the database. */
+async function writeDraft(supabase: SupabaseClient, content: unknown): Promise<ActionResult> {
+  const result = parseSiteContent(content);
+  if (!result.ok) return { ok: false, error: result.issues.join("; ") };
+
+  const { data, error } = await supabase
+    .from("site_content")
+    .update({ content: result.content, updated_at: new Date().toISOString() })
+    .eq("id", "draft")
+    .select("id");
+  if (error) {
+    console.error("saveDraft failed:", error.message);
+    return { ok: false, error: "Couldn't save the draft. Try again." };
+  }
+  // RLS filters silently: no row back means nothing was written.
+  if (!data || data.length === 0)
+    return { ok: false, error: "Couldn't save the draft. Try again." };
+  return { ok: true };
+}
+
+export async function loadDraft(): Promise<{ draft: SiteContent; published: SiteContent }> {
+  await requireAdmin();
+  const supabase = await createServerSupabase();
+  const [draft, published] = await Promise.all([
+    readContent(supabase, "draft"),
+    readContent(supabase, "published"),
+  ]);
+  return { draft, published };
+}
+
+export async function saveDraft(content: SiteContent): Promise<ActionResult> {
+  await requireAdmin();
+  return writeDraft(await createServerSupabase(), content);
+}
+
+/** Saves the given content as the draft, publishes it atomically, then expires the site's cache. */
+export async function publishDraft(
+  content: SiteContent,
+): Promise<ActionResult & { publishedAt?: string }> {
+  await requireAdmin();
+  const supabase = await createServerSupabase();
+  const saved = await writeDraft(supabase, content);
+  if (!saved.ok) return saved;
+
+  const { data, error } = await supabase.rpc("publish_draft");
+  if (error) {
+    console.error("publishDraft failed:", error.message);
+    return { ok: false, error: "The draft was saved, but publishing failed. Try again." };
+  }
+  updateTag(CONTENT_TAG);
+  return { ok: true, publishedAt: typeof data === "string" ? data : undefined };
+}
+
+/** Resets the draft to what's live and returns it. */
+export async function discardDraft(): Promise<ActionResult & { content?: SiteContent }> {
+  await requireAdmin();
+  const supabase = await createServerSupabase();
+  const { error } = await supabase.rpc("discard_draft");
+  if (error) {
+    console.error("discardDraft failed:", error.message);
+    return { ok: false, error: "Couldn't discard the draft. Try again." };
+  }
+  try {
+    return { ok: true, content: await readContent(supabase, "draft") };
+  } catch (e) {
+    console.error("discardDraft reload failed:", e);
+    return {
+      ok: false,
+      error: "The draft was discarded, but reloading it failed. Refresh the page.",
+    };
+  }
 }

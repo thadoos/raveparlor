@@ -1,0 +1,20 @@
+/* Flex column so DraftBar can reorder itself: after main on phones, before it from 820px. */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--layout-max);
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+@media (min-width: 820px) {
+  .main {
+    padding: 40px 32px 64px;
+  }
+}
