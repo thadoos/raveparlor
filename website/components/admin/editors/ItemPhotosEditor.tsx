@@ -46,6 +46,7 @@ export function ItemPhotosEditor({ draft, apply, category, item, index }: ItemPh
         <div key={i} className={styles.photo}>
           {photos.length === 2 ? <p className="admin-label">Photo {i + 1}</p> : null}
           <PhotoEditor
+            name={photos.length === 2 ? `Photo ${i + 1}` : undefined}
             photo={photos[i]}
             folder={folder}
             onReplace={(image) =>
@@ -72,9 +73,8 @@ export function ItemPhotosEditor({ draft, apply, category, item, index }: ItemPh
         </div>
       ))}
 
-      {index === undefined && photos.length === 1 ? (
-        <PhotoPicker label="Add a second photo" upload={add} />
-      ) : null}
+      {/* Also offered from photo 1 in visual mode: phones show only that one in the dialog. */}
+      {photos.length === 1 ? <PhotoPicker label="Add a second photo" upload={add} /> : null}
     </div>
   );
 }

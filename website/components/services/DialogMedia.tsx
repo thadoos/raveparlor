@@ -20,7 +20,7 @@ export function DialogMedia({ category, item, photos }: DialogMediaProps) {
         <Editable key={i} target={{ kind: "itemPhoto", category, item, index: i === 0 ? 0 : 1 }}>
           <Image
             src={photo.src}
-            alt=""
+            alt={photo.alt}
             width={800}
             height={500}
             sizes="(max-width: 820px) 100vw, 520px"

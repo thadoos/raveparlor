@@ -93,10 +93,19 @@ interface PhotoEditorProps {
   onAltChange: (alt: string) => void;
   /** Extra controls under the replace button, e.g. "Remove". */
   actions?: ReactNode;
+  /** Which photo this is, e.g. "Photo 2", when there are several: names its fields apart. */
+  name?: string;
 }
 
 /** One photo: preview, replace (resized in the browser, then uploaded) and alt text. */
-export function PhotoEditor({ photo, folder, onReplace, onAltChange, actions }: PhotoEditorProps) {
+export function PhotoEditor({
+  photo,
+  folder,
+  onReplace,
+  onAltChange,
+  actions,
+  name,
+}: PhotoEditorProps) {
   const upload = usePhotoUpload(folder, onReplace);
   const image = resolveImage(photo, SUPABASE_URL);
 
@@ -116,12 +125,15 @@ export function PhotoEditor({ photo, folder, onReplace, onAltChange, actions }: 
       </div>
 
       <div className={styles.actions}>
-        <PhotoPicker label="Replace photo" upload={upload} />
+        <PhotoPicker
+          label={name ? `Replace ${name.toLowerCase()}` : "Replace photo"}
+          upload={upload}
+        />
         {actions}
       </div>
 
       <TextField
-        label="Alt text"
+        label={name ? `${name} alt text` : "Alt text"}
         value={photo.alt}
         onChange={onAltChange}
         hint="Describe the photo for screen readers and search engines."
