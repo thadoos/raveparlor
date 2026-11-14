@@ -1,7 +1,7 @@
 import { deepEqual } from "@/lib/admin/changes";
 import type { EditTarget } from "@/lib/admin/target-key";
-import { CATEGORY_KEYS } from "@/lib/content/schema";
-import type { CategoryKey, SiteContent } from "@/lib/content/schema";
+import { CATEGORY_KEYS, IMAGE_SLOTS } from "@/lib/content/schema";
+import type { CategoryKey, ImageSlot, SiteContent } from "@/lib/content/schema";
 import { MENU_STRUCTURE } from "@/lib/content/structure";
 
 /** What form mode shows: one section at a time and, in Services, one service or category intro. */
@@ -14,6 +14,8 @@ export type FormItem = `${CategoryKey}.${string}`;
 export interface FormSelection {
   section: FormSection;
   item?: FormItem;
+  /** In Photos: the image to scroll to, e.g. the price poster a publish warning links to. */
+  slot?: ImageSlot;
 }
 
 export const FORM_SECTIONS: readonly { id: FormSection; label: string }[] = [
@@ -56,6 +58,10 @@ function isSection(value: string | null): value is FormSection {
   return FORM_SECTIONS.some((s) => s.id === value);
 }
 
+function isSlot(value: string | null): value is ImageSlot {
+  return (IMAGE_SLOTS as readonly (string | null)[]).includes(value);
+}
+
 function isCategory(value: string): value is CategoryKey {
   return (CATEGORY_KEYS as readonly string[]).includes(value);
 }
@@ -69,10 +75,17 @@ function splitItem(item: string): { category: CategoryKey; key: string | null } 
   return MENU_STRUCTURE[category].items.some((i) => i.key === key) ? { category, key } : null;
 }
 
-/** Reads `?section=&item=`. Unknown values fall back to Services with nothing selected. */
+/**
+ * Reads `?section=&item=` (or `?section=photos&slot=`). Unknown values fall back to Services with
+ * nothing selected; an unknown slot is dropped.
+ */
 export function parseFormSelection(params: URLSearchParams): FormSelection {
   const raw = params.get("section");
   const section = isSection(raw) ? raw : DEFAULT_SECTION;
+  if (section === "photos") {
+    const slot = params.get("slot");
+    return isSlot(slot) ? { section, slot } : { section };
+  }
   const item = params.get("item");
   if (section !== "services" || item === null || !splitItem(item)) return { section };
   return { section, item: item as FormItem };
@@ -82,6 +95,7 @@ export function parseFormSelection(params: URLSearchParams): FormSelection {
 export function formSelectionQuery(s: FormSelection): string {
   const params = new URLSearchParams({ section: s.section });
   if (s.section === "services" && s.item) params.set("item", s.item);
+  if (s.section === "photos" && s.slot) params.set("slot", s.slot);
   return params.toString();
 }
 
@@ -134,7 +148,7 @@ export function targetSelection(t: EditTarget): FormSelection {
     case "business":
       return { section: "business" };
     case "image":
-      return { section: "photos" };
+      return { section: "photos", slot: t.slot };
   }
 }
 

@@ -194,6 +194,11 @@
   min-width: 0;
   padding: 20px 16px;
   border: 1px solid var(--color-offwhite-muted);
+  /* a link can scroll to one card (the price poster from the publish warning) */
+  scroll-margin-top: 8px;
+}
+.photoCard:focus {
+  outline: none;
 }
 .photoTitle {
   margin: 0 0 16px;
@@ -270,5 +275,6 @@
   }
   .photoCard {
     padding: 24px 24px 28px;
+    scroll-margin-top: 96px;
   }
 }

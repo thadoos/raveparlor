@@ -45,6 +45,15 @@ describe("parseFormSelection", () => {
   it("ignores the item outside services", () => {
     expect(parse("section=hours&item=cut.cutting")).toEqual({ section: "hours" });
   });
+
+  it("round-trips a photo slot, and drops unknown slots or slots outside photos", () => {
+    const selection = parse("section=photos&slot=priceList");
+    expect(selection).toEqual({ section: "photos", slot: "priceList" });
+    expect(formSelectionQuery(selection)).toBe("section=photos&slot=priceList");
+    expect(parse("section=photos&slot=nope")).toEqual({ section: "photos" });
+    expect(parse("section=hours&slot=priceList")).toEqual({ section: "hours" });
+    expect(parse("section=photos")).toEqual({ section: "photos" });
+  });
 });
 
 describe("formSelectionQuery", () => {
@@ -85,7 +94,10 @@ describe("selection and targets", () => {
       section: "services",
       item: "colour.roots",
     });
-    expect(targetSelection({ kind: "image", slot: "priceList" })).toEqual({ section: "photos" });
+    expect(targetSelection({ kind: "image", slot: "priceList" })).toEqual({
+      section: "photos",
+      slot: "priceList",
+    });
     expect(targetSelection({ kind: "business" })).toEqual({ section: "business" });
   });
 });

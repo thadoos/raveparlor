@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { EditorFor } from "@/components/admin/editors/EditorFor";
 import type { EditorProps } from "@/components/admin/editors/types";
 import { FormShell } from "@/components/admin/form/FormShell";
@@ -14,7 +14,7 @@ import {
 import type { FormSelection } from "@/lib/admin/form-selection";
 import { IMAGE_GROUPS, imageSlotLabel, targetKey, targetLabel } from "@/lib/admin/targets";
 import type { EditTarget } from "@/lib/admin/targets";
-import type { SiteContent } from "@/lib/content/schema";
+import type { ImageSlot, SiteContent } from "@/lib/content/schema";
 
 interface FormModeProps extends EditorProps {
   /** The draft as last saved, for the changed-section dots. */
@@ -39,6 +39,16 @@ export function FormMode({
     [onSelect],
   );
 
+  // A link to one image (the poster warning) scrolls its card into view and focuses it. The card
+  // itself takes focus, not its first control: on phones an input would raise the keyboard.
+  const photoCards = useRef(new Map<ImageSlot, HTMLElement>());
+  const focusSlot = selection.section === "photos" ? selection.slot : undefined;
+  useEffect(() => {
+    const card = focusSlot ? photoCards.current.get(focusSlot) : undefined;
+    card?.focus({ preventScroll: true });
+    card?.scrollIntoView({ block: "start" });
+  }, [focusSlot]);
+
   const target = selectionTarget(selection);
   const sectionLabel = FORM_SECTIONS.find((s) => s.id === selection.section)?.label ?? "";
 
@@ -51,7 +61,16 @@ export function FormMode({
             <h3 className={styles.groupTitle}>{group.title}</h3>
             <div className={styles.photoGrid}>
               {group.slots.map((slot) => (
-                <section key={slot} className={styles.photoCard} aria-label={imageSlotLabel(slot)}>
+                <section
+                  key={slot}
+                  ref={(node) => {
+                    if (node) photoCards.current.set(slot, node);
+                    else photoCards.current.delete(slot);
+                  }}
+                  className={styles.photoCard}
+                  tabIndex={-1}
+                  aria-label={imageSlotLabel(slot)}
+                >
                   <h4 className={styles.photoTitle}>{imageSlotLabel(slot)}</h4>
                   <EditorFor target={{ kind: "image", slot }} draft={draft} apply={apply} />
                 </section>
