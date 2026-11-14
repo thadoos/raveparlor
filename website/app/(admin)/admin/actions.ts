@@ -8,6 +8,7 @@ import { ADMIN_PATH, LOGIN_PATH, getAdmin, requireAdmin } from "@/lib/admin/auth
 import { runDraftAction } from "@/lib/admin/draft-action";
 import type { ActionResult } from "@/lib/admin/draft-action";
 import { findOrphans } from "@/lib/admin/orphans";
+import type { StorageObject } from "@/lib/admin/orphans";
 import { CONTENT_TAG } from "@/lib/content/published";
 import { parseSiteContent } from "@/lib/content/schema";
 import type { SiteContent } from "@/lib/content/schema";
@@ -139,15 +140,17 @@ async function writeDraft(supabase: SupabaseClient, content: unknown): Promise<A
 // Image cleanup ------------------------------------------------------------------------------
 // Uploads land in storage before they are saved anywhere, so replaced or abandoned photos pile up.
 // After a publish or discard, anything not used by the draft, the live site or the last few
-// versions (kept so a rollback still has its photos) is removed.
+// versions (kept so a rollback still has its photos) is removed. Objects under an hour old are
+// skipped, so a photo uploaded but not yet saved to the draft survives (see findOrphans).
 
 const IMAGE_BUCKET = "site-images";
 const KEPT_VERSIONS = 10;
 const LIST_PAGE = 1000;
 
-/** Every object path in the bucket. Folders (entries without an id) are listed recursively. */
-async function listImagePaths(supabase: SupabaseClient, prefix = ""): Promise<string[]> {
-  const paths: string[] = [];
+/** Every object in the bucket, with its creation time. Folders (entries without an id) are listed
+ *  recursively. */
+async function listImages(supabase: SupabaseClient, prefix = ""): Promise<StorageObject[]> {
+  const objects: StorageObject[] = [];
   for (let offset = 0; ; offset += LIST_PAGE) {
     const { data, error } = await supabase.storage
       .from(IMAGE_BUCKET)
@@ -155,10 +158,11 @@ async function listImagePaths(supabase: SupabaseClient, prefix = ""): Promise<st
     if (error) throw new Error(`Listing "${prefix}" failed: ${error.message}`);
     for (const entry of data) {
       const path = prefix ? `${prefix}/${entry.name}` : entry.name;
-      if (entry.id === null) paths.push(...(await listImagePaths(supabase, path)));
-      else paths.push(path);
+      if (entry.id === null) objects.push(...(await listImages(supabase, path)));
+      // A missing timestamp reads as unknown age, which findOrphans keeps.
+      else objects.push({ path, createdAt: entry.created_at ?? "" });
     }
-    if (data.length < LIST_PAGE) return paths;
+    if (data.length < LIST_PAGE) return objects;
   }
 }
 
@@ -180,13 +184,15 @@ async function readRecentVersions(supabase: SupabaseClient): Promise<SiteContent
 /** Removes unreferenced images. Never throws: a failed cleanup only leaves files behind. */
 async function cleanupOrphans(supabase: SupabaseClient): Promise<void> {
   try {
-    const [paths, draft, published, versions] = await Promise.all([
-      listImagePaths(supabase),
+    const [objects, draft, published, versions] = await Promise.all([
+      listImages(supabase),
       readContent(supabase, "draft"),
       readContent(supabase, "published"),
       readRecentVersions(supabase),
     ]);
-    const orphans = findOrphans(paths, [draft, published, ...versions]);
+    const orphans = findOrphans(objects, [draft, published, ...versions], {
+      now: new Date(),
+    });
     if (orphans.length === 0) return;
     const { error } = await supabase.storage.from(IMAGE_BUCKET).remove(orphans);
     if (error) throw new Error(`Removing ${orphans.length} images failed: ${error.message}`);
