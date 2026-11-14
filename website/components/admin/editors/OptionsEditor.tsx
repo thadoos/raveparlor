@@ -158,7 +158,9 @@ function OptionLabel({ value, index, validate, onCommit }: OptionLabelProps) {
     if (event.key === "Enter") {
       event.preventDefault();
       commit();
-    } else if (event.key === "Escape") {
+    } else if (event.key === "Escape" && (text !== value || error !== null)) {
+      // Only this Escape is ours: with nothing to revert, it still closes the editor sheet.
+      event.preventDefault();
       setText(value);
       setError(null);
     }
