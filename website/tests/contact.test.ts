@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BOOK_MESSAGE, WHATSAPP_NUMBER, serviceMessage, whatsappLink } from "@/lib/contact";
+import { BOOK_MESSAGE, serviceMessage, whatsappLink } from "@/lib/contact";
 
 describe("serviceMessage", () => {
   it("names the barber and the cut when a barber is chosen", () => {
@@ -57,12 +57,14 @@ describe("serviceMessage", () => {
 
 describe("whatsappLink", () => {
   it("links to the salon number without a message", () => {
-    expect(whatsappLink()).toBe(`https://wa.me/${WHATSAPP_NUMBER}`);
-    expect(WHATSAPP_NUMBER).toBe("447789096148");
+    expect(whatsappLink("447789096148")).toBe("https://wa.me/447789096148");
   });
 
   it("url-encodes the message", () => {
-    const link = whatsappLink("Hi, I'd like to book Cutting and Finishing (Gentleman).");
+    const link = whatsappLink(
+      "447789096148",
+      "Hi, I'd like to book Cutting and Finishing (Gentleman).",
+    );
     expect(link).toBe(
       "https://wa.me/447789096148?text=Hi%2C%20I'd%20like%20to%20book%20Cutting%20and%20Finishing%20(Gentleman).",
     );
@@ -70,7 +72,7 @@ describe("whatsappLink", () => {
 
   it("encodes the general booking message", () => {
     expect(BOOK_MESSAGE).toBe("Hi, I'd like to book an appointment at Rave's Parlor.");
-    expect(whatsappLink(BOOK_MESSAGE)).toBe(
+    expect(whatsappLink("447789096148", BOOK_MESSAGE)).toBe(
       `https://wa.me/447789096148?text=${encodeURIComponent(BOOK_MESSAGE)}`,
     );
   });

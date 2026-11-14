@@ -1,9 +1,9 @@
-/** Business WhatsApp number, in international format without the plus. */
-export const WHATSAPP_NUMBER = "447789096148";
-
-/** Opens a chat with the salon; `message` pre-fills the text box (the customer still presses send). */
-export function whatsappLink(message?: string) {
-  const base = `https://wa.me/${WHATSAPP_NUMBER}`;
+/**
+ * Opens a chat with `number` (international format, no plus); `message` pre-fills the text box
+ * (the customer still presses send).
+ */
+export function whatsappLink(number: string, message?: string) {
+  const base = `https://wa.me/${number}`;
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 

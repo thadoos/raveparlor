@@ -7,7 +7,7 @@ import {
   type Selection,
 } from "@/lib/booking/picker";
 
-const selection: Selection = { barber: "John", cut: "Ladies", row: 1, col: 1 };
+const selection: Selection = { barberId: "john", cut: "Ladies", row: 1, col: 1 };
 
 describe("pickerReducer", () => {
   it("starts closed, or already picking", () => {
@@ -30,7 +30,7 @@ describe("pickerReducer", () => {
   it("picks a single selection, replacing the previous one", () => {
     const first = pickerReducer(initialPickerState(true), { type: "pick", selection });
     expect(first.selection).toEqual(selection);
-    const other: Selection = { barber: null, cut: "Gentleman", row: 3, col: 0 };
+    const other: Selection = { barberId: null, cut: "Gentleman", row: 3, col: 0 };
     expect(pickerReducer(first, { type: "pick", selection: other }).selection).toEqual(other);
   });
 

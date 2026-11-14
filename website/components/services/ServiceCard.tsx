@@ -28,7 +28,8 @@ interface ServiceCardProps {
  */
 export function ServiceCard({ categoryKey, index, item, animate }: ServiceCardProps) {
   const { state, open, registerCard } = useServiceDialog();
-  const category = useSiteView().menu[categoryKey];
+  const { site, menu } = useSiteView();
+  const category = menu[categoryKey];
   const ref = useMemo(() => registerCard(categoryKey, index), [registerCard, categoryKey, index]);
   const price = priceLabel(item);
   const pickable = isPickable(item, category);
@@ -79,7 +80,12 @@ export function ServiceCard({ categoryKey, index, item, animate }: ServiceCardPr
       <div className={styles.actions}>
         <a
           className={styles.booknow}
-          href={bookingHref({ item, category, selection: null })}
+          href={bookingHref({
+            item,
+            category,
+            selection: null,
+            defaultWhatsApp: site.whatsappNumber,
+          })}
           target="_blank"
           rel="noopener noreferrer"
           onClick={onBookNow}

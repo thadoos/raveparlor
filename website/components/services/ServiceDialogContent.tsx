@@ -91,7 +91,12 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
         </div>
         <DialogDetails item={item} flipped={picker.flipped} />
         <DialogActions
-          href={bookingHref({ item, category, selection: picker.selection })}
+          href={bookingHref({
+            item,
+            category,
+            selection: picker.selection,
+            defaultWhatsApp: site.whatsappNumber,
+          })}
           flipped={picker.flipped}
           blocked={picker.flipped && !picker.selection}
           bookRef={bookRef}

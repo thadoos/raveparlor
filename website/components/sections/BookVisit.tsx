@@ -33,7 +33,7 @@ export function BookVisit({ site }: BookVisitProps) {
           </p>
           <a
             className={styles.cta}
-            href={whatsappLink(BOOK_MESSAGE)}
+            href={whatsappLink(site.whatsappNumber, BOOK_MESSAGE)}
             target="_blank"
             rel="noopener noreferrer"
           >

@@ -5,7 +5,21 @@ import { bookingHref, bookingMessage } from "@/lib/booking/href";
 import { whatsappLink } from "@/lib/contact";
 import type { CategoryKey, MenuItem } from "@/lib/data/services";
 
-const MENU = buildSiteView(DEFAULT_CONTENT, "").menu;
+const JULIAN_NUMBER = "447700900123";
+const DEFAULT_NUMBER = "447789096148";
+const CONTENT = {
+  ...DEFAULT_CONTENT,
+  barbers: DEFAULT_CONTENT.barbers.map((b) =>
+    b.name === "Julian" ? { ...b, whatsApp: JULIAN_NUMBER } : b,
+  ),
+};
+const MENU = buildSiteView(CONTENT, "").menu;
+
+function barberId(name: string): string {
+  const found = CONTENT.barbers.find((b) => b.name === name);
+  if (!found) throw new Error(`No barber named ${name}`);
+  return found.id;
+}
 
 function item(category: CategoryKey, name: string): MenuItem {
   const found = MENU[category].items.find((candidate) => candidate.name === name);
@@ -21,7 +35,8 @@ describe("bookingMessage", () => {
       bookingMessage({
         item: cutting,
         category: MENU.cut,
-        selection: { barber: "Julian", cut: "Ladies", row: 2, col: 1 },
+        selection: { barberId: barberId("Julian"), cut: "Ladies", row: 2, col: 1 },
+        defaultWhatsApp: DEFAULT_NUMBER,
       }),
     ).toBe("Hi, I'd like to book Cutting and Finishing (Ladies) with Julian.");
   });
@@ -31,7 +46,8 @@ describe("bookingMessage", () => {
       bookingMessage({
         item: cutting,
         category: MENU.cut,
-        selection: { barber: null, cut: "Gentleman", row: 3, col: 0 },
+        selection: { barberId: null, cut: "Gentleman", row: 3, col: 0 },
+        defaultWhatsApp: DEFAULT_NUMBER,
       }),
     ).toBe("Hi, I'd like to book Cutting and Finishing (Gentleman). Any barber is fine.");
   });
@@ -42,13 +58,15 @@ describe("bookingMessage", () => {
         item: item("cut", "Up-do Hairdressing"),
         category: MENU.cut,
         selection: null,
+        defaultWhatsApp: DEFAULT_NUMBER,
       }),
     ).toBe("Hi, I'd like to book Up-do Hairdressing. Any barber is fine.");
     expect(
       bookingMessage({
         item: item("cut", "Up-do Hairdressing"),
         category: MENU.cut,
-        selection: { barber: "Rave", cut: null, row: 0, col: 0 },
+        selection: { barberId: barberId("Rave"), cut: null, row: 0, col: 0 },
+        defaultWhatsApp: DEFAULT_NUMBER,
       }),
     ).toBe("Hi, I'd like to book Up-do Hairdressing with Rave.");
   });
@@ -58,7 +76,8 @@ describe("bookingMessage", () => {
       bookingMessage({
         item: item("colour", "Full Head Colour"),
         category: MENU.colour,
-        selection: { barber: null, cut: "Medium length", row: 0, col: 1 },
+        selection: { barberId: null, cut: "Medium length", row: 0, col: 1 },
+        defaultWhatsApp: DEFAULT_NUMBER,
       }),
     ).toBe("Hi, I'd like to book Full Head Colour (Medium length).");
   });
@@ -69,6 +88,7 @@ describe("bookingMessage", () => {
         item: item("colour", "Root Retouching"),
         category: MENU.colour,
         selection: null,
+        defaultWhatsApp: DEFAULT_NUMBER,
       }),
     ).toBe("Hi, I'd like to book Root Retouching.");
     expect(
@@ -76,6 +96,7 @@ describe("bookingMessage", () => {
         item: item("treat", "Olaplex No.1 & No.2"),
         category: MENU.treat,
         selection: null,
+        defaultWhatsApp: DEFAULT_NUMBER,
       }),
     ).toBe("Hi, I'd like to book Olaplex No.1 and No.2.");
   });
@@ -87,8 +108,45 @@ describe("bookingHref", () => {
       item: item("perm", "Ion Straightening"),
       category: MENU.perm,
       selection: null,
+      defaultWhatsApp: DEFAULT_NUMBER,
     };
-    expect(bookingHref(options)).toBe(whatsappLink(bookingMessage(options)));
-    expect(bookingHref(options)).toContain("https://wa.me/");
+    expect(bookingHref(options)).toBe(whatsappLink(DEFAULT_NUMBER, bookingMessage(options)));
+  });
+
+  const cutting = () => item("cut", "Cutting & Finishing");
+  const base = () => ({ item: cutting(), category: MENU.cut, defaultWhatsApp: DEFAULT_NUMBER });
+
+  it("uses the chosen barber's number", () => {
+    const href = bookingHref({
+      ...base(),
+      selection: { barberId: barberId("Julian"), cut: "Ladies", row: 2, col: 1 },
+      defaultWhatsApp: DEFAULT_NUMBER,
+    });
+    expect(href.startsWith(`https://wa.me/${JULIAN_NUMBER}?text=`)).toBe(true);
+  });
+
+  it("uses the default number for no preference or no selection", () => {
+    const none = bookingHref({
+      ...base(),
+      selection: { barberId: null, cut: "Gentleman", row: 3, col: 0 },
+      defaultWhatsApp: DEFAULT_NUMBER,
+    });
+    expect(none.startsWith(`https://wa.me/${DEFAULT_NUMBER}?text=`)).toBe(true);
+    expect(
+      bookingHref({ ...base(), selection: null }).startsWith(
+        `https://wa.me/${DEFAULT_NUMBER}?text=`,
+      ),
+    ).toBe(true);
+  });
+
+  it("treats an unknown barber id as no preference", () => {
+    const options = {
+      ...base(),
+      selection: { barberId: "missing-id", cut: "Ladies", row: 0, col: 0 },
+    };
+    expect(bookingHref(options).startsWith(`https://wa.me/${DEFAULT_NUMBER}?text=`)).toBe(true);
+    expect(bookingMessage(options)).toBe(
+      "Hi, I'd like to book Cutting and Finishing (Ladies). Any barber is fine.",
+    );
   });
 });

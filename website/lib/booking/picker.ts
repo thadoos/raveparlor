@@ -1,8 +1,8 @@
 /** The booking picker: choosing a barber and/or a cut or hair length before continuing on WhatsApp. */
 
 export interface Selection {
-  /** The chosen barber; null for "No preference" (and for services without a barber choice). */
-  barber: string | null;
+  /** Id of the chosen barber; null for "No preference" (and for services without a barber choice). */
+  barberId: string | null;
   /** The chosen cut type or hair length, e.g. "Gentleman" or "Medium length". */
   cut: string | null;
   /** Index of the chosen row (barber) in the price area; "No preference" comes after the barbers. */

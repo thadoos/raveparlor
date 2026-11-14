@@ -66,14 +66,18 @@ export function PriceTable({ item, category, picking, selection, onPick }: Price
                     label={price}
                     picking={picking}
                     selected={isSelected(r, c)}
-                    onPick={() => onPick({ barber: row.label, cut: cols[c], row: r, col: c })}
+                    onPick={() =>
+                      onPick({ barberId: row.barberId ?? null, cut: cols[c], row: r, col: c })
+                    }
                   />
                 ) : hasChoices(item) && isPrice(price) ? (
                   <PriceCell
                     label={price}
                     picking={picking}
                     selected={isSelected(r, c)}
-                    onPick={() => onPick({ barber: null, cut: cutLabel(cols, c), row: r, col: c })}
+                    onPick={() =>
+                      onPick({ barberId: null, cut: cutLabel(cols, c), row: r, col: c })
+                    }
                   />
                 ) : (
                   price
@@ -93,7 +97,7 @@ export function PriceTable({ item, category, picking, selection, onPick }: Price
                     label={min === null ? "–" : `from £${min}`}
                     picking={picking}
                     selected={isSelected(anyRow, c)}
-                    onPick={() => onPick({ barber: null, cut: col, row: anyRow, col: c })}
+                    onPick={() => onPick({ barberId: null, cut: col, row: anyRow, col: c })}
                   />
                 </td>
               );

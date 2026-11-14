@@ -17,18 +17,18 @@ export function NamePicker({ barbers, picking, selection, onPick }: NamePickerPr
     <div className={cx(styles.who, picking && styles.isPicking)}>
       {barbers.map((barber, row) => (
         <PriceCell
-          key={barber.name}
+          key={barber.id}
           label={barber.name}
           picking={picking}
           selected={selection?.row === row}
-          onPick={() => onPick({ barber: barber.name, cut: null, row, col: 0 })}
+          onPick={() => onPick({ barberId: barber.id, cut: null, row, col: 0 })}
         />
       ))}
       <PriceCell
         label="No preference"
         picking={picking}
         selected={selection?.row === barbers.length}
-        onPick={() => onPick({ barber: null, cut: null, row: barbers.length, col: 0 })}
+        onPick={() => onPick({ barberId: null, cut: null, row: barbers.length, col: 0 })}
       />
     </div>
   );
