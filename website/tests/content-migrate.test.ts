@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_CONTENT } from "@/lib/content/defaults";
 import { DEFAULT_CONTENT_V1, migrateV1toV2 } from "@/lib/content/legacy-v1";
 import { contentImagePaths, parseSiteContent } from "@/lib/content/schema";
+import { DEFAULT_HERO, DEFAULT_REVIEWS } from "@/lib/content/site-copy";
 
 const RAVE_ID = "7b1f0c52-3a4e-4c1d-9a6b-1d2e3f4a5b61";
 
@@ -17,6 +18,11 @@ describe("migrateV1toV2", () => {
   });
 
   it("builds DEFAULT_CONTENT from the v1 literal", () => expect(DEFAULT_CONTENT).toEqual(migrated));
+
+  it("migrateV1toV2 output has the default hero and reviews", () => {
+    expect(migrated.hero).toEqual(DEFAULT_HERO);
+    expect(migrated.reviews).toEqual(DEFAULT_REVIEWS);
+  });
 
   it("moves cut prices into the cutting item, per barber", () => {
     const cutting = items.cut.items.cutting;

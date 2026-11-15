@@ -13,6 +13,7 @@ import {
 import type { CategoryKey, ImageRef } from "@/lib/content/primitives";
 // Type-only: schema.ts imports this module at runtime to migrate v1 input.
 import type { ItemContent, SiteContent } from "@/lib/content/schema";
+import { DEFAULT_HERO, DEFAULT_REVIEWS } from "@/lib/content/site-copy";
 import { LENGTHS } from "@/lib/content/structure";
 
 /**
@@ -151,6 +152,8 @@ export function migrateV1toV2(input: SiteContentV1): SiteContent {
     images: Object.fromEntries(
       IMAGE_SLOTS.map((slot) => [slot, v1.images[slot]]),
     ) as SiteContent["images"],
+    hero: structuredClone(DEFAULT_HERO),
+    reviews: structuredClone(DEFAULT_REVIEWS),
   };
 }
 

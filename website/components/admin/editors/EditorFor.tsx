@@ -7,8 +7,10 @@ import { BusinessEditor } from "./BusinessEditor";
 import { CategoryIntroEditor } from "./CategoryIntroEditor";
 import { ChemicalNoteEditor } from "./ChemicalNoteEditor";
 import { HoursEditor } from "./HoursEditor";
+import { HeroEditor } from "./HeroEditor";
 import { ImageSlotEditor } from "./ImageSlotEditor";
 import { ItemPhotosEditor } from "./ItemPhotosEditor";
+import { ReviewsEditor } from "./ReviewsEditor";
 import { ServiceItemEditor } from "./ServiceItemEditor";
 import type { EditorProps } from "./types";
 
@@ -50,6 +52,10 @@ export function EditorFor({ target, draft, apply, onOpenTarget }: EditorForProps
       return <CategoryIntroEditor draft={draft} apply={apply} category={target.category} />;
     case "hours":
       return <HoursEditor draft={draft} apply={apply} />;
+    case "hero":
+      return <HeroEditor draft={draft} apply={apply} />;
+    case "reviews":
+      return <ReviewsEditor draft={draft} apply={apply} />;
     case "business":
       return <BusinessEditor draft={draft} apply={apply} />;
     case "chemicalNote":

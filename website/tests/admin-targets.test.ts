@@ -33,6 +33,8 @@ const ALL_TARGETS: EditTarget[] = [
   { kind: "hours" },
   { kind: "business" },
   { kind: "chemicalNote" },
+  { kind: "hero" },
+  { kind: "reviews" },
   ...IMAGE_SLOTS.map((slot): EditTarget => ({ kind: "image", slot })),
 ];
 
@@ -47,11 +49,13 @@ describe("edit targets", () => {
     expect(targetKey({ kind: "item", category: "colour", item: "roots" })).toBe(
       "item:colour.roots",
     );
-    expect(
-      targetKey({ kind: "item", category: "colour", item: "roots", focus: "pricing" }),
-    ).toBe("item:colour.roots#pricing");
+    expect(targetKey({ kind: "item", category: "colour", item: "roots", focus: "pricing" })).toBe(
+      "item:colour.roots#pricing",
+    );
     expect(targetKey({ kind: "image", slot: "heroLeft" })).toBe("image:heroLeft");
     expect(targetKey({ kind: "barber", id: "abc" })).toBe("barber:abc");
+    expect(targetKey({ kind: "hero" })).toBe("hero");
+    expect(targetKey({ kind: "reviews" })).toBe("reviews");
     expect(targetKey({ kind: "itemPhoto", category: "cut", item: "cutting", index: 1 })).toBe(
       "itemPhoto:cut.cutting.1",
     );
@@ -68,6 +72,8 @@ describe("edit targets", () => {
     expect(parseTargetKey("bogus")).toBeNull();
     expect(parseTargetKey("barber:")).toBeNull();
     expect(parseTargetKey("hours:extra")).toBeNull();
+    expect(parseTargetKey("hero:x")).toBeNull();
+    expect(parseTargetKey("reviews:x")).toBeNull();
     expect(parseTargetKey("itemPhoto:cut.cutting.2")).toBeNull();
     expect(parseTargetKey("itemPhoto:cut.cutting.01")).toBeNull();
     expect(parseTargetKey("itemPhoto:cut.cutting")).toBeNull();
@@ -83,6 +89,8 @@ describe("edit targets", () => {
     const [first] = DEFAULT_CONTENT.barbers;
     expect(targetLabel({ kind: "barber", id: first.id }, DEFAULT_CONTENT)).toBe(first.name);
     expect(targetLabel({ kind: "hours" }, DEFAULT_CONTENT)).toBe("Opening hours");
+    expect(targetLabel({ kind: "hero" }, DEFAULT_CONTENT)).toBe("Hero captions");
+    expect(targetLabel({ kind: "reviews" }, DEFAULT_CONTENT)).toBe("Reviews");
     expect(
       targetLabel({ kind: "itemPhoto", category: "cut", item: "updo", index: 1 }, DEFAULT_CONTENT),
     ).toBe("Up-do Hairdressing photo 2");

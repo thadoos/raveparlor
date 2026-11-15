@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CONTENT } from "@/lib/content/defaults";
+import {
+  DEFAULT_HERO,
+  DEFAULT_REVIEWS,
+  REVIEW_AUTHOR_MAX,
+  REVIEW_QUOTE_MAX,
+} from "@/lib/content/site-copy";
 import { itemPhotoFolder, parseSiteContent } from "@/lib/content/schema";
 import type { ImageRef, ImageSlot, SiteContent } from "@/lib/content/schema";
 
@@ -116,6 +122,83 @@ describe("parseSiteContent", () => {
     ).toBe(false));
 
   it("rejects version 3", () => expect(mutated((c) => (c.version = 3)).ok).toBe(false));
+});
+
+describe("parseSiteContent hero and reviews", () => {
+  it("accepts a stored row without hero and reviews and fills the defaults", () => {
+    const stored: Record<string, unknown> = structuredClone(DEFAULT_CONTENT);
+    delete stored.hero;
+    delete stored.reviews;
+    const r = parseSiteContent(stored);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.content.hero).toEqual(DEFAULT_HERO);
+      expect(r.content.reviews).toEqual(DEFAULT_REVIEWS);
+    }
+  });
+
+  it("rejects an empty reviews list", () => {
+    const r = mutated((c) => (c.reviews.items = []));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.issues.some((i) => i.includes("reviews.items"))).toBe(true);
+  });
+
+  it("rejects a blank hero title", () => {
+    expect(mutated((c) => (c.hero.left.title = "  ")).ok).toBe(false);
+    expect(mutated((c) => (c.hero.left.title = "")).ok).toBe(false);
+    expect(mutated((c) => (c.hero.right.title = " ")).ok).toBe(false);
+    expect(mutated((c) => (c.hero.right.title = "")).ok).toBe(false);
+  });
+
+  it("parses an old stored row that still has linkLabel and drops it", () => {
+    const stored = structuredClone(DEFAULT_CONTENT) as unknown as {
+      hero: { left: Record<string, unknown>; right: Record<string, unknown> };
+    };
+    stored.hero.left.linkLabel = "Book an appointment";
+    stored.hero.right.linkLabel = "See prices";
+    const r = parseSiteContent(stored);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.content.hero).toEqual(DEFAULT_HERO);
+      expect(r.content.hero.left).not.toHaveProperty("linkLabel");
+      expect(r.content.hero.right).not.toHaveProperty("linkLabel");
+    }
+  });
+
+  it("rejects stars 0 and 6, score -0.1 and 5.1, count -1 and 1.5", () => {
+    expect(mutated((c) => (c.reviews.stars = 0)).ok).toBe(false);
+    expect(mutated((c) => (c.reviews.stars = 6)).ok).toBe(false);
+    expect(mutated((c) => (c.reviews.score = -0.1)).ok).toBe(false);
+    expect(mutated((c) => (c.reviews.score = 5.1)).ok).toBe(false);
+    expect(mutated((c) => (c.reviews.count = -1)).ok).toBe(false);
+    expect(mutated((c) => (c.reviews.count = 1.5)).ok).toBe(false);
+  });
+
+  it("accepts stars 1 and 5, score 0 and 5, count 0", () => {
+    expect(mutated((c) => (c.reviews.stars = 1)).ok).toBe(true);
+    expect(mutated((c) => (c.reviews.stars = 5)).ok).toBe(true);
+    expect(mutated((c) => (c.reviews.score = 0)).ok).toBe(true);
+    expect(mutated((c) => (c.reviews.score = 5)).ok).toBe(true);
+    expect(mutated((c) => (c.reviews.count = 0)).ok).toBe(true);
+  });
+
+  it("rejects a blank or over-length quote and author", () => {
+    expect(mutated((c) => (c.reviews.items[0].quote = " ")).ok).toBe(false);
+    expect(mutated((c) => (c.reviews.items[0].author = "")).ok).toBe(false);
+    expect(mutated((c) => (c.reviews.items[0].quote = "a".repeat(REVIEW_QUOTE_MAX + 1))).ok).toBe(
+      false,
+    );
+    expect(mutated((c) => (c.reviews.items[0].author = "a".repeat(REVIEW_AUTHOR_MAX + 1))).ok).toBe(
+      false,
+    );
+    expect(mutated((c) => (c.reviews.items[0].quote = "a".repeat(REVIEW_QUOTE_MAX))).ok).toBe(true);
+    expect(mutated((c) => (c.reviews.items[0].author = "a".repeat(REVIEW_AUTHOR_MAX))).ok).toBe(
+      true,
+    );
+  });
+
+  it("rejects a review whose id is not a uuid", () =>
+    expect(mutated((c) => (c.reviews.items[0].id = "not-a-uuid")).ok).toBe(false));
 });
 
 describe("parseSiteContent structure checks", () => {

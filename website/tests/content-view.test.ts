@@ -114,6 +114,24 @@ describe("buildSiteView", () => {
     expect(view.site.phoneDisplay).toBe("07789 096148");
     expect(view.site.hours).toEqual(DEFAULT_CONTENT.business.hours);
   });
+
+  it("passes the hero captions through", () => {
+    expect(view.hero).toEqual(DEFAULT_CONTENT.hero);
+  });
+
+  it("passes the reviews and star count through", () => {
+    expect(view.reviews.items).toEqual(DEFAULT_CONTENT.reviews.items);
+    expect(view.reviews.stars).toBe(5);
+  });
+
+  it("builds the Google rating from the review stats", () => {
+    expect(view.site.googleRating).toEqual({ score: "4.9", reviews: 202 });
+    const content: SiteContent = {
+      ...DEFAULT_CONTENT,
+      reviews: { ...DEFAULT_CONTENT.reviews, score: 5, count: 7 },
+    };
+    expect(buildSiteView(content, URL).site.googleRating).toEqual({ score: "5.0", reviews: 7 });
+  });
 });
 
 describe("resolveImage", () => {

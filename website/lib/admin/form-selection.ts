@@ -6,7 +6,8 @@ import { MENU_STRUCTURE } from "@/lib/content/structure";
 
 /** What form mode shows: one section at a time and, in Services, one service or category intro. */
 
-export type FormSection = "barbers" | "services" | "hours" | "photos" | "business";
+export type FormSection =
+  "barbers" | "services" | "hours" | "photos" | "hero" | "reviews" | "business";
 
 /** A service ("cut.cutting") or a category intro ("cut.intro") in the Services list. */
 export type FormItem = `${CategoryKey}.${string}`;
@@ -23,6 +24,8 @@ export const FORM_SECTIONS: readonly { id: FormSection; label: string }[] = [
   { id: "services", label: "Services" },
   { id: "hours", label: "Opening hours" },
   { id: "photos", label: "Photos" },
+  { id: "hero", label: "Hero captions" },
+  { id: "reviews", label: "Reviews" },
   { id: "business", label: "Business" },
 ];
 
@@ -106,6 +109,8 @@ export function selectionTarget(s: FormSelection): EditTarget | null {
     case "barbers":
     case "hours":
     case "business":
+    case "hero":
+    case "reviews":
       return { kind: s.section };
     case "photos":
       return null;
@@ -147,6 +152,10 @@ export function targetSelection(t: EditTarget): FormSelection {
       return { section: "hours" };
     case "business":
       return { section: "business" };
+    case "hero":
+      return { section: "hero" };
+    case "reviews":
+      return { section: "reviews" };
     case "image":
       return { section: "photos", slot: t.slot };
   }
@@ -159,6 +168,8 @@ export function dirtySections(saved: SiteContent, draft: SiteContent): Set<FormS
   if (!deepEqual(saved.business.hours, draft.business.hours)) dirty.add("hours");
   if (saved.business.defaultWhatsApp !== draft.business.defaultWhatsApp) dirty.add("business");
   if (!deepEqual(saved.images, draft.images)) dirty.add("photos");
+  if (!deepEqual(saved.hero, draft.hero)) dirty.add("hero");
+  if (!deepEqual(saved.reviews, draft.reviews)) dirty.add("reviews");
 
   const chemicalChanged = saved.sharedNotes.chemical !== draft.sharedNotes.chemical;
   for (const category of CATEGORY_KEYS) {

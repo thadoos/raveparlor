@@ -2,6 +2,12 @@ import { describe, expect, it } from "vitest";
 import { deepEqual, summarizeChanges } from "@/lib/admin/changes";
 import {
   addBarber,
+  addReview,
+  moveReview,
+  removeReview,
+  setHeroCaption,
+  setReviewStats,
+  updateReview,
   addItemPhoto,
   removeBarber,
   removeItemPhoto,
@@ -179,6 +185,62 @@ describe("summarizeChanges", () => {
       "Default WhatsApp number changed",
       "Alt text changed: priceList",
     ]);
+  });
+});
+
+describe("summarizeChanges for hero and reviews", () => {
+  const FIRST = DEFAULT_CONTENT.reviews.items[0];
+  const SECOND = DEFAULT_CONTENT.reviews.items[1];
+  const REVIEW_ID = "0e4c3f85-6d71-4f40-8d9e-4a5b6c7d8e95";
+
+  function summary(draft: SiteContent): string[] {
+    return summarizeChanges(content(), draft);
+  }
+
+  it("reports hero captions once when either side changed", () => {
+    expect(summary(setHeroCaption(content(), "left", { title: "New" }))).toEqual([
+      "Hero captions changed",
+    ]);
+    const both = setHeroCaption(setHeroCaption(content(), "left", { title: "Go" }), "right", {
+      title: "Other",
+    });
+    expect(summary(both)).toEqual(["Hero captions changed"]);
+  });
+
+  it("reports changed review stats once, whichever field changed", () => {
+    expect(summary(setReviewStats(content(), { score: 4.5 }))).toEqual(["Review stats changed"]);
+    expect(summary(setReviewStats(content(), { count: 10 }))).toEqual(["Review stats changed"]);
+    expect(summary(setReviewStats(content(), { stars: 4 }))).toEqual(["Review stats changed"]);
+    expect(summary(setReviewStats(content(), { score: 4.5, count: 10, stars: 4 }))).toEqual([
+      "Review stats changed",
+    ]);
+  });
+
+  it("reports an added review by author", () => {
+    expect(summary(addReview(content(), { quote: "Lovely", author: "Sam" }, REVIEW_ID))).toEqual([
+      "Review added: Sam",
+    ]);
+  });
+
+  it("reports a removed review by author", () => {
+    expect(summary(removeReview(content(), FIRST.id))).toEqual([`Review removed: ${FIRST.author}`]);
+  });
+
+  it("reports an edited review by author", () => {
+    expect(summary(updateReview(content(), FIRST.id, { quote: "Changed quote" }))).toEqual([
+      `Review edited: ${FIRST.author}`,
+    ]);
+    expect(summary(updateReview(content(), FIRST.id, { author: "Renamed" }))).toEqual([
+      "Review edited: Renamed",
+    ]);
+  });
+
+  it("reports reordered reviews", () => {
+    expect(summary(moveReview(content(), SECOND.id, 0))).toEqual(["Reviews reordered"]);
+  });
+
+  it("reports nothing when hero and reviews are unchanged", () => {
+    expect(summary(content())).toEqual([]);
   });
 });
 

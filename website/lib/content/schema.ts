@@ -13,7 +13,15 @@ import {
   whatsAppSchema,
 } from "@/lib/content/primitives";
 import type { CategoryKey } from "@/lib/content/primitives";
+import {
+  DEFAULT_HERO,
+  DEFAULT_REVIEWS,
+  heroSchema,
+  reviewsSchema,
+} from "@/lib/content/site-copy";
 import { checkStructure } from "@/lib/content/structure";
+
+export type { Hero, HeroCaption, Review, Reviews } from "@/lib/content/site-copy";
 
 /** Editable site content (version 2): schema, derived types and validation. Canonical values only. */
 
@@ -68,6 +76,9 @@ export const siteContentSchema = z.object({
   services: z.record(z.enum(CATEGORY_KEYS), categoryContentSchema),
   sharedNotes: sharedNotesSchema,
   images: z.record(z.enum(IMAGE_SLOTS), imageRefSchema),
+  // Defaults let stored rows that predate these fields still parse.
+  hero: heroSchema.default(() => structuredClone(DEFAULT_HERO)),
+  reviews: reviewsSchema.default(() => structuredClone(DEFAULT_REVIEWS)),
 });
 export type SiteContent = z.infer<typeof siteContentSchema>;
 

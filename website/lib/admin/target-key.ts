@@ -21,6 +21,8 @@ export type EditTarget =
   | { kind: "hours" }
   | { kind: "business" }
   | { kind: "chemicalNote" }
+  | { kind: "hero" }
+  | { kind: "reviews" }
   | { kind: "image"; slot: ImageSlot };
 
 /** A stable string for a target, e.g. "item:colour.roots", "item:colour.roots#pricing",
@@ -32,6 +34,8 @@ export function targetKey(t: EditTarget): string {
     case "hours":
     case "business":
     case "chemicalNote":
+    case "hero":
+    case "reviews":
       return t.kind;
     case "barber":
       return `barber:${t.id}`;

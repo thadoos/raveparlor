@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { setChemicalNote, setPrice, updateBarber } from "@/lib/admin/draft-ops";
+import {
+  setChemicalNote,
+  setHeroCaption,
+  setPrice,
+  setReviewStats,
+  updateBarber,
+} from "@/lib/admin/draft-ops";
 import {
   dirtySections,
   formSelectionQuery,
@@ -42,6 +48,12 @@ describe("parseFormSelection", () => {
     });
   });
 
+  it("accepts the hero and reviews sections", () => {
+    expect(parse("section=hero")).toEqual({ section: "hero" });
+    expect(parse("section=reviews")).toEqual({ section: "reviews" });
+    expect(formSelectionQuery({ section: "reviews" })).toBe("section=reviews");
+  });
+
   it("ignores the item outside services", () => {
     expect(parse("section=hours&item=cut.cutting")).toEqual({ section: "hours" });
   });
@@ -78,6 +90,8 @@ describe("selection and targets", () => {
     });
     expect(selectionTarget({ section: "services" })).toBeNull();
     expect(selectionTarget({ section: "hours" })).toEqual({ kind: "hours" });
+    expect(selectionTarget({ section: "hero" })).toEqual({ kind: "hero" });
+    expect(selectionTarget({ section: "reviews" })).toEqual({ kind: "reviews" });
   });
 
   it("maps targets to the section that edits them", () => {
@@ -99,6 +113,8 @@ describe("selection and targets", () => {
       slot: "priceList",
     });
     expect(targetSelection({ kind: "business" })).toEqual({ section: "business" });
+    expect(targetSelection({ kind: "hero" })).toEqual({ section: "hero" });
+    expect(targetSelection({ kind: "reviews" })).toEqual({ section: "reviews" });
   });
 });
 
@@ -136,6 +152,20 @@ describe("dirtySections", () => {
     draft.business.hours = draft.business.hours.slice(0, 1);
     draft.images.priceList = { ...draft.images.priceList, alt: "New" };
     expect([...dirtySections(saved, draft)].sort()).toEqual(["business", "hours", "photos"]);
+  });
+});
+
+describe("dirtySections for hero and reviews", () => {
+  it("marks hero only when the captions differ", () => {
+    const saved = content();
+    const draft = setHeroCaption(saved, "left", { title: "New title" });
+    expect([...dirtySections(saved, draft)]).toEqual(["hero"]);
+  });
+
+  it("marks reviews only when the reviews differ", () => {
+    const saved = content();
+    const draft = setReviewStats(saved, { count: 300 });
+    expect([...dirtySections(saved, draft)]).toEqual(["reviews"]);
   });
 });
 

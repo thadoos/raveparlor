@@ -30,8 +30,11 @@ export interface SiteInfo {
   copyrightStartYear: string;
 }
 
-/** The site details that are not editable content (hours and the WhatsApp number come from the content document). */
-export type StaticSiteInfo = Omit<SiteInfo, "hours" | "whatsappNumber" | "phoneDisplay">;
+/** The site details that are not editable content (hours, the WhatsApp number and the Google rating come from the content document). */
+export type StaticSiteInfo = Omit<
+  SiteInfo,
+  "hours" | "whatsappNumber" | "phoneDisplay" | "googleRating"
+>;
 
 export const SITE_STATIC: StaticSiteInfo = {
   brandName: "Rave’s Parlor London",
@@ -41,7 +44,6 @@ export const SITE_STATIC: StaticSiteInfo = {
     postcode: "KT3 4QG",
   },
   closedDays: ["Christmas Day", "Boxing Day", "New Year’s Day"],
-  googleRating: { score: "4.9", reviews: 202 },
   instagramUrl: "https://www.instagram.com/ravesparlor_london",
   mapsUrl: "https://maps.app.goo.gl/5DsbgsoeiHCW4rab9",
   copyrightStartYear: "2026",

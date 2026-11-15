@@ -1,7 +1,15 @@
 import { formatUkPhone } from "@/lib/content/normalize";
 import { CATEGORY_KEYS, IMAGE_SLOTS } from "@/lib/content/schema";
 import { allCells, priceRows, rowsIdentical } from "@/lib/content/prices";
-import type { Barber, CategoryKey, ImageRef, ImageSlot, SiteContent } from "@/lib/content/schema";
+import type {
+  Barber,
+  CategoryKey,
+  Hero,
+  ImageRef,
+  ImageSlot,
+  Review,
+  SiteContent,
+} from "@/lib/content/schema";
 import { IMAGE_POSITIONS, MENU_STRUCTURE } from "@/lib/content/structure";
 import { SITE_STATIC } from "@/lib/data/site";
 import type { SiteInfo } from "@/lib/data/site";
@@ -23,6 +31,9 @@ export interface SiteView {
   /** The barbers, in display order (booking looks up the chosen barber's name and number here). */
   barbers: readonly Barber[];
   images: Record<ImageSlot, ResolvedImage>;
+  hero: Hero;
+  /** The reviews to show and how many stars to draw (the score and count live in `site.googleRating`). */
+  reviews: { stars: number; items: readonly Review[] };
 }
 
 /** Paths starting with "/" are bundled files; anything else is an object in the public storage bucket. */
@@ -101,6 +112,7 @@ export function buildSiteInfo(content: SiteContent): SiteInfo {
     hours: content.business.hours,
     whatsappNumber: content.business.defaultWhatsApp,
     phoneDisplay: formatUkPhone(content.business.defaultWhatsApp),
+    googleRating: { score: content.reviews.score.toFixed(1), reviews: content.reviews.count },
   };
 }
 
@@ -116,5 +128,7 @@ export function buildSiteView(content: SiteContent, supabaseUrl: string): SiteVi
     menu: buildMenu(content, images, supabaseUrl),
     barbers: content.barbers,
     images,
+    hero: content.hero,
+    reviews: { stars: content.reviews.stars, items: content.reviews.items },
   };
 }

@@ -1,11 +1,14 @@
 import type {
   Barber,
   CategoryKey,
+  HeroCaption,
   ImageRef,
   ImageSlot,
   ItemContent,
   ItemPrices,
   OpeningHours,
+  Review,
+  Reviews,
   SiteContent,
 } from "@/lib/content/schema";
 import { allCells } from "@/lib/content/prices";
@@ -143,6 +146,60 @@ export function updateBarber(
   patch: Partial<Omit<Barber, "id">>,
 ): SiteContent {
   return { ...c, barbers: c.barbers.map((b) => (b.id === id ? { ...b, ...patch, id: b.id } : b)) };
+}
+
+/** Patches one side's hero caption. Only the named side changes. */
+export function setHeroCaption(
+  c: SiteContent,
+  side: "left" | "right",
+  patch: Partial<HeroCaption>,
+): SiteContent {
+  return { ...c, hero: { ...c.hero, [side]: { ...c.hero[side], ...patch } } };
+}
+
+/** Patches the review score, count and star count. The reviews themselves are untouched. */
+export function setReviewStats(
+  c: SiteContent,
+  patch: Partial<Pick<Reviews, "score" | "count" | "stars">>,
+): SiteContent {
+  return { ...c, reviews: { ...c.reviews, ...patch } };
+}
+
+/** Appends a review with the given id. */
+export function addReview(c: SiteContent, review: Omit<Review, "id">, id: string): SiteContent {
+  return { ...c, reviews: { ...c.reviews, items: [...c.reviews.items, { id, ...review }] } };
+}
+
+/** Removes the review. Unknown ids and the last remaining review (one is required) keep `c`. */
+export function removeReview(c: SiteContent, id: string): SiteContent {
+  if (c.reviews.items.length <= 1 || !c.reviews.items.some((r) => r.id === id)) return c;
+  return { ...c, reviews: { ...c.reviews, items: c.reviews.items.filter((r) => r.id !== id) } };
+}
+
+/** Moves the review to `toIndex`, clamped to the list. Unknown ids leave the order alone. */
+export function moveReview(c: SiteContent, id: string, toIndex: number): SiteContent {
+  const from = c.reviews.items.findIndex((r) => r.id === id);
+  if (from === -1) return c;
+  const items = c.reviews.items.filter((r) => r.id !== id);
+  const to = Math.max(0, Math.min(toIndex, items.length));
+  items.splice(to, 0, c.reviews.items[from]);
+  return { ...c, reviews: { ...c.reviews, items } };
+}
+
+/** Patches one review. The id never changes; an unknown id keeps `c`. */
+export function updateReview(
+  c: SiteContent,
+  id: string,
+  patch: Partial<Omit<Review, "id">>,
+): SiteContent {
+  if (!c.reviews.items.some((r) => r.id === id)) return c;
+  return {
+    ...c,
+    reviews: {
+      ...c.reviews,
+      items: c.reviews.items.map((r) => (r.id === id ? { ...r, ...patch, id: r.id } : r)),
+    },
+  };
 }
 
 /** The item's copy. Options, prices and photos have their own ops below. */

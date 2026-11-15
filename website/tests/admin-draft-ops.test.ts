@@ -2,15 +2,19 @@ import { describe, expect, it } from "vitest";
 import {
   addBarber,
   addItemPhoto,
+  addReview,
   applyRowToAllBarbers,
   clearItemNote,
   moveBarber,
+  moveReview,
   removeBarber,
   removeBarberDropsLastPrice,
   removeItemPhoto,
+  removeReview,
   setByBarber,
   setChemicalNote,
   setDefaultWhatsApp,
+  setHeroCaption,
   setHours,
   setImage,
   setImageAlt,
@@ -22,7 +26,9 @@ import {
   setOptionsDropsLastPrice,
   setPrice,
   setPriceDropsLastPrice,
+  setReviewStats,
   updateBarber,
+  updateReview,
 } from "@/lib/admin/draft-ops";
 import { DEFAULT_CONTENT } from "@/lib/content/defaults";
 import { parseSiteContent } from "@/lib/content/schema";
@@ -443,5 +449,134 @@ describe("keeping at least one price per service", () => {
     const c = onlyJohnCuts();
     expect(applyRowToAllBarbers(c, "cut", "cutting", RAVE.id)).toBe(c);
     expect(applyRowToAllBarbers(c, "cut", "cutting", JOHN.id)).not.toBe(c);
+  });
+});
+
+describe("hero caption operations", () => {
+  it("setHeroCaption changes only the title of the named side", () => {
+    const before = content();
+    const snapshot = structuredClone(before);
+    const next = setHeroCaption(before, "right", { title: "Colour" });
+    expect(next).not.toBe(before);
+    expect(before).toEqual(snapshot);
+    expect(next.hero.right).toEqual({ title: "Colour" });
+    expect(next.hero.left).toBe(before.hero.left);
+    expectValid(next);
+  });
+
+  it("setHeroCaption leaves the other side equal to the default", () => {
+    const next = setHeroCaption(content(), "left", { title: "Cuts" });
+    expect(next.hero.left).toEqual({ title: "Cuts" });
+    expect(next.hero.right).toEqual(DEFAULT_CONTENT.hero.right);
+  });
+});
+
+describe("review operations", () => {
+  const FIRST = DEFAULT_CONTENT.reviews.items[0];
+  const LAST = DEFAULT_CONTENT.reviews.items[DEFAULT_CONTENT.reviews.items.length - 1];
+  const REVIEW_ID = "0e4c3f85-6d71-4f40-8d9e-4a5b6c7d8e95";
+  const NEW_REVIEW = { quote: "Lovely cut.", author: "A. Visitor" };
+
+  function single(): SiteContent {
+    const c = content();
+    c.reviews.items = [FIRST];
+    return c;
+  }
+
+  it("setReviewStats patches only the given stats and leaves the reviews alone", () => {
+    const before = content();
+    const snapshot = structuredClone(before);
+    const next = setReviewStats(before, { score: 4.5, count: 10 });
+    expect(next).not.toBe(before);
+    expect(before).toEqual(snapshot);
+    expect(next.reviews.score).toBe(4.5);
+    expect(next.reviews.count).toBe(10);
+    expect(next.reviews.stars).toBe(before.reviews.stars);
+    expect(next.reviews.items).toBe(before.reviews.items);
+    expectValid(next);
+  });
+
+  it("addReview appends with the given id and the result parses", () => {
+    const before = content();
+    const snapshot = structuredClone(before);
+    const next = addReview(before, NEW_REVIEW, REVIEW_ID);
+    expect(before).toEqual(snapshot);
+    expect(next.reviews.items).toHaveLength(before.reviews.items.length + 1);
+    expect(next.reviews.items.at(-1)).toEqual({ id: REVIEW_ID, ...NEW_REVIEW });
+    expectValid(next);
+  });
+
+  it("addReview keeps two reviews with the same author", () => {
+    const once = addReview(content(), { quote: "One", author: "Sam" }, REVIEW_ID);
+    const twice = addReview(
+      once,
+      { quote: "Two", author: "Sam" },
+      "0e4c3f85-6d71-4f40-8d9e-4a5b6c7d8e96",
+    );
+    expect(twice.reviews.items.filter((r) => r.author === "Sam")).toHaveLength(2);
+    expectValid(twice);
+  });
+
+  it("removeReview drops a normal id", () => {
+    const before = content();
+    const snapshot = structuredClone(before);
+    const next = removeReview(before, FIRST.id);
+    expect(before).toEqual(snapshot);
+    expect(next.reviews.items.map((r) => r.id)).toEqual(
+      before.reviews.items.slice(1).map((r) => r.id),
+    );
+    expectValid(next);
+  });
+
+  it("removeReview keeps the input for an unknown id", () => {
+    const c = content();
+    expect(removeReview(c, REVIEW_ID)).toBe(c);
+  });
+
+  it("removeReview keeps the input when it is the last review", () => {
+    const c = single();
+    expect(removeReview(c, FIRST.id)).toBe(c);
+  });
+
+  it("moveReview moves a review and clamps to both ends", () => {
+    const before = content();
+    const snapshot = structuredClone(before);
+    const ids = before.reviews.items.map((r) => r.id);
+    const toFront = moveReview(before, LAST.id, -5);
+    expect(toFront.reviews.items.map((r) => r.id)).toEqual([LAST.id, ...ids.slice(0, -1)]);
+    const toEnd = moveReview(before, FIRST.id, 99);
+    expect(toEnd.reviews.items.map((r) => r.id)).toEqual([...ids.slice(1), FIRST.id]);
+    const middle = moveReview(before, FIRST.id, 2);
+    expect(middle.reviews.items[2].id).toBe(FIRST.id);
+    expect(before).toEqual(snapshot);
+    expectValid(toEnd);
+  });
+
+  it("moveReview ignores unknown ids", () => {
+    const c = content();
+    expect(moveReview(c, REVIEW_ID, 0)).toBe(c);
+  });
+
+  it("updateReview patches only that review", () => {
+    const before = content();
+    const snapshot = structuredClone(before);
+    const next = updateReview(before, FIRST.id, { author: "Someone Else" });
+    expect(next).not.toBe(before);
+    expect(before).toEqual(snapshot);
+    expect(next.reviews.items[0]).toEqual({ ...FIRST, author: "Someone Else" });
+    expect(next.reviews.items[1]).toBe(before.reviews.items[1]);
+    expectValid(next);
+  });
+
+  it("updateReview never changes the id, even if the patch has one", () => {
+    const patch = { quote: "New", id: REVIEW_ID } as Partial<Omit<typeof FIRST, "id">>;
+    const next = updateReview(content(), FIRST.id, patch);
+    expect(next.reviews.items[0].id).toBe(FIRST.id);
+    expect(next.reviews.items[0].quote).toBe("New");
+  });
+
+  it("updateReview keeps the input for an unknown id", () => {
+    const c = content();
+    expect(updateReview(c, REVIEW_ID, { quote: "x" })).toBe(c);
   });
 });

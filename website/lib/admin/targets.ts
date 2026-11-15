@@ -30,6 +30,8 @@ export function parseTargetKey(key: string): EditTarget | null {
     case "hours":
     case "business":
     case "chemicalNote":
+    case "hero":
+    case "reviews":
       return rest === null ? { kind } : null;
     case "barber":
       return rest ? { kind, id: rest } : null;
@@ -108,6 +110,10 @@ export function targetLabel(t: EditTarget, content: SiteContent): string {
       return "Business";
     case "chemicalNote":
       return "Chemical services note";
+    case "hero":
+      return "Hero captions";
+    case "reviews":
+      return "Reviews";
     case "image":
       return imageSlotLabel(t.slot);
   }

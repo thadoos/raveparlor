@@ -11,10 +11,19 @@ interface TextFieldProps {
   /** Shows "Required" while the value is blank. */
   required?: boolean;
   readOnly?: boolean;
+  maxLength?: number;
 }
 
 /** One-line text that writes to the draft as you type. */
-export function TextField({ label, value, onChange, hint, required, readOnly }: TextFieldProps) {
+export function TextField({
+  label,
+  value,
+  onChange,
+  hint,
+  required,
+  readOnly,
+  maxLength,
+}: TextFieldProps) {
   const id = useId();
   const missing = required && value.trim() === "";
   return (
@@ -27,6 +36,7 @@ export function TextField({ label, value, onChange, hint, required, readOnly }: 
         className={`admin-input ${missing ? styles.invalid : ""}`}
         value={value}
         readOnly={readOnly}
+        maxLength={maxLength}
         aria-invalid={missing || undefined}
         onChange={(event) => onChange(event.target.value)}
       />

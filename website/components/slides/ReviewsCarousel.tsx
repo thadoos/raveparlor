@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { cx } from "@/lib/cx";
-import type { Review } from "@/lib/data/reviews";
+import type { Review } from "@/lib/content/schema";
 import { useCarousel } from "@/lib/hooks/use-carousel";
 import { useSwipe } from "@/lib/hooks/use-swipe";
 import styles from "./ReviewsCarousel.module.css";
@@ -31,7 +31,7 @@ export function ReviewsCarousel({ reviews, intervalMs = 3000 }: ReviewsCarouselP
           const active = i === index;
           return (
             <figure
-              key={review.author}
+              key={review.id}
               className={cx(styles.review, active && styles.isActive)}
               aria-hidden={!active}
             >
@@ -47,7 +47,7 @@ export function ReviewsCarousel({ reviews, intervalMs = 3000 }: ReviewsCarouselP
         <div className={styles.dots}>
           {reviews.map((review, i) => (
             <button
-              key={review.author}
+              key={review.id}
               type="button"
               className={styles.dot}
               aria-label={`Show review ${i + 1} of ${count}`}

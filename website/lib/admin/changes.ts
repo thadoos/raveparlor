@@ -1,5 +1,12 @@
 import { CATEGORY_KEYS, IMAGE_SLOTS } from "@/lib/content/schema";
-import type { Barber, CategoryKey, ImageRef, ItemContent, SiteContent } from "@/lib/content/schema";
+import type {
+  Barber,
+  CategoryKey,
+  ImageRef,
+  ItemContent,
+  Review,
+  SiteContent,
+} from "@/lib/content/schema";
 import { MENU_STRUCTURE } from "@/lib/content/structure";
 
 /** Structural equality for JSON-like values. Ignores object key order (jsonb reorders keys). */
@@ -158,8 +165,42 @@ function imageLines(published: SiteContent, draft: SiteContent): string[] {
   return lines;
 }
 
+function heroLines(published: SiteContent, draft: SiteContent): string[] {
+  return deepEqual(published.hero, draft.hero) ? [] : ["Hero captions changed"];
+}
+
+function reviewById(reviews: readonly Review[]): Map<string, Review> {
+  return new Map(reviews.map((r) => [r.id, r]));
+}
+
+/** Stats (score, count, stars), then reviews added, removed, edited and reordered, matched by id. */
+function reviewLines(published: SiteContent, draft: SiteContent): string[] {
+  const lines: string[] = [];
+  const old = published.reviews;
+  const now = draft.reviews;
+  if (old.score !== now.score || old.count !== now.count || old.stars !== now.stars) {
+    lines.push("Review stats changed");
+  }
+
+  const before = reviewById(old.items);
+  const after = reviewById(now.items);
+  for (const r of now.items) if (!before.has(r.id)) lines.push(`Review added: ${r.author}`);
+  for (const r of old.items) if (!after.has(r.id)) lines.push(`Review removed: ${r.author}`);
+  for (const r of now.items) {
+    const prev = before.get(r.id);
+    if (prev && (prev.quote !== r.quote || prev.author !== r.author)) {
+      lines.push(`Review edited: ${r.author}`);
+    }
+  }
+
+  const keptBefore = old.items.filter((r) => after.has(r.id)).map((r) => r.id);
+  const keptAfter = now.items.filter((r) => before.has(r.id)).map((r) => r.id);
+  if (!deepEqual(keptBefore, keptAfter)) lines.push("Reviews reordered");
+  return lines;
+}
+
 /** Human-readable changes from `published` to `draft`: barbers, options and prices, copy, hours,
- *  number, images (site slots, then service photos). */
+ *  number, images (site slots, then service photos), hero captions, reviews. */
 export function summarizeChanges(published: SiteContent, draft: SiteContent): string[] {
   return [
     ...barberLines(published, draft),
@@ -170,5 +211,7 @@ export function summarizeChanges(published: SiteContent, draft: SiteContent): st
       ? []
       : ["Default WhatsApp number changed"]),
     ...imageLines(published, draft),
+    ...heroLines(published, draft),
+    ...reviewLines(published, draft),
   ];
 }

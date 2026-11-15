@@ -23,17 +23,17 @@ interface SitePageProps {
  * and inside a client tree alike.
  */
 export function SitePage({ view }: SitePageProps) {
-  const { site, menu, images } = view;
+  const { site, menu, images, hero, reviews } = view;
   return (
     <SiteViewProvider view={view}>
       <ServicesProvider>
         <AppShell>
           <Deck>
             <h1 className="sr">Rave’s Parlor London – hair salon</h1>
-            <HeroPair left={images.heroLeft} right={images.heroRight} />
+            <HeroPair left={images.heroLeft} right={images.heroRight} hero={hero} />
             <SplitSlide image={images.split} />
             <ParlorSlide site={site} image={images.parlor} />
-            <ReviewsSlide site={site} />
+            <ReviewsSlide site={site} reviews={reviews} />
             <ServicesOverview menu={menu} images={images} />
 
             {/* Final slide: scrolls normally inside itself */}

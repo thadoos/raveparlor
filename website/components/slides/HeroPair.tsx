@@ -1,15 +1,17 @@
 import Image from "next/image";
 import { Editable } from "@/components/edit/Editable";
 import { cx } from "@/lib/cx";
+import type { Hero } from "@/lib/content/schema";
 import type { ResolvedImage } from "@/lib/content/view";
 import styles from "./HeroPair.module.css";
 
 interface HeroPairProps {
   left: ResolvedImage;
   right: ResolvedImage;
+  hero: Hero;
 }
 
-export function HeroPair({ left, right }: HeroPairProps) {
+export function HeroPair({ left, right, hero }: HeroPairProps) {
   return (
     <section className="slide pair is-current" id="top" data-tone="light">
       <div className={cx("layer", styles.pairGrid)}>
@@ -31,8 +33,10 @@ export function HeroPair({ left, right }: HeroPairProps) {
             <div className="vignette"></div>
             <div className="scrim"></div>
             <figcaption className="cap">
-              <strong>Cutting &amp; Finishing</strong>
-              <a href="#services">Book an appointment</a>
+              <Editable target={{ kind: "hero" }}>
+                <strong>{hero.left.title}</strong>
+                <a href="#services">Book an appointment</a>
+              </Editable>
             </figcaption>
           </div>
         </figure>
@@ -53,8 +57,10 @@ export function HeroPair({ left, right }: HeroPairProps) {
             <div className="vignette"></div>
             <div className="scrim"></div>
             <figcaption className="cap">
-              <strong>Full Head Colour</strong>
-              <a href="#prices">See prices</a>
+              <Editable target={{ kind: "hero" }}>
+                <strong>{hero.right.title}</strong>
+                <a href="#prices">See prices</a>
+              </Editable>
             </figcaption>
           </div>
         </figure>
