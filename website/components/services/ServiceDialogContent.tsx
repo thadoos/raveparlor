@@ -16,7 +16,6 @@ import { useReducedMotion } from "@/lib/hooks/use-media";
 import { DialogActions } from "./DialogActions";
 import { DialogDetails } from "./DialogDetails";
 import { DialogMedia } from "./DialogMedia";
-import { DialogRating } from "./DialogRating";
 import type { DialogTarget } from "./dialog-state";
 import { PriceTable } from "./PriceTable";
 import { SinglePrice } from "./SinglePrice";
@@ -82,7 +81,6 @@ export function ServiceDialogContent({ target }: ServiceDialogContentProps) {
     <div className={dialogStyles.body}>
       <DialogMedia category={target.category} item={item.key} photos={item.photos} />
       <div className={styles.text}>
-        <DialogRating site={site} />
         <p className={styles.cat} id="md-cat">
           {category.name}
         </p>
