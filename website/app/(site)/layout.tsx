@@ -1,12 +1,19 @@
 import type { Metadata, Viewport } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SkipLink } from "@/components/layout/SkipLink";
+import { POSITION_KEY, RESTORE_ATTR } from "@/lib/deck/constants";
 import { getSiteView } from "@/lib/content/published";
 import { SITE_URL } from "@/lib/data/site";
 import { jost } from "@/lib/fonts";
 import { formatHoursSummary } from "@/lib/format";
 import { buildHairSalonLd } from "@/lib/seo";
 import "../globals.css";
+
+/**
+ * Runs before the deck is parsed: when a refresh will restore a saved slide, hide the deck until
+ * the controller has moved to it, so the first slide never flashes (see deck.css).
+ */
+const DECK_RESTORE_SCRIPT = `try{if(sessionStorage.getItem("${POSITION_KEY}"))document.documentElement.setAttribute("${RESTORE_ATTR}","")}catch(e){}`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const { site } = await getSiteView();
@@ -42,8 +49,10 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const view = await getSiteView();
   return (
-    <html lang="en" className={jost.variable}>
+    // suppressHydrationWarning: the restore script below may add an attribute before hydration
+    <html lang="en" className={jost.variable} suppressHydrationWarning>
       <body>
+        <script dangerouslySetInnerHTML={{ __html: DECK_RESTORE_SCRIPT }} />
         <SkipLink />
         {children}
         <JsonLd data={buildHairSalonLd(view.site, view.images.parlor)} />

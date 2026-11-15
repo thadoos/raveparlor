@@ -12,6 +12,18 @@
   background: var(--color-deck);
   touch-action: none;
 }
+/* A refresh is restoring a saved slide (see the site layout's inline script): hide the
+   server-rendered first slide until the controller has moved. Shown anyway after 2s in case
+   scripts never run. */
+:root[data-deck-restore] .deck {
+  visibility: hidden;
+  animation: deck-restore-fallback 0s 2s forwards;
+}
+@keyframes deck-restore-fallback {
+  to {
+    visibility: visible;
+  }
+}
 /* focused programmatically by the skip link: no ring around the whole screen */
 .deck:focus {
   outline: none;

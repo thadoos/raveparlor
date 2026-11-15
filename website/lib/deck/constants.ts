@@ -50,3 +50,8 @@ export const SCROLL_MS_PER_PX = 0.25;
 export const SCROLL_MAX_MS = 900;
 /** Jumps over more than one screen take this much longer. */
 export const MULTI_SLIDE_FACTOR = 1.25;
+
+/** sessionStorage key for the position restored after a refresh (same tab only). */
+export const POSITION_KEY = "deck:position";
+/** Set on <html> by an inline script while a saved position waits to be restored. */
+export const RESTORE_ATTR = "data-deck-restore";

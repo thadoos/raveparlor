@@ -1,5 +1,7 @@
 import {
   DECK_ID,
+  POSITION_KEY,
+  RESTORE_ATTR,
   DURATION,
   EASE,
   EASE_OUT,
@@ -60,10 +62,39 @@ const PHONE_SLIDES = ".slide:not(.pair), .half";
 /** Keys typed into these (or inside a `data-deck-ignore` element) are not slide navigation. */
 const IGNORED_KEY_TARGETS = "input, textarea, select, [data-deck-ignore]";
 
+interface SavedPosition {
+  /** Index among every `.slide, .half`, so it survives a desktop/phone switch. */
+  slide: number;
+  /** Inner scroll of a scrolling slide. */
+  top: number;
+}
+
+function readPosition(): SavedPosition | null {
+  try {
+    const raw = window.sessionStorage.getItem(POSITION_KEY);
+    if (!raw) return null;
+    const value: unknown = JSON.parse(raw);
+    if (
+      typeof value === "object" &&
+      value !== null &&
+      "slide" in value &&
+      "top" in value &&
+      Number.isInteger(value.slide) &&
+      typeof value.top === "number"
+    ) {
+      return { slide: value.slide as number, top: value.top };
+    }
+  } catch {
+    // storage blocked or bad JSON: start at the top
+  }
+  return null;
+}
+
 /**
  * Full-screen slide paging, moved with transforms (like Swiper). Framework-free: it owns the
  * slide list, the current index and every native listener. `mount` and `destroy` are idempotent
- * so React Strict Mode can run them twice.
+ * so React Strict Mode can run them twice. The current slide is saved on `pagehide` and restored
+ * on the next mount in the same tab, so a refresh keeps the visitor's place.
  */
 export class DeckController {
   private deck: HTMLElement | null = null;
@@ -77,6 +108,8 @@ export class DeckController {
   private timeouts = new Set<number>();
   private frames = new Set<number>();
   private events = new Emitter<DeckEvents>();
+  /** The slide restored after a refresh; kept until the visitor moves, so a phone/desktop switch right after mount lands on it rather than its pair. */
+  private anchor: HTMLElement | null = null;
 
   on<K extends keyof DeckEvents>(type: K, listener: (payload: DeckEvents[K]) => void): () => void {
     return this.events.on(type, listener);
@@ -103,7 +136,10 @@ export class DeckController {
     document.addEventListener("click", this.onClick, { signal });
     // header colour/blur follows content while a screen scrolls internally
     deck.addEventListener("scroll", this.onScroll, { capture: true, passive: true, signal });
+    window.addEventListener("pagehide", this.savePosition, { signal });
+    this.anchor = this.restoreTarget(deck);
     this.collect();
+    document.documentElement.removeAttribute(RESTORE_ATTR); // reveal the deck (see deck.css)
   }
 
   destroy(): void {
@@ -120,6 +156,7 @@ export class DeckController {
     this.busy = false;
     this.wheel = { quiet: false, lastWheel: 0, lastAbs: 0 };
     this.touch = null;
+    this.anchor = null;
   }
 
   step(dir: Direction): boolean {
@@ -147,6 +184,33 @@ export class DeckController {
     if (isScrollSlide(slide)) slide.scrollTop = y; // land already in place
     this.go(idx, { dur: jumpDuration(Math.abs(idx - this.cur)) });
   }
+
+  /* ---- position across refreshes ---- */
+
+  /** Finds the saved slide and restores its inner scroll; `collect` then makes it current. */
+  private restoreTarget(deck: HTMLElement): HTMLElement | null {
+    const saved = readPosition();
+    if (!saved) return null;
+    const el = deck.querySelectorAll<HTMLElement>(SLIDE_SELECTOR)[saved.slide];
+    if (!el) return null;
+    if (isScrollSlide(el)) el.scrollTop = saved.top;
+    return el;
+  }
+
+  private savePosition = (): void => {
+    const slide = this.currentSlide();
+    if (!slide || !this.deck) return;
+    const all = Array.from(this.deck.querySelectorAll<HTMLElement>(SLIDE_SELECTOR));
+    const position: SavedPosition = {
+      slide: all.indexOf(slide),
+      top: isScrollSlide(slide) ? slide.scrollTop : 0,
+    };
+    try {
+      window.sessionStorage.setItem(POSITION_KEY, JSON.stringify(position));
+    } catch {
+      // storage blocked: nothing to restore next time
+    }
+  };
 
   /* ---- timing helpers (everything is cleared in destroy) ---- */
 
@@ -204,7 +268,7 @@ export class DeckController {
   private collect(): void {
     const deck = this.deck;
     if (!deck) return;
-    const prev = this.slides[this.cur];
+    const prev = this.anchor ?? this.slides[this.cur];
     deck.querySelectorAll<HTMLElement>(SLIDE_SELECTOR).forEach(resetSlide);
     this.slides = Array.from(
       deck.querySelectorAll<HTMLElement>(this.phone ? PHONE_SLIDES : DESKTOP_SLIDES),
@@ -253,6 +317,7 @@ export class DeckController {
   private go(to: number, opt: GoOptions = {}): boolean {
     const { slides, cur } = this;
     if (this.busy || to < 0 || to >= slides.length || to === cur) return false;
+    this.anchor = null;
     this.busy = true;
     const dir: Direction = to > cur ? 1 : -1;
     const height = this.height();
