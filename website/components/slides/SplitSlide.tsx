@@ -26,13 +26,13 @@ export function SplitSlide({ image }: SplitSlideProps) {
           <div className="scrim"></div>
           <figcaption className="cap">
             <strong>By appointment</strong>
-            <a href="#prices">View the price list</a>
+            <a href="#services">Make an appointment</a>
           </figcaption>
         </figure>
         <div className={styles.text}>
           <p>Cut · Colour · Perm · Treatment</p>
           <h2>By Appointment</h2>
-          <a href="#prices">View the price list</a>
+          <a href="#services">Make an appointment</a>
         </div>
       </div>
     </section>

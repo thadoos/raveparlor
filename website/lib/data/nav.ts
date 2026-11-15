@@ -20,7 +20,7 @@ export const MENU_LINKS: readonly NavLink[] = [
   REVIEWS,
   SERVICES,
   PRICES,
-  { href: "#book", label: "Book & Visit" },
+  { href: "#book", label: "Details" },
 ];
 
 /** Links in the footer (the booking link is labelled "Book" here). */
