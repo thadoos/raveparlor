@@ -47,7 +47,6 @@ interface ServicesOverviewProps {
 }
 
 export function ServicesOverview({ menu, images }: ServicesOverviewProps) {
-  const total = CATEGORY_ORDER.reduce((sum, key) => sum + menu[key].items.length, 0);
   return (
     <section
       className={cx("slide scroll", styles.services)}
@@ -57,11 +56,11 @@ export function ServicesOverview({ menu, images }: ServicesOverviewProps) {
       aria-labelledby="services-title"
     >
       <Reveal as="h2" className={styles.title} id="services-title">
-        {/* The count is decoration (the cards state their own counts); the spaces keep the
+        {/* The tag is decoration; the spaces keep the
             accessible name "Our Services" and are not rendered inside the flex container. */}
         <span>Our</span>{" "}
         <span className={styles.tag} aria-hidden="true">
-          <span className={styles.tagIn}>{formatServiceCount(total)}</span>
+          <span className={styles.tagIn}>Book now</span>
         </span>{" "}
         <span>Services</span>
       </Reveal>

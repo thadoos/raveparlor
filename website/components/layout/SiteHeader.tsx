@@ -45,7 +45,7 @@ export function SiteHeader() {
       >
         <span className="logo-mark" aria-hidden="true"></span>
       </a>
-      <a className={styles.book} href="#book" onClick={close}>
+      <a className={styles.book} href="#services" onClick={close}>
         Book
       </a>
     </header>

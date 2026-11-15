@@ -32,7 +32,7 @@ export function HeroPair({ left, right }: HeroPairProps) {
             <div className="scrim"></div>
             <figcaption className="cap">
               <strong>Cutting &amp; Finishing</strong>
-              <a href="#book">Book an appointment</a>
+              <a href="#services">Book an appointment</a>
             </figcaption>
           </div>
         </figure>
