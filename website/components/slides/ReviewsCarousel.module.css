@@ -5,6 +5,13 @@
 }
 .stage {
   display: grid;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.stage:active {
+  cursor: grabbing;
 }
 .review {
   grid-area: 1 / 1;

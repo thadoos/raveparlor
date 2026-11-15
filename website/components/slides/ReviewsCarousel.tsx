@@ -1,8 +1,10 @@
 "use client";
 
+import { useRef } from "react";
 import { cx } from "@/lib/cx";
 import type { Review } from "@/lib/data/reviews";
 import { useCarousel } from "@/lib/hooks/use-carousel";
+import { useSwipe } from "@/lib/hooks/use-swipe";
 import styles from "./ReviewsCarousel.module.css";
 
 interface ReviewsCarouselProps {
@@ -12,7 +14,9 @@ interface ReviewsCarouselProps {
 
 export function ReviewsCarousel({ reviews, intervalMs = 3000 }: ReviewsCarouselProps) {
   const count = reviews.length;
-  const { index, select, pause, resume } = useCarousel(count, intervalMs);
+  const { index, select, next, prev, pause, resume } = useCarousel(count, intervalMs);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const swipe = useSwipe(stageRef, prev, next);
 
   return (
     <div
@@ -22,7 +26,7 @@ export function ReviewsCarousel({ reviews, intervalMs = 3000 }: ReviewsCarouselP
       onFocus={pause}
       onBlur={resume}
     >
-      <div className={styles.stage}>
+      <div ref={stageRef} className={styles.stage} {...swipe}>
         {reviews.map((review, i) => {
           const active = i === index;
           return (

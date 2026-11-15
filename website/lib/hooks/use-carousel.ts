@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 export interface Carousel {
   index: number;
   select: (i: number) => void;
+  next: () => void;
+  prev: () => void;
   pause: () => void;
   resume: () => void;
 }
@@ -26,8 +28,16 @@ export function useCarousel(count: number, intervalMs: number): Carousel {
   }, [index, paused, count, intervalMs]);
 
   const select = useCallback((i: number) => setIndex(i), []);
+  const next = useCallback(
+    () => setIndex((current) => (count > 0 ? (current + 1) % count : 0)),
+    [count],
+  );
+  const prev = useCallback(
+    () => setIndex((current) => (count > 0 ? (current - 1 + count) % count : 0)),
+    [count],
+  );
   const pause = useCallback(() => setPaused(true), []);
   const resume = useCallback(() => setPaused(false), []);
 
-  return { index, select, pause, resume };
+  return { index, select, next, prev, pause, resume };
 }
