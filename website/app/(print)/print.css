@@ -1,0 +1,21 @@
+/* Dev-only price list PDF export: lets the price list paginate as a document instead of the site's fixed deck. */
+@page {
+  size: A4;
+  margin: 14mm 16mm;
+}
+html,
+body {
+  height: auto;
+  overflow: visible;
+}
+.reveal {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+#prices {
+  padding: 8mm 0 0;
+}
+#prices [class*="__group"] {
+  break-inside: avoid;
+}
