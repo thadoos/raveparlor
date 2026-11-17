@@ -20,13 +20,16 @@
 }
 
 /* Visual mode: exactly one screen tall; the preview fills what the draft bar leaves. */
-.isVisual {
-  height: 100vh;
-  height: 100svh;
+.app.isVisual {
+  position: fixed;
+  inset: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 .main.visualMain {
   display: flex;
   min-height: 0;
+  overflow: hidden;
   max-width: none;
   padding: 0;
 }
