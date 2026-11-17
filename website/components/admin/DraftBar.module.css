@@ -64,8 +64,11 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  font-size: 12px;
-  letter-spacing: 0.1em;
+  color: var(--color-ink);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
   list-style: none;
   cursor: pointer;
 }
