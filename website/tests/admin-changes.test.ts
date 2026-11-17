@@ -163,14 +163,14 @@ describe("summarizeChanges", () => {
   });
 
   it("reports changed alt text", () => {
-    expect(changed((c) => (c.images.priceList.alt = "New alt"))).toEqual([
-      "Alt text changed: priceList",
+    expect(changed((c) => (c.images.parlor.alt = "New alt"))).toEqual([
+      "Alt text changed: parlor",
     ]);
   });
 
   it("orders lines as barbers, prices, copy, hours, number, images", () => {
     const lines = changed((c) => {
-      c.images.priceList.alt = "New alt";
+      c.images.parlor.alt = "New alt";
       c.business.defaultWhatsApp = "447700900123";
       c.business.hours[0].close = "20:00";
       c.services.cut.intro[0] = "Hello";
@@ -183,7 +183,7 @@ describe("summarizeChanges", () => {
       "Cut & Style: intro text changed",
       "Opening hours changed",
       "Default WhatsApp number changed",
-      "Alt text changed: priceList",
+      "Alt text changed: parlor",
     ]);
   });
 });

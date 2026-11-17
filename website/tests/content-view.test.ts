@@ -105,7 +105,6 @@ describe("buildSiteView", () => {
 
   it("resolves positions and category media", () => {
     expect(view.images.heroLeft.position).toBe("46% 42%");
-    expect(view.images.priceList.position).toBeUndefined();
     expect(view.menu.treat.media.position).toBe("40% 50%");
   });
 

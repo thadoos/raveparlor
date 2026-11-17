@@ -39,7 +39,7 @@ export function FormMode({
     [onSelect],
   );
 
-  // A link to one image (the poster warning) scrolls its card into view and focuses it. The card
+  // A link to one image (an image card a link points at) scrolls its card into view and focuses it. The card
   // itself takes focus, not its first control: on phones an input would raise the keyboard.
   const photoCards = useRef(new Map<ImageSlot, HTMLElement>());
   const focusSlot = selection.section === "photos" ? selection.slot : undefined;

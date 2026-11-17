@@ -105,8 +105,23 @@ function isV1(input: unknown): boolean {
   return typeof input === "object" && input !== null && "version" in input && input.version === 1;
 }
 
+/**
+ * Slots removed from the content model: priceList. Stored rows may still carry them, so they are
+ * dropped before validation instead of being rejected. Non-mutating.
+ */
+function withoutRemovedSlots(raw: unknown): unknown {
+  if (typeof raw !== "object" || raw === null) return raw;
+  const images: unknown = Reflect.get(raw, "images");
+  if (typeof images !== "object" || images === null || Array.isArray(images)) return raw;
+  return {
+    ...raw,
+    images: Object.fromEntries(Object.entries(images).filter(([slot]) => slot !== "priceList")),
+  };
+}
+
 /** Validates content. Version 1 input (old stored rows) is migrated to version 2 first. */
-export function parseSiteContent(input: unknown): ParseSiteContentResult {
+export function parseSiteContent(rawInput: unknown): ParseSiteContentResult {
+  const input = withoutRemovedSlots(rawInput);
   let candidate = input;
   if (isV1(input)) {
     const v1 = siteContentV1Schema.safeParse(input);

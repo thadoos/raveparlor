@@ -1,4 +1,3 @@
-import { deepEqual } from "@/lib/admin/changes";
 import type { EditTarget } from "@/lib/admin/target-key";
 import { CATEGORY_KEYS } from "@/lib/content/schema";
 import type { SiteContent } from "@/lib/content/schema";
@@ -6,33 +5,17 @@ import { MENU_STRUCTURE } from "@/lib/content/structure";
 
 /** Things worth a second look before publishing. Advisory only: they never block a publish. */
 export interface ContentWarning {
-  kind: "poster" | "staleBarberName";
+  kind: "staleBarberName";
   message: string;
   /** The editor that fixes it, so the publish dialog can link there. */
   target?: EditTarget;
 }
-
-const POSTER_MESSAGE = "Prices changed. Remember to upload an updated price poster.";
 
 const ITEM_FIELDS = [
   ["desc", "description"],
   ["ideal", "“ideal for” text"],
   ["note", "note"],
 ] as const;
-
-/** What the poster shows: every service's options and price rows. A barber added or removed counts,
- *  since it adds or removes rows. */
-function pricesChanged(published: SiteContent, draft: SiteContent): boolean {
-  const pricing = (c: SiteContent) =>
-    CATEGORY_KEYS.map((category) =>
-      MENU_STRUCTURE[category].items.map(({ key }) => {
-        const items = c.services[category].items;
-        const item = Object.hasOwn(items, key) ? items[key] : undefined;
-        return { options: item?.options, prices: item?.prices };
-      }),
-    );
-  return !deepEqual(pricing(published), pricing(draft));
-}
 
 function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -87,17 +70,6 @@ function copyFields(c: SiteContent): CopyField[] {
 
 export function contentWarnings(published: SiteContent, draft: SiteContent): ContentWarning[] {
   const warnings: ContentWarning[] = [];
-  if (
-    pricesChanged(published, draft) &&
-    published.images.priceList.path === draft.images.priceList.path
-  ) {
-    warnings.push({
-      kind: "poster",
-      message: POSTER_MESSAGE,
-      target: { kind: "image", slot: "priceList" },
-    });
-  }
-
   const remaining = new Set(draft.barbers.map((b) => b.name.trim().toLowerCase()));
   const removed = published.barbers
     .map((b) => b.name.trim())

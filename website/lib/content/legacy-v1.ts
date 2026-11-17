@@ -349,12 +349,6 @@ export const DEFAULT_CONTENT_V1: SiteContentV1 = {
     heroRight: bobCopper(BOB_COPPER_ALT),
     split: portraitMono(PORTRAIT_MONO_ALT),
     parlor: parlor(PARLOR_ALT),
-    priceList: {
-      path: "/images/price-list.webp",
-      alt: "Rave’s Parlor London price list: hair cut and blow-dry prices for Rave, John and Julian, colour and highlights, perm, and hair treatments. All chemical services exclude haircut, wash and finishing.",
-      width: 1491,
-      height: 1055,
-    },
     "overview.cut": portraitColour(PORTRAIT_COLOUR_ALT),
     "overview.colour": bobCopper(BOB_COPPER_ALT),
     "overview.perm": portraitMono(PORTRAIT_MONO_ALT),

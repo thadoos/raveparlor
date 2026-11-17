@@ -15,7 +15,6 @@ export const IMAGE_SLOTS = [
   "heroRight",
   "split",
   "parlor",
-  "priceList",
   "overview.cut",
   "overview.colour",
   "overview.perm",

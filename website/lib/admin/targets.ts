@@ -68,7 +68,6 @@ export const IMAGE_GROUPS: readonly { title: string; slots: readonly ImageSlot[]
     slots: ["overview.cut", "overview.colour", "overview.perm", "overview.treat"],
   },
   { title: "Service photos", slots: ["media.cut", "media.colour", "media.perm", "media.treat"] },
-  { title: "Price poster", slots: ["priceList"] },
 ];
 
 const FIXED_SLOT_LABELS: Partial<Record<ImageSlot, string>> = {
@@ -76,7 +75,6 @@ const FIXED_SLOT_LABELS: Partial<Record<ImageSlot, string>> = {
   heroRight: "Opening slide, right",
   split: "Split slide",
   parlor: "Parlor slide",
-  priceList: "Price poster",
 };
 
 export function imageSlotLabel(slot: ImageSlot): string {

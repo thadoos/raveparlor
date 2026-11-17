@@ -194,7 +194,7 @@
   min-width: 0;
   padding: 20px 16px;
   border: 1px solid var(--color-offwhite-muted);
-  /* a link can scroll to one card (the price poster from the publish warning) */
+  /* a link can scroll to one card (an image card a link points at) */
   scroll-margin-top: 8px;
 }
 .photoCard:focus {

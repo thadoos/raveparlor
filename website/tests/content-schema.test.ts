@@ -98,7 +98,22 @@ describe("parseSiteContent", () => {
   );
 
   it("rejects missing image slot", () =>
-    expect(mutated((c) => delete c.images.priceList).ok).toBe(false));
+    expect(mutated((c) => delete c.images.heroLeft).ok).toBe(false));
+
+  it("tolerates and drops the removed priceList image slot", () => {
+    const c = makeContent();
+    const stored = {
+      ...c,
+      images: {
+        ...c.images,
+        priceList: { path: "/images/price-list.webp", alt: "Old poster", width: 1491, height: 1055 },
+      },
+    };
+    const r = parseSiteContent(stored);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.content.images).not.toHaveProperty("priceList");
+    expect(stored.images).toHaveProperty("priceList");
+  });
 
   it("accepts an uploaded item photo storage key", () =>
     expect(

@@ -67,7 +67,7 @@ describe("migrateV1toV2", () => {
 
   it("drops the dialog image slots", () => {
     expect(migrated.images).not.toHaveProperty("dialog.cut.0");
-    expect(Object.keys(migrated.images)).toHaveLength(13);
+    expect(Object.keys(migrated.images)).toHaveLength(12);
   });
 
   it("does not mutate its input", () => {
@@ -80,7 +80,7 @@ describe("migrateV1toV2", () => {
 describe("contentImagePaths", () => {
   it("lists slot images and item photos", () => {
     const paths = contentImagePaths(DEFAULT_CONTENT);
-    expect(paths).toContain("/images/price-list.webp");
+    expect(paths).toContain(DEFAULT_CONTENT.images.parlor.path);
     for (const photo of DEFAULT_CONTENT.services.cut.items.cutting.photos)
       expect(paths).toContain(photo.path);
   });

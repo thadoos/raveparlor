@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { setOptions, setPrice } from "@/lib/admin/draft-ops";
 import { contentWarnings } from "@/lib/admin/warnings";
 import { DEFAULT_CONTENT } from "@/lib/content/defaults";
 import type { SiteContent } from "@/lib/content/schema";
@@ -15,42 +14,9 @@ function warningsFor(edit: (c: SiteContent) => void) {
 }
 
 describe("contentWarnings", () => {
-  it("gives exactly one poster warning when a price changes", () => {
-    const published = content();
-    const warnings = contentWarnings(
-      published,
-      setPrice(published, "cut", "cutting", published.barbers[0].id, 0, "£60"),
-    );
-    expect(warnings).toEqual([
-      {
-        kind: "poster",
-        message: "Prices changed. Remember to upload an updated price poster.",
-        target: { kind: "image", slot: "priceList" },
-      },
-    ]);
-  });
-
-  it("gives a poster warning for base prices and options", () => {
-    expect(
-      warningsFor((c) => (c.services.colour.items.roots.prices = { base: ["£85", "–", "–"] })),
-    ).toHaveLength(1);
-    const published = content();
-    const renamed = setOptions(published, "colour", "roots", ["S", "M", "L"], [0, 1, 2]);
-    expect(contentWarnings(published, renamed).map((w) => w.kind)).toEqual(["poster"]);
-  });
-
-  it("gives no poster warning when the price poster was replaced too", () => {
-    const warnings = warningsFor((c) => {
-      c.services.cut.items.cutting.prices.barbers![c.barbers[0].id][0] = "£60";
-      c.images.priceList = { ...c.images.priceList, path: "price-list/new.webp" };
-    });
-    expect(warnings).toEqual([]);
-  });
-
   it("warns about every copy field that still names a removed barber", () => {
     const warnings = warningsFor((c) => {
       c.barbers.splice(1, 1);
-      c.images.priceList = { ...c.images.priceList, path: "price-list/new.webp" };
     });
     expect(warnings.every((w) => w.kind === "staleBarberName")).toBe(true);
     expect(warnings.map((w) => w.message)).toEqual([
@@ -81,7 +47,6 @@ describe("contentWarnings", () => {
     });
     const draft = content();
     draft.services.cut.intro[0] = "Also available for events.";
-    draft.images.priceList = { ...draft.images.priceList, path: "price-list/new.webp" };
     expect(contentWarnings(published, draft)).toEqual([]);
 
     draft.services.cut.intro[0] = "Ask al, or anyone.";

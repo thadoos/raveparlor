@@ -59,11 +59,11 @@ describe("parseFormSelection", () => {
   });
 
   it("round-trips a photo slot, and drops unknown slots or slots outside photos", () => {
-    const selection = parse("section=photos&slot=priceList");
-    expect(selection).toEqual({ section: "photos", slot: "priceList" });
-    expect(formSelectionQuery(selection)).toBe("section=photos&slot=priceList");
+    const selection = parse("section=photos&slot=parlor");
+    expect(selection).toEqual({ section: "photos", slot: "parlor" });
+    expect(formSelectionQuery(selection)).toBe("section=photos&slot=parlor");
     expect(parse("section=photos&slot=nope")).toEqual({ section: "photos" });
-    expect(parse("section=hours&slot=priceList")).toEqual({ section: "hours" });
+    expect(parse("section=hours&slot=parlor")).toEqual({ section: "hours" });
     expect(parse("section=photos")).toEqual({ section: "photos" });
   });
 });
@@ -108,9 +108,9 @@ describe("selection and targets", () => {
       section: "services",
       item: "colour.roots",
     });
-    expect(targetSelection({ kind: "image", slot: "priceList" })).toEqual({
+    expect(targetSelection({ kind: "image", slot: "parlor" })).toEqual({
       section: "photos",
-      slot: "priceList",
+      slot: "parlor",
     });
     expect(targetSelection({ kind: "business" })).toEqual({ section: "business" });
     expect(targetSelection({ kind: "hero" })).toEqual({ section: "hero" });
@@ -150,7 +150,7 @@ describe("dirtySections", () => {
     draft.business.defaultWhatsApp = "447700900999";
     expect([...dirtySections(saved, draft)]).toEqual(["business"]);
     draft.business.hours = draft.business.hours.slice(0, 1);
-    draft.images.priceList = { ...draft.images.priceList, alt: "New" };
+    draft.images.parlor = { ...draft.images.parlor, alt: "New" };
     expect([...dirtySections(saved, draft)].sort()).toEqual(["business", "hours", "photos"]);
   });
 });

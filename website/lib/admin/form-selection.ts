@@ -15,7 +15,7 @@ export type FormItem = `${CategoryKey}.${string}`;
 export interface FormSelection {
   section: FormSection;
   item?: FormItem;
-  /** In Photos: the image to scroll to, e.g. the price poster a publish warning links to. */
+  /** In Photos: the image to scroll to, e.g. an image card a link points at. */
   slot?: ImageSlot;
 }
 
