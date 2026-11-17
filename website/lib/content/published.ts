@@ -33,6 +33,22 @@ export async function getPublishedContent(): Promise<SiteContent> {
   return parsePublishedRow(data);
 }
 
+/** When the published content was last saved, or null when unknown (never throws). */
+export async function getPublishedUpdatedAt(): Promise<Date | null> {
+  "use cache";
+  cacheLife("max");
+  cacheTag(CONTENT_TAG);
+
+  const { data, error } = await createPublicClient()
+    .from("site_content")
+    .select("updated_at")
+    .eq("id", "published")
+    .maybeSingle();
+  if (error || !data?.updated_at) return null;
+  const date = new Date(data.updated_at);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export async function getSiteView(): Promise<SiteView> {
   return buildSiteView(await getPublishedContent(), process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
 }

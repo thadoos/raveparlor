@@ -26,6 +26,8 @@ export interface SiteInfo {
   googleRating: GoogleRating;
   instagramUrl: string;
   mapsUrl: string;
+  /** Salon location (static, not editable content). */
+  geo: { latitude: number; longitude: number };
   /** First year shown in the copyright line (kept as data: no `new Date()` in server components). */
   copyrightStartYear: string;
 }
@@ -46,6 +48,7 @@ export const SITE_STATIC: StaticSiteInfo = {
   closedDays: ["Christmas Day", "Boxing Day", "New Year’s Day"],
   instagramUrl: "https://www.instagram.com/ravesparlor_london",
   mapsUrl: "https://maps.app.goo.gl/5DsbgsoeiHCW4rab9",
+  geo: { latitude: 51.404722013891806, longitude: -0.2568717066286711 },
   copyrightStartYear: "2026",
 };
 

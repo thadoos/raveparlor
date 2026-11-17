@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CONTENT } from "@/lib/content/defaults";
 import { buildSiteView } from "@/lib/content/view";
+import type { MenuCategory, MenuItem } from "@/lib/data/services";
 import { resolveSiteUrl } from "@/lib/data/site";
-import { buildHairSalonLd, e164, serializeJsonLd } from "@/lib/seo";
+import {
+  buildHairSalonLd,
+  buildPriceRange,
+  e164,
+  serializeJsonLd,
+  type OfferCatalogLd,
+} from "@/lib/seo";
 
 describe("resolveSiteUrl", () => {
   it("prefers NEXT_PUBLIC_SITE_URL", () => {
@@ -34,6 +41,8 @@ describe("resolveSiteUrl", () => {
   });
 });
 
+const view = buildSiteView(DEFAULT_CONTENT, "");
+
 describe("e164", () => {
   it("prefixes the international number with a plus", () => {
     expect(e164("447789096148")).toBe("+447789096148");
@@ -41,9 +50,8 @@ describe("e164", () => {
 });
 
 describe("buildHairSalonLd", () => {
-  const view = buildSiteView(DEFAULT_CONTENT, "");
   const site = view.site;
-  const ld = buildHairSalonLd(site, view.images.parlor, "https://example.com");
+  const ld = buildHairSalonLd(site, view.images.parlor, view.menu, "https://example.com");
 
   it("describes the salon", () => {
     expect(ld["@context"]).toBe("https://schema.org");
@@ -63,6 +71,14 @@ describe("buildHairSalonLd", () => {
       addressLocality: site.address.town,
       postalCode: site.address.postcode,
       addressCountry: "GB",
+    });
+  });
+
+  it("includes the geo coordinates", () => {
+    expect(ld.geo).toEqual({
+      "@type": "GeoCoordinates",
+      latitude: 51.404722013891806,
+      longitude: -0.2568717066286711,
     });
   });
 
@@ -94,15 +110,101 @@ describe("buildHairSalonLd", () => {
       },
       "https://project.supabase.co",
     );
-    expect(buildHairSalonLd(site, stored.images.parlor, "https://example.com").image).toBe(
+    expect(buildHairSalonLd(site, stored.images.parlor, stored.menu, "https://example.com").image).toBe(
       "https://project.supabase.co/storage/v1/object/public/site-images/parlor/reception.jpg",
     );
   });
 
-  it("makes no rating, review or price claims", () => {
-    expect(ld).not.toHaveProperty("aggregateRating");
-    expect(ld).not.toHaveProperty("review");
-    expect(ld).not.toHaveProperty("priceRange");
+  it("identifies the salon and its logo", () => {
+    expect(ld["@id"]).toBe("https://example.com/#salon");
+    expect(ld.logo).toBe("https://example.com/images/logo.png");
+  });
+
+  it("lists the areas served", () => {
+    expect(ld.areaServed).toEqual([
+      { "@type": "City", name: site.address.town },
+      { "@type": "City", name: "London" },
+    ]);
+  });
+
+  it("reports the Google rating", () => {
+    expect(ld.aggregateRating).toEqual({
+      "@type": "AggregateRating",
+      ratingValue: site.googleRating.score,
+      reviewCount: site.googleRating.reviews,
+      bestRating: "5",
+    });
+    expect(typeof ld.aggregateRating.reviewCount).toBe("number");
+  });
+
+  it("derives the price range from the menu", () => {
+    expect(ld.priceRange).toBe(buildPriceRange(view.menu));
+    expect(ld.priceRange).toMatch(/^£\d+ - £\d+\+?$/);
+  });
+
+  it("omits priceRange when the menu has no prices", () => {
+    expect(buildHairSalonLd(site, view.images.parlor, {}, "https://example.com")).not.toHaveProperty(
+      "priceRange",
+    );
+  });
+
+  it("builds a service catalog with one sub-catalog per category", () => {
+    const catalog = ld.hasOfferCatalog;
+    expect(catalog["@type"]).toBe("OfferCatalog");
+    expect(catalog.name).toBe("Services");
+    expect(catalog.itemListElement.map((c) => (c as OfferCatalogLd).name)).toEqual(
+      Object.values(view.menu).map((c) => c.name),
+    );
+    const first = catalog.itemListElement[0] as OfferCatalogLd;
+    const item = Object.values(view.menu)[0].items[0];
+    expect(first.itemListElement[0]).toMatchObject({
+      "@type": "Offer",
+      itemOffered: { "@type": "Service", name: item.name, description: item.desc },
+    });
+  });
+});
+
+/** A menu with one item per entry, each with a single row of the given price cells. */
+function menuOf(...prices: string[][]): Record<string, MenuCategory> {
+  const base = view.menu.cut;
+  const items: MenuItem[] = prices.map((cells, i) => ({
+    ...base.items[0],
+    key: `item-${i}`,
+    name: `Item ${i}`,
+    rows: [{ label: "", sub: "", prices: cells, barberId: null }],
+  }));
+  return { cat: { ...base, name: "Cat", items } };
+}
+
+describe("buildPriceRange", () => {
+  it("spans the lowest to the highest amount", () => {
+    expect(buildPriceRange(menuOf(["£80"], ["£30", "£45"]))).toBe("£30 - £80");
+  });
+
+  it("marks an open-ended highest price with a plus", () => {
+    expect(buildPriceRange(menuOf(["£30"], ["£100 – £220+"]))).toBe("£30 - £220+");
+  });
+
+  it("ignores empty cells", () => {
+    expect(buildPriceRange(menuOf(["–", "£50"], ["-"]))).toBe("£50 - £50");
+  });
+
+  it("is undefined without any price", () => {
+    expect(buildPriceRange(menuOf(["–"]))).toBeUndefined();
+    expect(buildPriceRange({})).toBeUndefined();
+  });
+});
+
+describe("hasOfferCatalog offers", () => {
+  const site = view.site;
+
+  it("uses the lowest price of the item and omits it when there is none", () => {
+    const ld = buildHairSalonLd(site, view.images.parlor, menuOf(["£100 – £220+", "£60"], ["–"]));
+    const offers = (ld.hasOfferCatalog.itemListElement[0] as OfferCatalogLd).itemListElement;
+    expect(offers[0]).toMatchObject({
+      priceSpecification: { "@type": "PriceSpecification", priceCurrency: "GBP", minPrice: 60 },
+    });
+    expect(offers[1]).not.toHaveProperty("priceSpecification");
   });
 });
 

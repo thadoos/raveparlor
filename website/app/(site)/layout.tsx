@@ -18,9 +18,10 @@ const DECK_RESTORE_SCRIPT = `try{if(sessionStorage.getItem("${POSITION_KEY}"))do
 export async function generateMetadata(): Promise<Metadata> {
   const { site } = await getSiteView();
   const description = `Hair salon in ${site.address.town}, London. Cut, colour, perm and treatments, by appointment. Open ${formatHoursSummary(site, ", ")}.`;
+  const title = `Rave’s Parlor | Hair Salon in ${site.address.town}, London`;
   return {
     metadataBase: new URL(SITE_URL),
-    title: { default: site.brandName, template: `%s | ${site.brandName}` },
+    title: { default: title, template: `%s | ${site.brandName}` },
     description,
     alternates: { canonical: "/" },
     // Stop mobile browsers wrapping the phone number in a link before hydration (causes a mismatch)
@@ -29,13 +30,13 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       siteName: site.brandName,
       locale: "en_GB",
-      title: site.brandName,
+      title,
       description,
       url: "/",
     },
     twitter: {
       card: "summary_large_image",
-      title: site.brandName,
+      title,
       description,
     },
   };
@@ -55,7 +56,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: DECK_RESTORE_SCRIPT }} />
         <SkipLink />
         {children}
-        <JsonLd data={buildHairSalonLd(view.site, view.images.parlor)} />
+        <JsonLd data={buildHairSalonLd(view.site, view.images.parlor, view.menu)} />
       </body>
     </html>
   );
