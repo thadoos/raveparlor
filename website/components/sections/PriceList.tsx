@@ -80,7 +80,7 @@ function ItemRows({ item, header, cols, grouped }: ItemRowsProps) {
       {ownHead && <OwnHead item={item} cols={cols} />}
       <div className={styles.row}>
         <div>{item.name}</div>
-        <PriceCells item={item} prices={rows[0].prices} cols={cols} captions={grouped} />
+        <PriceCells item={item} prices={rows[0].prices} cols={cols} captions={grouped && !fitsHeader(item, header)} />
       </div>
     </>
   );
@@ -94,7 +94,7 @@ interface OwnHeadProps {
 function OwnHead({ item, cols }: OwnHeadProps) {
   return (
     <div className={cx(styles.row, styles.subHead)}>
-      <h4></h4>
+      <div />
       {labels(item.options, cols).map((label, i) => (
         <span key={i}>{label}</span>
       ))}
@@ -105,10 +105,11 @@ function OwnHead({ item, cols }: OwnHeadProps) {
 interface BarberBlockProps {
   barber: Barber;
   items: readonly MenuItem[];
+  header: readonly string[];
   cols: number;
 }
 
-function BarberBlock({ barber, items, cols }: BarberBlockProps) {
+function BarberBlock({ barber, items, header, cols }: BarberBlockProps) {
   return (
     <>
       <div className={cx(styles.row, styles.barberHead)}>
@@ -123,7 +124,7 @@ function BarberBlock({ barber, items, cols }: BarberBlockProps) {
         return (
           <div className={styles.row} key={item.key}>
             <div>{item.name}</div>
-            <PriceCells item={item} prices={row.prices} cols={cols} captions />
+            <PriceCells item={item} prices={row.prices} cols={cols} captions={!fitsHeader(item, header)} />
           </div>
         );
       })}
@@ -152,10 +153,11 @@ function PriceGroup({ category, barbers }: PriceGroupProps) {
   const grouped = barberItems.length > 0;
   return (
     <div style={{ "--cols": cols } as CSSProperties}>
-      <div className={cx(styles.row, styles.headRow, grouped && styles.groupedHead)}>
+      <div className={cx(styles.row, styles.headRow)}>
         <h3>{category.name}</h3>
-        {!grouped &&
-          labels(header, cols).map((label, i) => <span key={i}>{label}</span>)}
+        {labels(header, cols).map((label, i) => (
+          <span key={i}>{label}</span>
+        ))}
       </div>
       {otherItems.map((item) => (
         <Fragment key={item.key}>
@@ -163,7 +165,7 @@ function PriceGroup({ category, barbers }: PriceGroupProps) {
         </Fragment>
       ))}
       {listedBarbers.map((barber) => (
-        <BarberBlock key={barber.id} barber={barber} items={barberItems} cols={cols} />
+        <BarberBlock key={barber.id} barber={barber} items={barberItems} header={header} cols={cols} />
       ))}
       {notes.map((note) => (
         <p className={styles.groupNote} key={note}>

@@ -1,4 +1,5 @@
 .prices {
+  --rule: #e6e6e3;
   position: relative;
   z-index: var(--z-raised);
   background: var(--color-paper);
@@ -17,7 +18,7 @@
   color: var(--color-muted);
 }
 .title {
-  margin: 0 0 72px;
+  margin: 0 0 88px;
   text-align: center;
   font-family: var(--logo);
   font-weight: 200;
@@ -27,16 +28,21 @@
   text-transform: uppercase;
 }
 .group {
-  margin: 0 0 56px;
+  margin: 0 0 80px;
 }
+.group:last-child {
+  margin-bottom: 0;
+}
+
+/* Rows */
 .row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(var(--cols), 96px);
+  grid-template-columns: minmax(0, 1fr) repeat(var(--cols), 104px);
   align-items: baseline;
-  column-gap: 8px;
-  padding: 14px 0;
-  border-bottom: 1px solid #e6e6e3;
-  font-size: 14px;
+  column-gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 15px;
   line-height: 1.45;
 }
 .row > span {
@@ -46,82 +52,75 @@
 .row .span {
   grid-column: 2 / -1;
 }
-.row small {
-  display: block;
-  margin-top: 2px;
-  color: var(--color-muted);
-  font-size: 12px;
-}
 .none {
-  color: var(--color-muted);
-}
-.headRow {
-  border-bottom-color: #111;
-  padding-bottom: 12px;
-}
-.headRow h3 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.subHead {
-  margin-top: 28px;
-  border-bottom-color: #111;
-  padding-bottom: 12px;
-}
-.subHead h4 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.headRow.groupedHead {
-  border-bottom: 2px solid #111;
-}
-.headRow.groupedHead h3 {
-  font-size: 15px;
-}
-.barberHead {
-  margin-top: 40px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #111;
-}
-.barberHead h4 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-.barberHead h4 small {
-  display: block;
-  margin-top: 4px;
-  color: var(--color-muted);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.04em;
+  color: var(--color-offwhite-muted);
 }
 .row .caption {
   display: block;
-  margin-top: 3px;
+  margin-top: 4px;
   font-size: 10px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-muted);
 }
+
+/* Category heading: level 2 in the hierarchy */
+.headRow {
+  align-items: end;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--color-ink);
+}
+.headRow h3 {
+  margin: 0;
+  font-family: var(--logo);
+  font-weight: 300;
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Column labels */
 .headRow span,
 .subHead span {
   font-size: 11px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-muted);
 }
-.groupNote {
-  margin: 10px 0 0;
+.subHead {
+  padding: 28px 0 10px;
+}
+
+/* Barber label: level 3, a quiet sub-section marker */
+.barberHead {
+  padding: 32px 0 10px;
+}
+.barberHead h4 {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin: 0;
   font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.barberHead h4 small {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-muted);
+}
+
+.groupNote {
+  margin: 14px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--color-muted);
 }
 
@@ -131,16 +130,27 @@
   }
   .title {
     font-size: 30px;
+    margin-bottom: 56px;
+  }
+  .group {
+    margin-bottom: 56px;
   }
   .row {
     grid-template-columns: minmax(0, 1fr) repeat(var(--cols), 64px);
-    column-gap: 6px;
-    font-size: 13px;
+    column-gap: 8px;
+    padding: 14px 0;
+    font-size: 14px;
+  }
+  .headRow {
+    padding-bottom: 12px;
+  }
+  .headRow h3 {
+    font-size: 19px;
   }
   .headRow span,
   .subHead span {
     font-size: 9px;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
   }
   .row .caption {
     font-size: 9px;
