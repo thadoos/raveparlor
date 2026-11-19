@@ -5,7 +5,6 @@ import { POSITION_KEY, RESTORE_ATTR } from "@/lib/deck/constants";
 import { getSiteView } from "@/lib/content/published";
 import { SITE_URL } from "@/lib/data/site";
 import { jost } from "@/lib/fonts";
-import { formatHoursSummary } from "@/lib/format";
 import { buildHairSalonLd, buildWebSiteLd } from "@/lib/seo";
 import "../globals.css";
 
@@ -17,8 +16,8 @@ const DECK_RESTORE_SCRIPT = `try{if(sessionStorage.getItem("${POSITION_KEY}"))do
 
 export async function generateMetadata(): Promise<Metadata> {
   const { site } = await getSiteView();
-  const description = `Hair salon in ${site.address.town}, London. Cut, colour, perm and treatments, by appointment. Open ${formatHoursSummary(site, ", ")}.`;
-  const title = `Rave’s Parlor | Hair Salon in ${site.address.town}, London`;
+  const description = `Luxury Asian hair salon in ${site.address.town}, London. Hair you’ll love, tailored to you. Cut, colour, perm and treatments by appointment.`;
+  const title = "Rave’s Parlor";
   return {
     metadataBase: new URL(SITE_URL),
     title: { default: title, template: `%s | ${site.brandName}` },
