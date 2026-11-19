@@ -6,6 +6,7 @@ import { resolveSiteUrl } from "@/lib/data/site";
 import {
   buildHairSalonLd,
   buildPriceRange,
+  buildWebSiteLd,
   e164,
   serializeJsonLd,
   type OfferCatalogLd,
@@ -205,6 +206,28 @@ describe("hasOfferCatalog offers", () => {
       priceSpecification: { "@type": "PriceSpecification", priceCurrency: "GBP", minPrice: 60 },
     });
     expect(offers[1]).not.toHaveProperty("priceSpecification");
+  });
+});
+
+describe("buildWebSiteLd", () => {
+  const site = view.site;
+  const ld = buildWebSiteLd(site, "https://example.com");
+
+  it("identifies the website", () => {
+    expect(ld["@type"]).toBe("WebSite");
+    expect(ld["@id"]).toBe("https://example.com/#website");
+    expect(ld.url).toBe("https://example.com");
+  });
+
+  it("uses the short site name with the brand name as an alternate", () => {
+    expect(ld.name).toBe("Rave’s Parlor");
+    expect(ld.alternateName).toEqual([site.brandName]);
+  });
+
+  it("is published by the salon", () => {
+    const salon = buildHairSalonLd(site, view.images.parlor, view.menu, "https://example.com");
+    expect(ld.publisher).toEqual({ "@id": "https://example.com/#salon" });
+    expect(ld.publisher["@id"]).toBe(salon["@id"]);
   });
 });
 

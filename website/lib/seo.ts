@@ -69,6 +69,19 @@ export interface HairSalonLd {
   hasMap: string;
 }
 
+/** The short site name Google shows above the title in search results. */
+export const SITE_SHORT_NAME = "Rave’s Parlor";
+
+export interface WebSiteLd {
+  "@context": "https://schema.org";
+  "@type": "WebSite";
+  "@id": string;
+  name: string;
+  alternateName: readonly string[];
+  url: string;
+  publisher: { "@id": string };
+}
+
 /** The WhatsApp number in E.164 form: "+447789096148". */
 export function e164(whatsappNumber: string): string {
   return `+${whatsappNumber}`;
@@ -182,6 +195,22 @@ export function buildHairSalonLd(
     })),
     sameAs: [site.instagramUrl],
     hasMap: site.mapsUrl,
+  };
+}
+
+/**
+ * The website as JSON-LD, so Google can use a proper site name in search results instead of the bare
+ * domain. `siteUrl` is the canonical origin (defaults to `SITE_URL`); the publisher is the salon.
+ */
+export function buildWebSiteLd(site: SiteInfo, siteUrl: string = SITE_URL): WebSiteLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${siteUrl}/#website`,
+    name: SITE_SHORT_NAME,
+    alternateName: [site.brandName],
+    url: siteUrl,
+    publisher: { "@id": `${siteUrl}/#salon` },
   };
 }
 

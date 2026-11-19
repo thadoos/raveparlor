@@ -6,7 +6,7 @@ import { getSiteView } from "@/lib/content/published";
 import { SITE_URL } from "@/lib/data/site";
 import { jost } from "@/lib/fonts";
 import { formatHoursSummary } from "@/lib/format";
-import { buildHairSalonLd } from "@/lib/seo";
+import { buildHairSalonLd, buildWebSiteLd } from "@/lib/seo";
 import "../globals.css";
 
 /**
@@ -57,6 +57,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <SkipLink />
         {children}
         <JsonLd data={buildHairSalonLd(view.site, view.images.parlor, view.menu)} />
+        <JsonLd data={buildWebSiteLd(view.site)} />
       </body>
     </html>
   );
